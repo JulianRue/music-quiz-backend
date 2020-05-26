@@ -10,7 +10,7 @@ const client = new Client({
 client.connect();
 
 const getPlaylists = (request, response) => {
-    pool.query('SELECT id,name FROM playlist', (error, results) => {
+    client.query('SELECT id,name FROM playlist', (error, results) => {
         if (error) {
             throw error;
         }

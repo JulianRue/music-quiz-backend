@@ -11,7 +11,7 @@ app.use(
     })
 )
 
-app.get('/', (request, response) => {
+app.get('/api/', (request, response) => {
     response.json({ info: 'Node.js, Express, and Postgres API' })
 })
 
