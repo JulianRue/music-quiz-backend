@@ -1,6 +1,7 @@
 const http = require('http');
 const server = http.createServer();
 const io = require('socket.io')(server);
+const rest = require("./rest.js");
 
 io.on('connection', socket => {
     console.log("User connected");
