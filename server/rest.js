@@ -9,14 +9,15 @@ app.use(
     bodyParser.urlencoded({
         extended: true,
     })
-)
+);
 
 app.get('/api/', (request, response) => {
     response.json({ info: 'Node.js, Express, and Postgres API' })
-})
+});
 
 app.get('/api/playlist', db.getPlaylists);
+app.get('/api/playlist/:id', db.getPlaylistSongs);
 
 app.listen(port, () => {
-    console.log(`App running on port ${port}.`)
-})
+    console.log(`REST Interface is running on port ${port}.`)
+});
