@@ -7,7 +7,7 @@ const client = new Client({
     database: 'music_quiz',
     password: '3a90b22a25',
     port: 5432,
-})
+});
 
 client.connect();
 
@@ -35,6 +35,19 @@ const getPlaylistSongs = (request, response) => {
 };
 
 
+getPlaylistFromIds(['1','2']).then(val => console.log("Value: " + JSON.stringify(val.rows)));
+
+async function getPlaylistFromIds(playlist){
+    //playlist muss so aussehen: ['1','2','3']
+    const query = {
+        text: 'SELECT * FROM song INNER JOIN songlist ON songlist.songid = song.id WHERE playlistId = ANY ($1)',
+        values: [playlist],
+    };
+
+    client.query(query);
+    const res = await client.query(query);
+    return res;
+}
 
 
 

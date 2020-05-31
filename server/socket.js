@@ -1,6 +1,7 @@
 const http = require('http');
 const server = http.createServer();
 const io = require('socket.io')(server);
+//import { db } from './rest'
 
 io.on('connection', socket => {
     console.log("User connected");
@@ -13,6 +14,10 @@ io.on('connection', socket => {
     socket.on('start-song', data => {
         const timestamp = Date.now();
         io.in(data.room).emit('song-started', {songId: data.songId, timestamp: timestamp});
+    });
+
+    socket.on('start-game', playlists => {
+        db.getPlaylistSongs()
     });
 
     socket.on('start-game', room => {
@@ -69,3 +74,9 @@ io.on('connection', socket => {
 server.listen(8000, () => {
     console.log("Socket.io Server is listening on port 8000");
 });
+
+function getRandomSong(playlist){
+    const number = Math.floor(Math.random() * playlist.length);
+    const json = playlist[number];
+    playlist.spice(number,1);
+}
