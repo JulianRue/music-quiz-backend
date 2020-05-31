@@ -12,7 +12,7 @@ const client = new Client({
 client.connect();
 
 const getPlaylists = (request, response) => {
-    client.query('SELECT id,name FROM playlist', (error, results) => {
+    client.query('SELECT * FROM playlist', (error, results) => {
         if (error) {
             throw error;
         }
@@ -22,7 +22,7 @@ const getPlaylists = (request, response) => {
 
 const getPlaylistSongs = (request, response) => {
     const query = {
-        text: 'SELECT song.url FROM song INNER JOIN songlist ON songlist.songid = song.id WHERE playlistid = $1',
+        text: 'SELECT * FROM song INNER JOIN songlist ON songlist.songid = song.id WHERE playlistid = $1',
         values: [request.params.id],
     };
 
