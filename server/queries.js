@@ -12,7 +12,12 @@ const client = new Client({
 client.connect();
 
 const getPlaylists = (request, response) => {
-    client.query('SELECT * FROM playlist', (error, results) => {
+    const query = {
+        text: 'SELECT * FROM playlist ORDER BY popularity DESC LIMIT $1',
+        values: [request.params.count],
+    };
+
+    client.query(query, (error, results) => {
         if (error) {
             throw error;
         }
@@ -20,9 +25,10 @@ const getPlaylists = (request, response) => {
     })
 };
 
-const getPlaylistSongs = (request, response) => {
+const getPlaylistSongsById = (request, response) => {
+    console.log("Called2");
     const query = {
-        text: 'SELECT * FROM song INNER JOIN songlist ON songlist.songid = song.id WHERE playlistid = $1',
+        text: 'SELECT DISTINCT * FROM song INNER JOIN songlist ON songlist.songid = song.id WHERE playlistid = $1',
         values: [request.params.id],
     };
 
@@ -34,10 +40,24 @@ const getPlaylistSongs = (request, response) => {
     })
 };
 
+const getPlaylistSongsByName = (request, response) => {
+    console.log("Called3");
+    const query = {
+        text: 'SELECT DISTINCT TOP $1 * FROM song INNER JOIN songlist ON songlist.songid = song.id WHERE creatorname LIKE $2',
+        values: [request.params.count, request.params.name],
+    };
+
+    client.query(query, (error, results) => {
+        if (error) {
+            throw error;
+        }
+        response.status(200).json(results.rows);
+    })
+};
 
 //getPlaylistFromIds(['1','2']).then(val => console.log("Value: " + JSON.stringify(val.rows)));
 
-async function getPlaylistFromIds(playlist){
+async function getPlaylistSongsFromIds(playlist){
     //playlist muss so aussehen: ['1','2','3']
     console.log("CALLED!");
     const query = {
@@ -120,6 +140,6 @@ function addPlaylistsHARDCODED(){
 }
 
 module.exports = {
-    getPlaylists, getPlaylistSongs,getPlaylistFromIds
+    getPlaylists, getPlaylistSongsByName, getPlaylistSongsById,getPlaylistFromIds: getPlaylistSongsFromIds
 };
 

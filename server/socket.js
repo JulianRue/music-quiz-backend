@@ -91,7 +91,7 @@ function user(name, room){
 //user.addPoints(1);
 //console.log(user.getPoints());
 
-startGame(data_);
+//startGame(data_);
 function startGame(data){
     //playlists layout muss json array mit playlistids sein ['1','2']
     console.log("Playlist ids: " + data.playlist);
