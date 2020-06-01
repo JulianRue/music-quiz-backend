@@ -13,11 +13,6 @@ io.on('connection', socket => {
         console.log("User disconnected");
     });
 
-    socket.on('start-song', data => {
-        const timestamp = Date.now();
-        io.in(data.room).emit('song-started', {songId: data.songId, timestamp: timestamp});
-    });
-
     socket.on('start-game', room => {
         console.log("Game started");
         io.in(room).emit('game-started', "Game started");
@@ -91,14 +86,13 @@ function user(name, room){
 startGame(data_);
 function startGame(data){
     //playlists layout muss json array mit playlistids sein ['1','2']
-    console.log("Playlist ids: " + data.playlist);
     (async () => {
         var songs = await db.getPlaylistFromIds(data.playlist);
-        //console.log("Songs: -> " + JSON.stringify(songs));
         for(var i = 0; i < data.roundCount; i++){
             var song = getRandomSong(songs);
+            const timestamp = Date.now();
+            io.in(data.room).emit('song-started', {songId: data.songId, timestamp: timestamp});
             console.log("Song -> " + JSON.stringify(song) +"\n\n");
-            await pSleep(30 * 1000);
         }
     })();
 }
