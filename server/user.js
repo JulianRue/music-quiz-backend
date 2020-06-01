@@ -12,6 +12,14 @@ class User {
     getPoints(){
         return this.points;
     }
+
+    getName(){
+        return this.name;
+    }
+
+    getRoom(){
+        return this.room;
+    }
 }
 
 module.exports = User
