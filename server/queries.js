@@ -26,7 +26,6 @@ const getPlaylists = (request, response) => {
 };
 
 const getPlaylistSongsById = (request, response) => {
-    console.log("Called2");
     const query = {
         text: 'SELECT DISTINCT * FROM song INNER JOIN songlist ON songlist.songid = song.id WHERE playlistid = $1',
         values: [request.params.id],
@@ -41,10 +40,9 @@ const getPlaylistSongsById = (request, response) => {
 };
 
 const getPlaylistSongsByName = (request, response) => {
-    console.log("Called3");
     const query = {
-        text: 'SELECT DISTINCT TOP $1 * FROM song INNER JOIN songlist ON songlist.songid = song.id WHERE creatorname LIKE $2',
-        values: [request.params.count, request.params.name],
+        text: 'SELECT DISTINCT * FROM playlist WHERE creatorname LIKE $1 ORDER BY popularity DESC',
+        values: [request.params.name],
     };
 
     client.query(query, (error, results) => {
