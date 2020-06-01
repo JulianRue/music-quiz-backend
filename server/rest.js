@@ -2,7 +2,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const db = require('./queries');
-//export {db};
 
 const port = 3000;
 
@@ -24,3 +23,4 @@ app.listen(port, () => {
     console.log(`REST Interface is running on port ${port}.`)
 });
 
+module.exports = db;

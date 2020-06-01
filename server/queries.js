@@ -35,10 +35,11 @@ const getPlaylistSongs = (request, response) => {
 };
 
 
-getPlaylistFromIds(['1','2']).then(val => console.log("Value: " + JSON.stringify(val.rows)));
+//getPlaylistFromIds(['1','2']).then(val => console.log("Value: " + JSON.stringify(val.rows)));
 
 async function getPlaylistFromIds(playlist){
     //playlist muss so aussehen: ['1','2','3']
+    console.log("CALLED!");
     const query = {
         text: 'SELECT * FROM song INNER JOIN songlist ON songlist.songid = song.id WHERE playlistId = ANY ($1)',
         values: [playlist],
@@ -46,7 +47,8 @@ async function getPlaylistFromIds(playlist){
 
     client.query(query);
     const res = await client.query(query);
-    return res;
+    //console.log(res.rows);
+    return res.rows;
 }
 
 
@@ -118,6 +120,6 @@ function addPlaylistsHARDCODED(){
 }
 
 module.exports = {
-    getPlaylists, getPlaylistSongs
+    getPlaylists, getPlaylistSongs,getPlaylistFromIds
 };
 
