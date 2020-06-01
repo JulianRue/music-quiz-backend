@@ -6,3 +6,7 @@
 /server/.idea/*
 /server/.idea
 /server/.idea/
+.idea/.gitignore
+.idea/misc.xml
+.idea/modules.xml
+.idea/
