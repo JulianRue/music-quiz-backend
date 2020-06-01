@@ -18,13 +18,10 @@ io.on('connection', socket => {
         io.in(data.room).emit('song-started', {songId: data.songId, timestamp: timestamp});
     });
 
-    socket.on('start-game', data => {
-        startGame(data);
-    });
-
     socket.on('start-game', room => {
         console.log("Game started");
         io.in(room).emit('game-started', "Game started");
+        startGame(data);
     });
 
     socket.on('create-room', (room) => {
@@ -91,7 +88,7 @@ function user(name, room){
 //user.addPoints(1);
 //console.log(user.getPoints());
 
-//startGame(data_);
+startGame(data_);
 function startGame(data){
     //playlists layout muss json array mit playlistids sein ['1','2']
     console.log("Playlist ids: " + data.playlist);
@@ -101,6 +98,7 @@ function startGame(data){
         for(var i = 0; i < data.roundCount; i++){
             var song = getRandomSong(songs);
             console.log("Song -> " + JSON.stringify(song) +"\n\n");
+            await pSleep(30 * 1000);
         }
     })();
 }
@@ -108,6 +106,6 @@ function startGame(data){
 function getRandomSong(songs){
     const number = Math.floor(Math.random() * songs.length);
     const json = songs[number];
-    //songs.spice(number,1);
+    songs.splice(number,1);
     return json;
 }
