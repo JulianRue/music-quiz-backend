@@ -1,6 +1,7 @@
 const http = require('http');
 const server = http.createServer();
 const io = require('socket.io')(server);
+const User = require('./user');
 //import { db } from './rest'
 
 io.on('connection', socket => {
@@ -74,6 +75,19 @@ io.on('connection', socket => {
 server.listen(8000, () => {
     console.log("Socket.io Server is listening on port 8000");
 });
+/*
+function user(name, room){
+    this.name = name;
+    this.room = room;
+    this.points = 0;
+}
+*/
+
+
+
+const user = new User('peter', '123');
+user.addPoints(1);
+console.log(user.getPoints());
 
 function getRandomSong(playlist){
     const number = Math.floor(Math.random() * playlist.length);
