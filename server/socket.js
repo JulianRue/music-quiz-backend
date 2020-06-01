@@ -2,7 +2,7 @@ const http = require('http');
 const server = http.createServer();
 const io = require('socket.io')(server);
 const User = require('./user');
-const data_ = require('./startGame.json');
+const data_ = require('./exampleJsons/startGame.json');
 const db = require('./rest');
 
 io.on('connection', socket => {
@@ -13,9 +13,10 @@ io.on('connection', socket => {
         console.log("User disconnected");
     });
 
-    socket.on('start-game', room => {
+    socket.on('start-game', data => {
+        //data => startGame.json (beispiel json)
         console.log("Game started");
-        io.in(room).emit('game-started', "Game started");
+        io.in(data.room).emit('game-started', "Game started");
         startGame(data);
     });
 
@@ -85,7 +86,7 @@ function user(name, room){
 
 startGame(data_);
 function startGame(data){
-    //playlists layout muss json array mit playlistids sein ['1','2']
+    //data => startGame.json (beispiel json)
     (async () => {
         var songs = await db.getPlaylistFromIds(data.playlist);
         for(var i = 0; i < data.roundCount; i++){
