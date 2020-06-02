@@ -84,7 +84,7 @@ function user(name, room){
 //user.addPoints(1);
 //console.log(user.getPoints());
 
-startGame(data_);
+// startGame(data_);
 function startGame(data){
     //data => startGame.json (beispiel json)
     (async () => {
@@ -92,7 +92,7 @@ function startGame(data){
         for(var i = 0; i < data.roundCount; i++){
             var song = getRandomSong(songs);
             const timestamp = Date.now();
-            io.in(data.room).emit('song-started', {songId: data.songId, timestamp: timestamp});
+            io.in(data.room).emit('song-started', {url: song.url, timestamp: timestamp});
             console.log("Song -> " + JSON.stringify(song) +"\n\n");
         }
     })();
