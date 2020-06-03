@@ -2,7 +2,7 @@ const http = require('http');
 const server = http.createServer();
 const io = require('socket.io')(server);
 const User = require('./user');
-const data_ = require('./exampleJsons/startGame.json');
+const data_ = require('../exampleJsons/startGame.json');
 const db = require('./rest');
 
 io.on('connection', socket => {
