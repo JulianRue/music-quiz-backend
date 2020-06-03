@@ -1,13 +1,17 @@
-const http = require('http');
+import http from 'http';
+import socketio from 'socket.io';
+import user from './user'
+import db from './queries';
+import {GameParameters} from './interface'
+
+
+
 const server = http.createServer();
-const io = require('socket.io')(server);
-const User = require('./user');
-const data_ = require('../exampleJsons/startGame.json');
-const db = require('./rest');
+const io = socketio(server);
 
 io.on('connection', socket => {
     console.log("User connected");
-    console.log("Total Users: " + io.engine.clientsCount);
+    console.log("Total Users: " + io.clients.length);
 
     socket.on('disconnect', () => {
         console.log("User disconnected");
@@ -70,30 +74,20 @@ server.listen(8000, () => {
     console.log("Socket.io Server is listening on port 8000");
 });
 
-/*
-function user(name, room){
-    this.name = name;
-    this.room = room;
-    this.points = 0;
-}
-*/
-
-
 // startGame(data_);
-function startGame(data){
-    //data => startGame.json (beispiel json)
+function startGame(params : GameParameters){
     (async () => {
-        var songs = await db.getPlaylistFromIds(data.playlist);
-        for(var i = 0; i < data.roundCount; i++){
+        var songs : any = await db.getPlaylistSongsFromIds(params.playlistIds);
+        for(var i = 0; i < params.gameCount; i++){
             var song = getRandomSong(songs);
             const timestamp = Date.now();
-            io.in(data.room).emit('song-started', {url: song.url, timestamp: timestamp});
+            io.in(params.roomName).emit('song-started', {url: song.url, timestamp: timestamp});
             console.log("Song -> " + JSON.stringify(song) +"\n\n");
         }
     })();
 }
 
-function getRandomSong(songs){
+function getRandomSong(songs:any[]){
     const number = Math.floor(Math.random() * songs.length);
     const json = songs[number];
     songs.splice(number,1);

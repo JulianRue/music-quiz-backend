@@ -55,8 +55,21 @@ function getPlaylistSongsByName(request : Request , response : Response) {
         response.status(200).json(results.rows);
     })
 };
+
+async function getPlaylistSongsFromIds(playlistIds : number[]){
+    const query = {
+        text: 'SELECT * FROM song INNER JOIN songlist ON songlist.songid = song.id WHERE playlistId = ANY ($1)',
+        values: [playlistIds],
+    };
+
+    client.query(query);
+    const res = await client.query(query);
+    return res.rows;
+}
+
 export default {
     getPlaylists: getPlaylists,
     getPlaylistSongsById: getPlaylistSongsById,
-    getPlaylistSongsByName : getPlaylistSongsByName
+    getPlaylistSongsByName : getPlaylistSongsByName,
+    getPlaylistSongsFromIds : getPlaylistSongsFromIds
 }

@@ -53,8 +53,6 @@ const getPlaylistSongsByName = (request, response) => {
     })
 };
 
-//getPlaylistFromIds(['1','2']).then(val => console.log("Value: " + JSON.stringify(val.rows)));
-
 async function getPlaylistSongsFromIds(playlist){
     //playlist muss so aussehen: ['1','2','3']
     console.log("CALLED!");
