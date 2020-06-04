@@ -2,10 +2,10 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import db from "./queries";
 
+export const app = express();
+export const port :number  = 3000;
+console.log("Started rest");
 
-
-const app = express();
-const port :number  = 3000;
 app.use(bodyParser.json());
 app.use(
     bodyParser.urlencoded({
@@ -25,4 +25,8 @@ app.listen(port, () => {
     console.log(`REST Interface is running on port ${port}.`)
 });
 
-module.exports = db;
+function run(){
+
+}
+
+export default {}

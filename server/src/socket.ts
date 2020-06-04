@@ -4,8 +4,6 @@ import user from './user'
 import db from './queries';
 import {GameParameters} from './interface'
 
-
-
 const server = http.createServer();
 const io = socketio(server);
 
@@ -77,7 +75,7 @@ server.listen(8000, () => {
 // startGame(data_);
 function startGame(params : GameParameters){
     (async () => {
-        var songs : any = await db.getPlaylistSongsFromIds(params.playlistIds);
+        var songs : any[] = await db.getPlaylistSongsFromIds(params.playlistIds);
         for(var i = 0; i < params.gameCount; i++){
             var song = getRandomSong(songs);
             const timestamp = Date.now();
@@ -93,3 +91,5 @@ function getRandomSong(songs:any[]){
     songs.splice(number,1);
     return json;
 }
+
+export default {this:this}
