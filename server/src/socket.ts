@@ -9,7 +9,7 @@ const io = socketio(server);
 
 io.on('connection', socket => {
     console.log("User connected");
-    console.log("Total Users: " + io.clients.length);
+    console.log("Total Users: " + Object.keys(io.sockets.connected).length);
 
     socket.on('disconnect', () => {
         console.log("User disconnected");
@@ -19,7 +19,8 @@ io.on('connection', socket => {
         //data => startGame.json (beispiel json)
         console.log("Game started");
         io.in(data.room).emit('game-started', "Game started");
-        startGame(data);
+        const gp:GameParameters = new GameParameters(data.playlist, data.room, data.roundCount);
+        startGame(gp);
     });
 
     socket.on('create-room', (room) => {
