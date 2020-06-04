@@ -19,8 +19,7 @@ io.on('connection', socket => {
         //data => startGame.json (beispiel json)
         console.log("Game started");
         io.in(data.room).emit('game-started', "Game started");
-        const gp:GameParameters = new GameParameters(data.playlist, data.room, data.roundCount);
-        startGame(gp);
+        startGame(data);
     });
 
     socket.on('create-room', (room) => {
@@ -76,12 +75,13 @@ server.listen(8000, () => {
 // startGame(data_);
 function startGame(params : GameParameters){
     (async () => {
-        var songs : any[] = await db.getPlaylistSongsFromIds(params.playlistIds);
-        for(var i = 0; i < params.gameCount; i++){
+        var songs : any[] = await db.getPlaylistSongsFromIds(params.playlist);
+        for(var i = 0; i < params.roundCount; i++){
             var song = getRandomSong(songs);
             const timestamp = Date.now();
-            io.in(params.roomName).emit('song-started', {url: song.url, timestamp: timestamp});
+            io.in(params.room).emit('song-started', {url: song.url, timestamp: timestamp});
             console.log("Song -> " + JSON.stringify(song) +"\n\n");
+            await delay(38*1000);
         }
     })();
 }
@@ -91,6 +91,10 @@ function getRandomSong(songs:any[]){
     const json = songs[number];
     songs.splice(number,1);
     return json;
+}
+
+function delay(ms: number) {
+    return new Promise( resolve => setTimeout(resolve, ms) );
 }
 
 export default {this:this}

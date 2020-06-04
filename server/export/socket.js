@@ -19,7 +19,7 @@ const server = http_1.default.createServer();
 const io = socket_io_1.default(server);
 io.on('connection', socket => {
     console.log("User connected");
-    console.log("Total Users: " + io.clients.length);
+    console.log("Total Users: " + Object.keys(io.sockets.connected).length);
     socket.on('disconnect', () => {
         console.log("User disconnected");
     });
@@ -79,12 +79,13 @@ server.listen(8000, () => {
 // startGame(data_);
 function startGame(params) {
     (() => __awaiter(this, void 0, void 0, function* () {
-        var songs = yield queries_1.default.getPlaylistSongsFromIds(params.playlistIds);
-        for (var i = 0; i < params.gameCount; i++) {
+        var songs = yield queries_1.default.getPlaylistSongsFromIds(params.playlist);
+        for (var i = 0; i < params.roundCount; i++) {
             var song = getRandomSong(songs);
             const timestamp = Date.now();
-            io.in(params.roomName).emit('song-started', { url: song.url, timestamp: timestamp });
+            io.in(params.room).emit('song-started', { url: song.url, timestamp: timestamp });
             console.log("Song -> " + JSON.stringify(song) + "\n\n");
+            yield delay(38 * 1000);
         }
     }))();
 }
@@ -93,5 +94,8 @@ function getRandomSong(songs) {
     const json = songs[number];
     songs.splice(number, 1);
     return json;
+}
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 exports.default = { this: this };
