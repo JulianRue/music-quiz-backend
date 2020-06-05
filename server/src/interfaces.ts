@@ -1,11 +1,41 @@
+export interface IGameParameters {
+    playlist : number[];
+    room : string;
+    roundCount : number;
+}
+
+export interface ICreateRoom{
+    roomName: string;
+    password : string;
+    username: string;
+}
+
+export interface IJoinRoom{
+    roomName: string;
+    password : string;
+    username: string;
+}
+
+export interface ILeave{
+    roomName:string;
+    username:string;
+}
+
+export interface IStartGame{
+    playlist:number[];
+    roundCount:number;
+    room:string;
+}
+
 export class User {
     name:string;
-    room:string;
     points:number;
-    constructor(name : string, room: string) {
+    isAdmin:boolean;
+
+    constructor(name : string, isAdmin:boolean = false) {
         this.name = name;
-        this.room = room;
         this.points = 0;
+        this.isAdmin = isAdmin;
     }
     addPoints(points:number) {
         this.points += points;
@@ -15,23 +45,36 @@ export class User {
     }
 }
 
-export interface GameParameters {
-    playlist : number[];
-    room : string;
-    roundCount : number;
-}
-
-export interface Song{
+export class Song{
     id:number;
     name:string;
     interpret:string;
     url:string;
     genre:string;
     album:string;
+
+
+    constructor(id: number = 0, name: string = "", interpret: string = "", url: string = "", genre: string = "", album: string = "") {
+        this.id = id;
+        this.name = name;
+        this.interpret = interpret;
+        this.url = url;
+        this.genre = genre;
+        this.album = album;
+    }
 }
 
-export interface Room{
+export class Room{
     currentSong:Song;
-    roomNr:string;
+    roomName:string;
+    password : string;
     users:User[];
+
+    constructor(roomName: string, password: string, username:string) {
+        this.currentSong = new Song();
+        this.roomName = roomName;
+        this.password = password;
+        this.users = Array();
+        this.users.push(new User(username, true));
+    }
 }
