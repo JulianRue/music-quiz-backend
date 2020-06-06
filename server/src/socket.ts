@@ -6,7 +6,7 @@ import engine, {delay, getRandomSong, getRoomIndex, removeUser} from './engine';
 
 const server = http.createServer();
 const io = socketio(server);
-let rooms:Room[];
+const rooms: Room[] = [];
 
 io.on('connection', socket => {
     console.log("User connected");
