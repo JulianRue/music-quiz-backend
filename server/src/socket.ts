@@ -2,7 +2,7 @@ import http from 'http';
 import socketio from 'socket.io';
 import db from './queries';
 import {ICreateRoom, IJoinRoom, ILeave, IStartGame, Room, Song, User} from './interfaces'
-import engine, {delay, getRandomSong, getRoomIndex, removeUser} from './engine';
+import engine, {delay, getRandomSong, getRoomIndex, levenshtein, removeUser} from './engine';
 
 const server = http.createServer();
 const io = socketio(server);
@@ -81,6 +81,8 @@ io.on('connection', socket => {
     });
 
 });
+
+//console.log("Return -> " + levenshtein("justin bieber (feat deine mum) ft. 187", "justin biebes (feat deine mum)"));
 
 server.listen(8000, () => {
     console.log("Socket.io Server is listening on port 8000");
