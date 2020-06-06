@@ -2,7 +2,7 @@ import http from 'http';
 import socketio from 'socket.io';
 import db from './queries';
 import {ICreateRoom, IJoinRoom, ILeave, IStartGame, Room, Song, User} from './interfaces'
-import engine, {delay, getRandomSong, getRoomIndex, levenshtein, removeUser, getUsersInRoom} from './engine';
+import engine, {delay, getRandomSong, getRoomIndex, levenshtein, removeUser} from './engine';
 
 const server = http.createServer();
 const io = socketio(server);
@@ -52,8 +52,8 @@ io.on('connection', socket => {
     });
 
     socket.on('get-clients', (roomName: string) => {
-        const users: User[] = getUsersInRoom(rooms, roomName);
-        io.in(roomName).emit('clients-updated', users);
+        const index = getRoomIndex(rooms, roomName);
+        io.in(roomName).emit('clients-updated', rooms[index].users);
     });
 
     socket.on('leave', (data : ILeave) => {

@@ -106,11 +106,6 @@ export function removeUser(users: User[], username: string): User[] {
     return users;
 }
 
-export function getUsersInRoom(rooms: Room[], roomName: string): User[] {
-    let index = getRoomIndex(rooms, roomName);
-    return rooms[index].getUsers();
-}
-
 export function delay(ms: number) {
     return new Promise( resolve => setTimeout(resolve, ms) );
 }

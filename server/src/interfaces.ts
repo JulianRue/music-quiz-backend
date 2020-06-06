@@ -72,10 +72,6 @@ export class Room{
         this.users.push(new User(username, true));
     }
 
-    getUsers(): User[] {
-        return this.users;
-    }
-
     isAdminInRoom(): boolean {
         let isAdminInRoom = true;
         const admin = this.users.find(user => user.isAdmin === true);
