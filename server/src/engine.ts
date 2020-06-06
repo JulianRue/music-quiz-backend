@@ -95,14 +95,20 @@ export function getRoomIndex(rooms:Room[], name:string):number{
     return -1;
 }
 
-export function removeUser(users:User[], username:string):boolean{
-    for(var i = 0; i < User.length; i++){
-        if(users[i].name == username){
-            users.splice(i,1);
-            return true;
+export function removeUser(users: User[], username: string): User[] {
+    let spliced = false;
+    for(let i = 0; i < users.length && !spliced; i++) {
+        if(users[i].name === username) {
+            users.splice(i, 1);
+            spliced = true;
         }
     }
-    return false;
+    return users;
+}
+
+export function getUsersInRoom(rooms: Room[], roomName: string): User[] {
+    let index = getRoomIndex(rooms, roomName);
+    return rooms[index].getUsers();
 }
 
 export function delay(ms: number) {

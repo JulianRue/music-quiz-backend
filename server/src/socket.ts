@@ -2,7 +2,7 @@ import http from 'http';
 import socketio from 'socket.io';
 import db from './queries';
 import {ICreateRoom, IJoinRoom, ILeave, IStartGame, Room, Song, User} from './interfaces'
-import engine, {delay, getRandomSong, getRoomIndex, levenshtein, removeUser} from './engine';
+import engine, {delay, getRandomSong, getRoomIndex, levenshtein, removeUser, getUsersInRoom} from './engine';
 
 const server = http.createServer();
 const io = socketio(server);
@@ -47,36 +47,26 @@ io.on('connection', socket => {
             rooms[index].users.push(new User(data.username));
             socket.join(data.roomName);
             console.log("Room joined");
-            var roomData = io.sockets.adapter.rooms[data.roomName];
-            io.in(data.roomName).emit('clients-updated', roomData.length);
             socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, isAdmin: false});
         }
     });
 
     socket.on('get-clients', (roomName: string) => {
-        var roomData = io.sockets.adapter.rooms[roomName];
-        var playerCount = 0;
-        if (roomData !== undefined) {
-            playerCount = roomData.length
-        }
-        io.in(roomName).emit('clients-updated', playerCount);
+        const users: User[] = getUsersInRoom(rooms, roomName);
+        io.in(roomName).emit('clients-updated', users);
     });
 
     socket.on('leave', (data : ILeave) => {
         socket.leave(data.roomName);
-        var roomData = io.sockets.adapter.rooms[data.roomName];
-        var playerCount = 0;
-        if (roomData !== undefined) {
-            playerCount = roomData.length
+        const index = getRoomIndex(rooms, data.roomName);
+        const users: User[] = removeUser(rooms[index].users, data.username);
+        if (!rooms[index].isAdminInRoom()) {
+            console.log("No admin");
         }
-        let index = getRoomIndex(rooms, data.roomName);
-        if(!removeUser(rooms[index].users, data.username)){
-            console.log("Remove error!");
-            console.log("Username: " + data.username);
-            console.log("Room: " + data.roomName);
+        if (rooms[index].users.length === 0) {
+            rooms.splice(index, 1);
         }
-        console.log(playerCount);
-        io.in(data.roomName).emit('clients-updated', playerCount);
+        io.in(data.roomName).emit('clients-updated', users);
         console.log("Room left");
     });
 
@@ -100,8 +90,6 @@ function startGame(params : IStartGame){
         }
     })();
 }
-
-
 
 
 
