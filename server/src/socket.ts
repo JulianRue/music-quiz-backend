@@ -1,7 +1,7 @@
 import http from 'http';
 import socketio from 'socket.io';
 import db from './queries';
-import {ICreateRoom, IGameParameters, IJoinRoom, ILeave, IStartGame, Room, Song, User} from './interfaces'
+import {ICreateRoom, IJoinRoom, ILeave, IStartGame, Room, Song, User} from './interfaces'
 import engine, {delay, getRandomSong, getRoomIndex, removeUser} from './engine';
 
 const server = http.createServer();
@@ -86,7 +86,7 @@ server.listen(8000, () => {
     console.log("Socket.io Server is listening on port 8000");
 });
 
-function startGame(params : IGameParameters){
+function startGame(params : IStartGame){
     (async () => {
         var songs : Song[] = await db.getPlaylistSongsFromIds(params.playlist);
         for(var i = 0; i < params.roundCount; i++){
