@@ -22,11 +22,13 @@ export interface IStartGame{
 }
 
 export class User {
+    id:string;
     name:string;
     points:number;
     isAdmin:boolean;
 
-    constructor(name : string, isAdmin:boolean = false) {
+    constructor(id: string, name: string, isAdmin: boolean = false) {
+        this.id = id;
         this.name = name;
         this.points = 0;
         this.isAdmin = isAdmin;
@@ -64,12 +66,12 @@ export class Room{
     password : string;
     users:User[];
 
-    constructor(roomName: string, password: string, username:string) {
+    constructor(roomName: string, password: string, userId: string, username: string) {
         this.currentSong = new Song();
         this.roomName = roomName;
         this.password = password;
         this.users = Array();
-        this.users.push(new User(username, true));
+        this.users.push(new User(userId, username, true));
     }
 
     isAdminInRoom(): boolean {

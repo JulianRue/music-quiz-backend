@@ -9,6 +9,7 @@ const io = socketio(server);
 const rooms: Room[] = [];
 
 io.on('connection', socket => {
+    console.log(socket.id);
     console.log("User connected");
     console.log("Total Users: " + Object.keys(io.sockets.connected).length);
 
@@ -24,7 +25,7 @@ io.on('connection', socket => {
 
     socket.on('create-room', (data : ICreateRoom) => {
         if (io.sockets.adapter.rooms[data.roomName] === undefined) {
-            rooms.push(new Room(data.roomName, data.password, data.username));
+            rooms.push(new Room(data.roomName, data.password, socket.id, data.username));
             socket.join(data.roomName);
             console.log("Room created");
             socket.emit('room-connection', {connected: true, message: "Room created", room: data.roomName, isAdmin: true});
@@ -44,7 +45,7 @@ io.on('connection', socket => {
                 socket.emit('room-connection', {connected: false, message: "Room does not exist", room: data.roomName, isAdmin: false});
                 return;
             }
-            rooms[index].users.push(new User(data.username));
+            rooms[index].users.push(new User(socket.id, data.username));
             socket.join(data.roomName);
             console.log("Room joined");
             socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, isAdmin: false});
