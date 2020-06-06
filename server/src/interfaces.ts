@@ -1,9 +1,3 @@
-export interface IGameParameters {
-    playlist : number[];
-    room : string;
-    roundCount : number;
-}
-
 export interface ICreateRoom{
     roomName: string;
     password : string;
