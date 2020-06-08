@@ -54,7 +54,12 @@ io.on('connection', socket => {
 
     socket.on('get-clients', (roomName: string) => {
         const index = getRoomIndex(rooms, roomName);
-        io.in(roomName).emit('clients-updated', rooms[index].users);
+        if(index != -1){
+            io.in(roomName).emit('clients-updated', rooms[index].users);
+        }
+        else{
+            socket.emit('room-connection', {connected: false, message: "Room does not exist", room: roomName, isAdmin: false});
+        }
     });
 
     socket.on('leave', (data : ILeave) => {
