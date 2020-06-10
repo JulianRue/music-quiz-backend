@@ -25,10 +25,11 @@ io.on('connection', socket => {
 
     socket.on('create-room', (data : ICreateRoom) => {
         if (io.sockets.adapter.rooms[data.roomName] === undefined) {
-            rooms.push(new Room(data.roomName, data.password, socket.id, data.username));
+            const length = rooms.push(new Room(data.roomName, data.password, socket.id, data.username));
             socket.join(data.roomName);
             console.log("Room created");
             socket.emit('room-connection', {connected: true, message: "Room created", room: data.roomName, isAdmin: true});
+            io.in(data.roomName).emit('clients-updated', rooms[length - 1].users);
         } else {
             console.log("Room already exists");
             socket.emit('room-connection', {connected: false, message: "Room already exists", room: data.roomName, isAdmin: true});
@@ -49,16 +50,7 @@ io.on('connection', socket => {
             socket.join(data.roomName);
             console.log("Room joined");
             socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, isAdmin: false});
-        }
-    });
-
-    socket.on('get-clients', (roomName: string) => {
-        const index = getRoomIndex(rooms, roomName);
-        if(index != -1){
-            io.in(roomName).emit('clients-updated', rooms[index].users);
-        }
-        else{
-            socket.emit('room-connection', {connected: false, message: "Room does not exist", room: roomName, isAdmin: false});
+            io.in(data.roomName).emit('clients-updated', rooms[index].users);
         }
     });
 
