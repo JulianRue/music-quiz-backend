@@ -63,8 +63,9 @@ export class Song{
 export class Room{
     currentSong:Song;
     roomName:string;
-    password : string;
-    users:User[];
+    password: string;
+    users: User[];
+    isInGame: boolean;
 
     constructor(roomName: string, password: string, userId: string, username: string) {
         this.currentSong = new Song();
@@ -72,6 +73,7 @@ export class Room{
         this.password = password;
         this.users = Array();
         this.users.push(new User(userId, username, true));
+        this.isInGame = false;
     }
 
     isAdminInRoom(): boolean {

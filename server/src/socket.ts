@@ -21,6 +21,8 @@ io.on('connection', socket => {
         console.log("Game started");
         io.in(data.room).emit('game-started', "Game started");
         startGame(data);
+        const index = getRoomIndex(rooms, data.room);
+        rooms[index].isInGame = true;
     });
 
     socket.on('create-room', (data : ICreateRoom) => {
@@ -49,7 +51,7 @@ io.on('connection', socket => {
             rooms[index].users.push(new User(socket.id, data.username));
             socket.join(data.roomName);
             console.log("Room joined");
-            socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, isAdmin: false});
+            socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, isAdmin: false, isInGame: rooms[index].isInGame});
             io.in(data.roomName).emit('clients-updated', rooms[index].users);
         }
     });
