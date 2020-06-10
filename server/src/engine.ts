@@ -106,6 +106,16 @@ export function removeUser(users: User[], username: string): User[] {
     return users;
 }
 
+export function isSamePassword(str1: string, str2: string): boolean {
+    if (!str1) {
+        str1 = "";
+    }
+    if (!str2) {
+        str2 = "";
+    }
+    return str1 === str2;
+}
+
 export function delay(ms: number) {
     return new Promise( resolve => setTimeout(resolve, ms) );
 }

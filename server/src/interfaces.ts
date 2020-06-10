@@ -18,7 +18,7 @@ export interface ILeave{
 export interface IStartGame{
     playlist:number[];
     roundCount:number;
-    room:string;
+    roomName:string;
 }
 
 export class User {
