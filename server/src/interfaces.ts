@@ -1,3 +1,5 @@
+import {randomString} from "./engine";
+
 export interface ICreateRoom{
     roomName: string;
     password : string;
@@ -26,6 +28,7 @@ export interface ILeave{
 
 export interface IStartGame{
     playlist:number[];
+    password : string;
     roundCount:number;
     roomName:string;
 }
@@ -78,16 +81,18 @@ export class Room{
     currentSong:Song;
     roomName:string;
     password: string;
+    adminPassword : string;
     users: User[];
     isInGame: boolean;
 
-    constructor(roomName: string, password: string, userId: string, username: string) {
+    constructor(roomName: string, password: string, userId: string, username: string, adminPassword: string = "") {
         this.currentSong = new Song();
         this.roomName = roomName;
         this.password = password;
         this.users = Array();
         this.users.push(new User(userId, username, true));
         this.isInGame = false;
+        this.adminPassword = randomString(10);
     }
 
     isAdminInRoom(): boolean {
