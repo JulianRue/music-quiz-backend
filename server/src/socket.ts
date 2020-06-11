@@ -2,18 +2,26 @@ import http from 'http';
 import socketio from 'socket.io';
 import db from './queries';
 import {IChat, ICreateRoom, IGuess, IJoinRoom, ILeave, IStartGame, Room, Song, User} from './interfaces'
-import engine, {delay, getRandomSong, getRoomIndex, removeUser, isSamePassword, validateGuess} from './engine';
+import engine, {
+    delay,
+    getRandomSong,
+    getRoomIndex,
+    removeUser,
+    isSamePassword,
+    validateGuess,
+    getUsername, removeUserGlobal
+} from './engine';
 
 const server = http.createServer();
 const io = socketio(server);
 const rooms: Room[] = [];
 
 io.on('connection', socket => {
-    console.log(socket.id);
     console.log("User connected");
     console.log("Total Users: " + Object.keys(io.sockets.connected).length);
 
     socket.on('disconnect', () => {
+        removeUserGlobal(socket.id, rooms);
         console.log("User disconnected");
     });
 
@@ -47,7 +55,7 @@ io.on('connection', socket => {
         } else if (!isSamePassword(rooms[index].password, data.password)) {
             socket.emit('room-connection', {connected: false, message: "Wrong password", room: data.roomName, isAdmin: false});
         } else {
-            rooms[index].users.push(new User(socket.id, data.username));
+            rooms[index].users.push(new User(socket.id, getUsername(data.username, rooms[index].users)));
             socket.join(data.roomName);
             console.log("Room joined");
             socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, isAdmin: false, isInGame: rooms[index].isInGame});

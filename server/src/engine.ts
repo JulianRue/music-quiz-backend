@@ -28,6 +28,30 @@ export function validateGuess(guess:string, correct:string, percent:number, perc
     }
 }
 
+export function removeUserGlobal(id:string, rooms:Room[]){
+    rooms.forEach(function(room){
+       let index:number = room.users.findIndex( user => user.id == id);
+       if(index != -1){
+           room.users.splice(index,1);
+           return;
+       }
+    });
+}
+
+export function getUsername(username:string, users:User[]):string{
+    let name = username;
+    for(let i = 1; i < 999; i++){
+        let tempUsr = users.find(user => user.name == name);
+        if(tempUsr === undefined){
+            return name;
+        }
+        else{
+            name = username + " (" + i + ")";
+        }
+    }
+    return "";
+}
+
 function levenshtein(a: string, b: string): number {
     const an = a ? a.length : 0;
     const bn = b ? b.length : 0;
