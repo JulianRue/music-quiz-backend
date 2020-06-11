@@ -14,7 +14,6 @@ export interface IJoinRoom{
 
 export interface IGuess{
     room : string;
-    password : string;
     text : string;
     username : string;
     userid : string;
@@ -28,13 +27,13 @@ export interface IChat {
 
 export interface ILeave{
     roomName:string;
-    password : string;
     username:string;
+    userid:string;
 }
 
 export interface IStartGame{
     playlist:number[];
-    password : string;
+    adminPassword : string;
     roundCount:number;
     roomName:string;
 }
@@ -62,6 +61,11 @@ export class User {
     }
     removePoints(points:number){
         this.points -= points;
+    }
+    newRound(){
+        this.guessedTitle = false;
+        this.guessedIntrepret = false;
+        this.guessesAlbum = false;
     }
 }
 
