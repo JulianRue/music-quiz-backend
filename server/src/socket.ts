@@ -1,8 +1,8 @@
 import http from 'http';
 import socketio from 'socket.io';
 import db from './queries';
-import {ICreateRoom, IJoinRoom, ILeave, IStartGame, Room, Song, User} from './interfaces'
-import engine, {delay, getRandomSong, getRoomIndex, levenshtein, removeUser, isSamePassword} from './engine';
+import {IChat, ICreateRoom, IGuess, IJoinRoom, ILeave, IStartGame, Room, Song, User} from './interfaces'
+import engine, {delay, getRandomSong, getRoomIndex, removeUser, isSamePassword, validateGuess} from './engine';
 
 const server = http.createServer();
 const io = socketio(server);
@@ -56,6 +56,62 @@ io.on('connection', socket => {
         }
     });
 
+    socket.on('guess', (data : IGuess) => {
+        let index = getRoomIndex(rooms,data.room);
+        if(index == -1){
+            //TODO ERROR LOG
+            return;
+        }
+        let room = rooms[index];
+        let user = room.getUser(data.userid);
+
+        if(user.id == "-1"){
+            //TODO ERROR LOG
+            return;
+        }
+
+        if(!user.guessedTitle){
+            let guess = validateGuess(data.text, room.currentSong.name, 15, 30);
+            if(guess == 1){
+                user.addPoints(1);
+                user.guessedTitle = true;
+                io.in(data.room).emit('user-guessed-title', user);
+                return;
+            }
+            else if(guess == 2){
+                io.emit('guess-response', "Song title was close! Try again");
+            }
+        }
+
+        if(!user.guessedIntrepret){
+            let guess = validateGuess(data.text, room.currentSong.interpret, 10, 25);
+            if(guess == 1){
+                user.addPoints(1);
+                user.guessedIntrepret = true;
+                io.in(data.room).emit('user-guessed-interpret', user);
+                return;
+            }
+            else if(guess == 2){
+                io.emit('guess-response', "Intrepret was close! Try again");
+            }
+        }
+
+        if(!user.guessesAlbum){
+            let guess = validateGuess(data.text, room.currentSong.album, 15, 30);
+            if(guess == 1){
+                user.addPoints(1);
+                user.guessesAlbum = true;
+                io.in(data.room).emit('user-guessed-album', user);
+                return;
+            }
+            else if(guess == 2){
+                io.emit('guess-response', "Album was close! Try again");
+            }
+        }
+
+        let chat : IChat = {text : data.text, username : data.username, userid : data.userid};
+        io.in(data.room).emit('chat', chat);
+    });
     socket.on('leave', (data : ILeave) => {
         const roomName = data.roomName.toUpperCase();
         socket.leave(roomName);
