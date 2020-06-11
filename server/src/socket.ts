@@ -18,43 +18,40 @@ io.on('connection', socket => {
     });
 
     socket.on('start-game', (data : IStartGame) => {
-        const roomName = data.roomName.toUpperCase();
         console.log("Game started");
-        io.in(roomName).emit('game-started', "Game started");
+        io.in(data.roomName).emit('game-started', "Game started");
 
-        const index = getRoomIndex(rooms, roomName);
+        const index = getRoomIndex(rooms, data.roomName);
         let room:Room = rooms[index];
         room.isInGame = true;
         startGame(data, room);
     });
 
     socket.on('create-room', (data : ICreateRoom) => {
-        const roomName = data.roomName.toUpperCase();
-        if (io.sockets.adapter.rooms[roomName] === undefined) {
-            const length = rooms.push(new Room(roomName, data.password, socket.id, data.username));
-            socket.join(roomName);
+        if (io.sockets.adapter.rooms[data.roomName] === undefined) {
+            const length = rooms.push(new Room(data.roomName, data.password, socket.id, data.username));
+            socket.join(data.roomName);
             console.log("Room created");
-            socket.emit('room-connection', {connected: true, message: "Room created", room: roomName, isAdmin: true});
-            io.in(roomName).emit('clients-updated', rooms[length - 1].users);
+            socket.emit('room-connection', {connected: true, message: "Room created", room: data.roomName, isAdmin: true});
+            io.in(data.roomName).emit('clients-updated', rooms[length - 1].users);
         } else {
             console.log("Room already exists");
-            socket.emit('room-connection', {connected: false, message: "Room already exists", room: roomName, isAdmin: true});
+            socket.emit('room-connection', {connected: false, message: "Room already exists", room: data.roomName, isAdmin: true});
         }
     });
 
     socket.on('join-room', (data : IJoinRoom) => {
-        const roomName = data.roomName.toUpperCase();
-        const index = getRoomIndex(rooms, roomName);
+        const index = getRoomIndex(rooms, data.roomName);
         if (index === -1) {
-            socket.emit('room-connection', {connected: false, message: "Room does not exist", room: roomName, isAdmin: false});
+            socket.emit('room-connection', {connected: false, message: "Room does not exist", room: data.roomName, isAdmin: false});
         } else if (!isSamePassword(rooms[index].password, data.password)) {
-            socket.emit('room-connection', {connected: false, message: "Wrong password", room: roomName, isAdmin: false});
+            socket.emit('room-connection', {connected: false, message: "Wrong password", room: data.roomName, isAdmin: false});
         } else {
             rooms[index].users.push(new User(socket.id, data.username));
-            socket.join(roomName);
+            socket.join(data.roomName);
             console.log("Room joined");
-            socket.emit('room-connection', {connected: true, message: "Room joined", room: roomName, isAdmin: false, isInGame: rooms[index].isInGame});
-            io.in(roomName).emit('clients-updated', rooms[index].users);
+            socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, isAdmin: false, isInGame: rooms[index].isInGame});
+            io.in(data.roomName).emit('clients-updated', rooms[index].users);
         }
     });
 
@@ -116,9 +113,8 @@ io.on('connection', socket => {
     });
 
     socket.on('leave', (data : ILeave) => {
-        const roomName = data.roomName.toUpperCase();
-        socket.leave(roomName);
-        const index = getRoomIndex(rooms, roomName);
+        socket.leave(data.roomName);
+        const index = getRoomIndex(rooms, data.roomName);
         const users: User[] = removeUser(rooms[index].users, data.username);
         if (!rooms[index].isAdminInRoom()) {
             console.log("No admin");
@@ -126,7 +122,7 @@ io.on('connection', socket => {
         if (rooms[index].users.length === 0) {
             rooms.splice(index, 1);
         }
-        io.in(roomName).emit('clients-updated', users);
+        io.in(data.roomName).emit('clients-updated', users);
         console.log("Room left");
     });
 
