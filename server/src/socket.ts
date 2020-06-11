@@ -21,9 +21,11 @@ io.on('connection', socket => {
         const roomName = data.roomName.toUpperCase();
         console.log("Game started");
         io.in(roomName).emit('game-started', "Game started");
-        startGame(data);
+
         const index = getRoomIndex(rooms, roomName);
-        rooms[index].isInGame = true;
+        let room:Room = rooms[index];
+        room.isInGame = true;
+        startGame(data, room);
     });
 
     socket.on('create-room', (data : ICreateRoom) => {
@@ -70,7 +72,7 @@ io.on('connection', socket => {
             return;
         }
 
-        if(!user.guessedTitle){
+        if(!user.guessedTitle && room.isInGame){
             let guess = validateGuess(data.text, room.currentSong.name, 15, 30);
             if(guess == 1){
                 user.addPoints(1);
@@ -83,7 +85,7 @@ io.on('connection', socket => {
             }
         }
 
-        if(!user.guessedIntrepret){
+        if(!user.guessedIntrepret && room.isInGame){
             let guess = validateGuess(data.text, room.currentSong.interpret, 10, 25);
             if(guess == 1){
                 user.addPoints(1);
@@ -96,7 +98,7 @@ io.on('connection', socket => {
             }
         }
 
-        if(!user.guessesAlbum){
+        if(!user.guessesAlbum && room.isInGame){
             let guess = validateGuess(data.text, room.currentSong.album, 15, 30);
             if(guess == 1){
                 user.addPoints(1);
@@ -112,6 +114,7 @@ io.on('connection', socket => {
         let chat : IChat = {text : data.text, username : data.username, userid : data.userid};
         io.in(data.room).emit('chat', chat);
     });
+
     socket.on('leave', (data : ILeave) => {
         const roomName = data.roomName.toUpperCase();
         socket.leave(roomName);
@@ -135,15 +138,18 @@ server.listen(8000, () => {
     console.log("Socket.io Server is listening on port 8000");
 });
 
-function startGame(params : IStartGame){
+function startGame(params : IStartGame, room:Room) : void{
     (async () => {
         var songs : Song[] = await db.getPlaylistSongsFromIds(params.playlist);
         for(var i = 0; i < params.roundCount; i++){
-            var song:Song = getRandomSong(songs);
+            room.isInGame = true;
+            room.newRound();
+            room.currentSong = getRandomSong(songs);
             const timestamp = Date.now();
-            io.in(params.roomName).emit('song-started', {url: song.url, timestamp: timestamp});
-
-            await delay(38*1000);
+            io.in(params.roomName).emit('song-started', {url: room.currentSong.url, timestamp: timestamp});
+            await delay(34*1000);
+            room.isInGame = false;
+            await delay(6*1000);
         }
     })();
 }
