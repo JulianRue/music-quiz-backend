@@ -1,8 +1,34 @@
 import {Room, Song, User} from "./interfaces";
 
-export function levenshtein(a: string, b: string): number {
-    a = formatString(a);
-    b = formatString(b);
+export function randomString(length:number):string {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}
+
+export function validateGuess(guess:string, correct:string, percent:number, percentClose:number) : number{
+    //percent -> 20 = 20% etc
+    guess = formatString(guess);
+    correct = formatString(correct);
+    percent = percent / 100.0;
+    var count = levenshtein(guess,correct);
+
+    if(count / correct.length < percent){
+        return 1;
+    }
+    else if(count / correct.length < percentClose){
+        return 2;
+    }
+    else{
+        return 0;
+    }
+}
+
+function levenshtein(a: string, b: string): number {
     const an = a ? a.length : 0;
     const bn = b ? b.length : 0;
     if (an === 0)
