@@ -20,6 +20,12 @@ export interface IGuess{
     userid : string;
 }
 
+export interface IChat {
+    text: string;
+    username: string;
+    userid: string;
+}
+
 export interface ILeave{
     roomName:string;
     password : string;
