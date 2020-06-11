@@ -10,8 +10,17 @@ export interface IJoinRoom{
     username: string;
 }
 
+export interface IGuess{
+    room : string;
+    password : string;
+    text : string;
+    username : string;
+    userid : string;
+}
+
 export interface ILeave{
     roomName:string;
+    password : string;
     username:string;
 }
 
@@ -26,12 +35,18 @@ export class User {
     name:string;
     points:number;
     isAdmin:boolean;
+    guessedTitle:boolean;
+    guessedIntrepret:boolean;
+    guessesAlbum:boolean;
 
     constructor(id: string, name: string, isAdmin: boolean = false) {
         this.id = id;
         this.name = name;
         this.points = 0;
         this.isAdmin = isAdmin;
+        this.guessedTitle = false;
+        this.guessedIntrepret = false;
+        this.guessesAlbum = false;
     }
     addPoints(points:number) {
         this.points += points;
@@ -48,7 +63,6 @@ export class Song{
     url:string;
     genre:string;
     album:string;
-
 
     constructor(id: number = 0, name: string = "", interpret: string = "", url: string = "", genre: string = "", album: string = "") {
         this.id = id;
@@ -83,5 +97,16 @@ export class Room{
             isAdminInRoom = false;
         }
         return isAdminInRoom;
+    }
+
+    getUser(id:string):User{
+        if(this.users != undefined){
+            for(let i = 0; i < this.users.length; i++){
+                if(this.users[i].id == id){
+                    return this.users[i];
+                }
+            }
+        }
+        return new User("-1","");
     }
 }
