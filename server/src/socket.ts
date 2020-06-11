@@ -81,7 +81,7 @@ io.on('connection', socket => {
                 return;
             }
             else if(guess == 2){
-                io.emit('guess-response', "Song title was close! Try again");
+                socket.emit('guess-response', "Song title was close! Try again");
             }
         }
 
@@ -94,7 +94,7 @@ io.on('connection', socket => {
                 return;
             }
             else if(guess == 2){
-                io.emit('guess-response', "Intrepret was close! Try again");
+                socket.emit('guess-response', "Intrepret was close! Try again");
             }
         }
 
@@ -107,7 +107,7 @@ io.on('connection', socket => {
                 return;
             }
             else if(guess == 2){
-                io.emit('guess-response', "Album was close! Try again");
+                socket.emit('guess-response', "Album was close! Try again");
             }
         }
 
