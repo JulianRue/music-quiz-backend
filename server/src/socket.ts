@@ -1,7 +1,18 @@
 import http from 'http';
 import socketio from 'socket.io';
 import db from './queries';
-import {IChat, ICreateRoom, IGuess, IJoinRoom, ILeave, IStartGame, Room, Song, User} from './interfaces'
+import {
+    IChat,
+    ICreateRoom,
+    IGuess,
+    IGuessedCorrect,
+    IJoinRoom,
+    ILeave,
+    IStartGame, IUser,
+    Room,
+    Song,
+    User
+} from './interfaces'
 import engine, {
     delay,
     getRandomSong,
@@ -19,11 +30,6 @@ const rooms: Room[] = [];
 io.on('connection', socket => {
     console.log("User connected");
     console.log("Total Users: " + Object.keys(io.sockets.connected).length);
-
-    socket.on('disconnect', () => {
-        removeUserGlobal(socket.id, rooms);
-        console.log("User disconnected");
-    });
 
     socket.on('start-game', (data : IStartGame) => {
         console.log("Game started");
@@ -82,7 +88,8 @@ io.on('connection', socket => {
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedTitle = true;
-                io.in(data.room).emit('user-guessed-title', user);
+                const message:IGuessedCorrect = {username:user.name, text: "Successfully guessed the Title and got " + 1 + " points!"};
+                io.in(data.room).emit('user-guessed-correct', message);
                 return;
             }
             else if(guess == 2){
@@ -95,7 +102,8 @@ io.on('connection', socket => {
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedIntrepret = true;
-                io.in(data.room).emit('user-guessed-interpret', user);
+                const message:IGuessedCorrect = {username:user.name, text: "Successfully guessed the Interpret and got " + 1 + " points!"};
+                io.in(data.room).emit('user-guessed-correct', message);
                 return;
             }
             else if(guess == 2){
@@ -108,7 +116,8 @@ io.on('connection', socket => {
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedAlbum = true;
-                io.in(data.room).emit('user-guessed-album', user);
+                const message:IGuessedCorrect = {username:user.name, text: "Successfully guessed the Album and got " + 1 + " points!"};
+                io.in(data.room).emit('user-guessed-correct', message);
                 return;
             }
             else if(guess == 2){
@@ -116,18 +125,19 @@ io.on('connection', socket => {
             }
         }
 
-        let chat : IChat = {text : data.text, username : data.username, userid : data.userid};
+        let chat : IChat = {text : data.text, username : data.username};
         io.in(data.room).emit('chat', chat);
     });
 
     socket.on('leave', (data : ILeave) => {
         socket.leave(data.roomName);
         const index = getRoomIndex(rooms, data.roomName);
-        const users: User[] = removeUser(rooms[index].users, data.username);
-        if (!rooms[index].isAdminInRoom()) {
+        const room:Room = rooms[index];
+        const users: User[] = removeUser(room.users, data.username);
+        if (!room.isAdminInRoom()) {
             console.log("No admin");
         }
-        if (rooms[index].users.length === 0) {
+        if (room.users.length === 0) {
             rooms.splice(index, 1);
         }
         io.in(data.roomName).emit('clients-updated', users);
