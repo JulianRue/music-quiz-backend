@@ -126,6 +126,6 @@ export class Room{
     }
 
     newRound(){
-        this.users.forEach( user => {user.newRound()});
+        this.users.forEach(user => user.newRound());
     }
 }
