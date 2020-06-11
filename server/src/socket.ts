@@ -142,14 +142,15 @@ function startGame(params : IStartGame, room:Room) : void{
     (async () => {
         var songs : Song[] = await db.getPlaylistSongsFromIds(params.playlist);
         for(var i = 0; i < params.roundCount; i++){
-            room.isInGame = true;
             room.newRound();
             room.currentSong = getRandomSong(songs);
             const timestamp = Date.now();
             io.in(params.roomName).emit('song-started', {url: room.currentSong.url, timestamp: timestamp});
-            await delay(34*1000);
+            await delay(4*1000); // delay damit alle gleichzeitig starten!
+            room.isInGame = true;   // wenn lied dann läuft auf true setzen
+            await delay(30*1000);   //lied läuft 30 sekunden
             room.isInGame = false;
-            await delay(6*1000);
+            await delay(5*1000) //pause zwischen den runden
         }
     })();
 }
