@@ -25,6 +25,11 @@ export interface IChat {
     userid: string;
 }
 
+export interface IUser {
+    username:string;
+    points:number;
+    isAdmin:boolean;
+}
 export interface ILeave{
     roomName:string;
     username:string;
@@ -45,7 +50,7 @@ export class User {
     isAdmin:boolean;
     guessedTitle:boolean;
     guessedIntrepret:boolean;
-    guessesAlbum:boolean;
+    guessedAlbum:boolean;
 
     constructor(id: string, name: string, isAdmin: boolean = false) {
         this.id = id;
@@ -54,7 +59,7 @@ export class User {
         this.isAdmin = isAdmin;
         this.guessedTitle = false;
         this.guessedIntrepret = false;
-        this.guessesAlbum = false;
+        this.guessedAlbum = false;
     }
     addPoints(points:number) {
         this.points += points;
@@ -65,7 +70,7 @@ export class User {
     newRound(){
         this.guessedTitle = false;
         this.guessedIntrepret = false;
-        this.guessesAlbum = false;
+        this.guessedAlbum = false;
     }
 }
 
@@ -127,5 +132,11 @@ export class Room{
 
     newRound(){
         this.users.forEach(user => user.newRound());
+    }
+
+    getUsers() : IUser[]{
+        let iUsers:IUser[] = Array();
+        this.users.forEach(user => iUsers.push({username : user.name, isAdmin : user.isAdmin, points : user.points}));
+        return iUsers;
     }
 }

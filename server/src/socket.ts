@@ -41,7 +41,7 @@ io.on('connection', socket => {
             socket.join(data.roomName);
             console.log("Room created");
             socket.emit('room-connection', {connected: true, message: "Room created", room: data.roomName, isAdmin: true});
-            io.in(data.roomName).emit('clients-updated', rooms[length - 1].users);
+            io.in(data.roomName).emit('clients-updated', rooms[length - 1].getUsers());
         } else {
             console.log("Room already exists");
             socket.emit('room-connection', {connected: false, message: "Room already exists", room: data.roomName, isAdmin: true});
@@ -59,7 +59,7 @@ io.on('connection', socket => {
             socket.join(data.roomName);
             console.log("Room joined");
             socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, isAdmin: false, isInGame: rooms[index].isInGame});
-            io.in(data.roomName).emit('clients-updated', rooms[index].users);
+            io.in(data.roomName).emit('clients-updated', rooms[index].getUsers());
         }
     });
 
@@ -103,11 +103,11 @@ io.on('connection', socket => {
             }
         }
 
-        if(!user.guessesAlbum && room.isInGame){
+        if(!user.guessedAlbum && room.isInGame){
             let guess = validateGuess(data.text, room.currentSong.album, 15, 30);
             if(guess == 1){
                 user.addPoints(1);
-                user.guessesAlbum = true;
+                user.guessedAlbum = true;
                 io.in(data.room).emit('user-guessed-album', user);
                 return;
             }
