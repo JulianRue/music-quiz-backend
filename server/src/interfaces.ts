@@ -22,7 +22,11 @@ export interface IGuess{
 export interface IChat {
     text: string;
     username: string;
-    userid: string;
+}
+
+export interface IGuessedCorrect{
+    username:string;
+    text:string;
 }
 
 export interface IUser {
