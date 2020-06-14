@@ -29,6 +29,7 @@ const rooms: Room[] = [];
 
 io.on('connection', socket => {
     console.log("User connected");
+    socket.emit('connected', socket.id);
     console.log("Total Users: " + Object.keys(io.sockets.connected).length);
 
     socket.on('start-game', (data : IStartGame) => {
@@ -71,6 +72,7 @@ io.on('connection', socket => {
 
     socket.on('guess', (data : IGuess) => {
         let index = getRoomIndex(rooms,data.room);
+        const text = data.text.toUpperCase();
         if(index == -1){
             //TODO ERROR LOG
             return;
@@ -83,8 +85,10 @@ io.on('connection', socket => {
             return;
         }
 
+        console.log(room.currentSong.name, room.currentSong.interpret);
+
         if(!user.guessedTitle && room.isInGame){
-            let guess = validateGuess(data.text, room.currentSong.name, 15, 30);
+            let guess = validateGuess(text, room.currentSong.name, 15, 30);
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedTitle = true;
@@ -98,7 +102,7 @@ io.on('connection', socket => {
         }
 
         if(!user.guessedIntrepret && room.isInGame){
-            let guess = validateGuess(data.text, room.currentSong.interpret, 10, 25);
+            let guess = validateGuess(text, room.currentSong.interpret, 10, 25);
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedIntrepret = true;
@@ -112,7 +116,7 @@ io.on('connection', socket => {
         }
 
         if(!user.guessedAlbum && room.isInGame){
-            let guess = validateGuess(data.text, room.currentSong.album, 15, 30);
+            let guess = validateGuess(text, room.currentSong.album, 15, 30);
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedAlbum = true;

@@ -115,6 +115,7 @@ function removeEnd(s:string, sub:string):string{
 }
 
 export function formatString(s:string):string{
+    s = s.toUpperCase();
     s = s.replace("'","");
 
     s = removeSub(s, "(", ")");
