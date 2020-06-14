@@ -85,8 +85,6 @@ io.on('connection', socket => {
             return;
         }
 
-        console.log(room.currentSong.name, room.currentSong.interpret);
-
         if(!user.guessedTitle && room.isInGame){
             let guess = validateGuess(text, room.currentSong.name, 15, 30);
             if(guess == 1){
