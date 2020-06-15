@@ -127,15 +127,18 @@ io.on('connection', socket => {
             }
         }
 
-        let chat : IChat = {text : "gucci " + data.text, username : user.name};
+        let chat : IChat = {text : data.text, username : user.name};
         io.in(data.room).emit('chat', chat);
     });
 
     socket.on('leave', (data : ILeave) => {
         socket.leave(data.roomName);
         const index = getRoomIndex(rooms, data.roomName);
+        if(index == -1) return;
+
         const room:Room = rooms[index];
         const users: User[] = removeUser(room.users, data.username);
+
         if (!room.isAdminInRoom()) {
             console.log("No admin");
         }
@@ -157,17 +160,30 @@ server.listen(8000, () => {
 function startGame(params : IStartGame, room:Room) : void{
     (async () => {
         var songs : Song[] = await db.getPlaylistSongsFromIds(params.playlist);
-        for(var i = 0; i < params.roundCount; i++){
-            room.newRound();
-            room.currentSong = getRandomSong(songs);
-            const timestamp = Date.now();
-            io.in(params.roomName).emit('song-started', {url: room.currentSong.url, timestamp: timestamp});
-            await delay(4*1000); // delay damit alle gleichzeitig starten!
-            room.isInGame = true;   // wenn lied dann läuft auf true setzen
-            await delay(30*1000);   //lied läuft 30 sekunden
-            room.isInGame = false;
-            await delay(5*1000) //pause zwischen den runden
+        try{
+            for(var i = 0; i < params.roundCount && room.getUsers().length > 0; i++){
+                room.newRound();
+                room.currentSong = getRandomSong(songs);
+                const timestamp = Date.now();
+                io.in(params.roomName).emit('song-started', {url: room.currentSong.url, timestamp: timestamp});
+
+                for(let j = 0; j < 4 && room.getUsers().length > 0; j++)
+                    await delay(1000); // delay damit alle gleichzeitig starten!
+
+                room.isInGame = true;   // wenn lied dann läuft auf true setzen
+
+                for(let j = 0; j < 30 && room.getUsers().length > 0; j++)
+                    await delay(1000);   //lied läuft 30 sekunden
+                room.isInGame = false;
+
+                for(let j = 0; j < 5 && room.getUsers().length > 0; j++)
+                    await delay(1000) //pause zwischen den runden
+            }
         }
+        catch (e) {
+            console.log(e);
+        }
+
     })();
 }
 
