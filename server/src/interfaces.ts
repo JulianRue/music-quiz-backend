@@ -15,8 +15,6 @@ export interface IJoinRoom{
 export interface IGuess{
     room : string;
     text : string;
-    username : string;
-    userid : string;
 }
 
 export interface IChat {
@@ -36,8 +34,6 @@ export interface IUser {
 }
 export interface ILeave{
     roomName:string;
-    username:string;
-    userid:string;
 }
 
 export interface IStartGame{
