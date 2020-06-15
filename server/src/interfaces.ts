@@ -139,4 +139,8 @@ export class Room{
         this.users.forEach(user => iUsers.push({username : user.name, isAdmin : user.isAdmin, points : user.points}));
         return iUsers;
     }
+
+    removeUser(id:string){
+        this.users = this.users.filter(user => user.id != id);
+    }
 }

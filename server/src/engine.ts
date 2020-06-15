@@ -146,17 +146,6 @@ export function getRoomIndex(rooms:Room[], name:string):number{
     return -1;
 }
 
-export function removeUser(users: User[], username: string): User[] {
-    let spliced = false;
-    for(let i = 0; i < users.length && !spliced; i++) {
-        if(users[i].name === username) {
-            users.splice(i, 1);
-            spliced = true;
-        }
-    }
-    return users;
-}
-
 export function isSamePassword(str1: string, str2: string): boolean {
     if (!str1) {
         str1 = "";

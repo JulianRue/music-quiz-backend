@@ -13,11 +13,11 @@ import {
     Song,
     User
 } from './interfaces'
+
 import engine, {
     delay,
     getRandomSong,
     getRoomIndex,
-    removeUser,
     isSamePassword,
     validateGuess,
     getUsername, removeUserGlobal
@@ -137,7 +137,7 @@ io.on('connection', socket => {
         if(index == -1) return;
 
         const room:Room = rooms[index];
-        const users: User[] = removeUser(room.users, data.username);
+        room.removeUser(socket.id);
 
         if (!room.isAdminInRoom()) {
             console.log("No admin");
@@ -145,7 +145,9 @@ io.on('connection', socket => {
         if (room.users.length === 0) {
             rooms.splice(index, 1);
         }
-        io.in(data.roomName).emit('clients-updated', users);
+        else{
+            io.in(data.roomName).emit('clients-updated', room.getUsers());
+        }
         console.log("Room left");
     });
 
