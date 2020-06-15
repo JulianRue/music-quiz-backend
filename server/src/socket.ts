@@ -127,7 +127,7 @@ io.on('connection', socket => {
             }
         }
 
-        let chat : IChat = {text : data.text, username : data.username};
+        let chat : IChat = {text : data.text, username : user.name};
         io.in(data.room).emit('chat', chat);
     });
 
