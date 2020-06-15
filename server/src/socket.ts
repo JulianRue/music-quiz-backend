@@ -78,7 +78,7 @@ io.on('connection', socket => {
             return;
         }
         let room = rooms[index];
-        let user = room.getUser(data.userid);
+        let user = room.getUser(socket.id);
 
         if(user.id == "-1"){
             //TODO ERROR LOG
@@ -127,7 +127,7 @@ io.on('connection', socket => {
             }
         }
 
-        let chat : IChat = {text : data.text, username : user.name};
+        let chat : IChat = {text : "gucci " + data.text, username : user.name};
         io.in(data.room).emit('chat', chat);
     });
 
