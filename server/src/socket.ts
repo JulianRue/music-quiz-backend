@@ -47,25 +47,26 @@ io.on('connection', socket => {
             const length = rooms.push(new Room(data.roomName, data.password, socket.id, data.username));
             socket.join(data.roomName);
             console.log("Room created");
-            socket.emit('room-connection', {connected: true, message: "Room created", room: data.roomName, isAdmin: true});
+            socket.emit('room-connection', {connected: true, message: "Room created", room: data.roomName, username: data.username, isAdmin: true, isInGame: false});
             io.in(data.roomName).emit('clients-updated', rooms[length - 1].getUsers());
         } else {
             console.log("Room already exists");
-            socket.emit('room-connection', {connected: false, message: "Room already exists", room: data.roomName, isAdmin: true});
+            socket.emit('room-connection', {connected: false, message: "Room already exists"});
         }
     });
 
     socket.on('join-room', (data : IJoinRoom) => {
         const index = getRoomIndex(rooms, data.roomName);
         if (index === -1) {
-            socket.emit('room-connection', {connected: false, message: "Room does not exist", room: data.roomName, isAdmin: false});
+            socket.emit('room-connection', {connected: false, message: "Room does not exist"});
         } else if (!isSamePassword(rooms[index].password, data.password)) {
-            socket.emit('room-connection', {connected: false, message: "Wrong password", room: data.roomName, isAdmin: false});
+            socket.emit('room-connection', {connected: false, message: "Wrong password"});
         } else {
             rooms[index].users.push(new User(socket.id, getUsername(data.username, rooms[index].users)));
             socket.join(data.roomName);
             console.log("Room joined");
-            socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, isAdmin: false, isInGame: rooms[index].isInGame});
+            // TODO: ÜBERPRÜFEN OB BENUTZER MIT DEMSELBEN NAMEN IM RAUM IST, DANN NEUEN USERNAMEN AN CLIENT SCHICKEN
+            socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, username: data.username, isAdmin: false, isInGame: rooms[index].isInGame});
             io.in(data.roomName).emit('clients-updated', rooms[index].getUsers());
         }
     });
