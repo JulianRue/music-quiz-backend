@@ -62,11 +62,11 @@ io.on('connection', socket => {
         } else if (!isSamePassword(rooms[index].password, data.password)) {
             socket.emit('room-connection', {connected: false, message: "Wrong password"});
         } else {
-            rooms[index].users.push(new User(socket.id, getUsername(data.username, rooms[index].users)));
+            const username = getUsername(data.username, rooms[index].users);
+            rooms[index].users.push(new User(socket.id, username));
             socket.join(data.roomName);
             console.log("Room joined");
-            // TODO: ÜBERPRÜFEN OB BENUTZER MIT DEMSELBEN NAMEN IM RAUM IST, DANN NEUEN USERNAMEN AN CLIENT SCHICKEN
-            socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, username: data.username, isAdmin: false, isInGame: rooms[index].isInGame});
+            socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, username: username, isAdmin: false, isInGame: rooms[index].isInGame});
             io.in(data.roomName).emit('clients-updated', rooms[index].getUsers());
         }
     });
