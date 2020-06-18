@@ -3,6 +3,10 @@ import bodyParser from 'body-parser';
 import db from "./queries";
 
 export const app = express();
+
+const keycloak = require('../config/keycloakConfig.js').initKeycloak();
+app.use(keycloak.middleware());
+
 export const port :number  = 3000;
 console.log("Started rest");
 
@@ -17,7 +21,7 @@ app.get('/api/', (request, response) => {
     response.json({ info: 'Node.js, Express, REST, and Postgres API' })
 });
 
-app.get('/api/playlist/:count', db.getPlaylists);
+app.get('/api/playlist/:count', /*keycloak.protect(['user','admin']),*/ db.getPlaylists);
 app.get('/api/playlist/id/:id', db.getPlaylistSongsById);
 app.get('/api/playlist/user/:name', db.getPlaylistSongsByName);
 
