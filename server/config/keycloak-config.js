@@ -7,7 +7,7 @@ var keycloakConfig = {
     clientId: 'nodejs-rest',
     bearerOnly: true,
     serverUrl: 'http://localhost:8080/auth',
-    realm: 'Music-quiz',
+    realm: 'music-quiz',
     credentials: {
         secret: '284dd0d2-1bfd-4278-940b-4badb994bdc0'
     }
