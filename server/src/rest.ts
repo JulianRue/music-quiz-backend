@@ -7,6 +7,7 @@ export const app = express();
 
 const Keycloak =  require("keycloak-connect");
 var session = require('express-session');
+var cors = require('cors');
 var memoryStore =  new  session.MemoryStore();
 var keycloak =  new  Keycloak({ store: memoryStore });
 app.use(session({
@@ -16,6 +17,18 @@ app.use(session({
     store: memoryStore
 }));
 app.use(keycloak.middleware());
+
+var originsWhitelist = [
+    'http://localhost:4200'
+  ];
+var corsOptions = {
+    origin: function(origin: any, callback: any){
+          var isWhitelisted = originsWhitelist.indexOf(origin) !== -1;
+          callback(null, isWhitelisted);
+    }
+  }
+   
+  app.use(cors(corsOptions));
 
 /*
 const keycloak = require('../config/keycloak-config.js').initKeycloak();
