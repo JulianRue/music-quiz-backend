@@ -60,7 +60,7 @@ function getPlaylistSongsByName(request, response) {
 function getPlaylistSongsFromIds(playlistIds) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
-            text: 'SELECT * FROM song INNER JOIN songlist ON songlist.songid = song.id WHERE playlistId = ANY ($1)',
+            text: 'SELECT song.* FROM song INNER JOIN songlist ON songlist.songid = song.id WHERE playlistId = ANY ($1)',
             values: [playlistIds],
         };
         client.query(query);

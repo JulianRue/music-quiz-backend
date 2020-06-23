@@ -4,7 +4,13 @@ import db from "./queries";
 
 export const app = express();
 
+const https = require("https"),
+    fs = require("fs");
 
+const options = {
+    key: fs.readFileSync("/etc/letsencrypt/live/monalit.de/privkey.pem"),
+    cert: fs.readFileSync("/etc/letsencrypt/live/monalit.de/fullchain.pem")
+};
 const Keycloak =  require("keycloak-connect");
 var session = require('express-session');
 var cors = require('cors');
@@ -60,6 +66,6 @@ function run(){
 
 }
 
-
+https.createServer(options, app).listen(3001);
 
 export default {}
