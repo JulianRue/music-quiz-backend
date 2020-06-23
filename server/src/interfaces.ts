@@ -22,9 +22,14 @@ export interface IChat {
     username: string;
 }
 
+export interface IGuessedClose{
+    type:string;
+}
+
 export interface IGuessedCorrect{
     username:string;
-    text:string;
+    type:string;
+    points:number;
 }
 
 export interface IUser {

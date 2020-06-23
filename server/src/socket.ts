@@ -8,7 +8,7 @@ import {
     IGuessedCorrect,
     IJoinRoom,
     ILeave,
-    IStartGame, IUser,
+    IStartGame, IUser, IGuessedClose,
     Room,
     Song,
     User
@@ -101,12 +101,13 @@ io.on('connection', socket => {
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedTitle = true;
-                const message:IGuessedCorrect = {username:user.name, text: "Successfully guessed the Title and got " + 1 + " points!"};
+                const message:IGuessedCorrect = {username:user.name, type: "Title", points:1};
                 io.in(data.room).emit('user-guessed-correct', message);
                 return;
             }
             else if(guess == 2){
-                socket.emit('guess-response', "Song title was close! Try again");
+                const message: IGuessedClose = {type:"Song"};
+                socket.emit('guess-response', message);
             }
         }
 
@@ -115,12 +116,13 @@ io.on('connection', socket => {
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedIntrepret = true;
-                const message:IGuessedCorrect = {username:user.name, text: "Successfully guessed the Interpret and got " + 1 + " points!"};
+                const message:IGuessedCorrect = {username:user.name, type: "Interpret", points:1};
                 io.in(data.room).emit('user-guessed-correct', message);
                 return;
             }
             else if(guess == 2){
-                socket.emit('guess-response', "Intrepret was close! Try again");
+                const message: IGuessedClose = {type:"Intrepret"};
+                socket.emit('guess-response', message);
             }
         }
 
@@ -129,12 +131,13 @@ io.on('connection', socket => {
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedAlbum = true;
-                const message:IGuessedCorrect = {username:user.name, text: "Successfully guessed the Album and got " + 1 + " points!"};
+                const message:IGuessedCorrect = {username:user.name, type: "Album", points:1};
                 io.in(data.room).emit('user-guessed-correct', message);
                 return;
             }
             else if(guess == 2){
-                socket.emit('guess-response', "Album was close! Try again");
+                const message: IGuessedClose = {type:"Album"};
+                socket.emit('guess-response', message);
             }
         }
 
