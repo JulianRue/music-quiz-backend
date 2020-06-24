@@ -151,14 +151,15 @@ io.on('connection', socket => {
         if(index == -1) return;
 
         const room:Room = rooms[index];
-        if (room.removeUser(socket.id) === 0) {
-            room.setAdmin();
-        }
-
+        const removedIndex = room.removeUser(socket.id);
+        
         if (room.users.length === 0) {
             rooms.splice(index, 1);
         }
         else{
+            if (removedIndex === 0) {
+                room.setAdmin();
+            }
             io.in(data.roomName).emit('clients-updated', room.getUsers());
         }
         console.log("Room left");
