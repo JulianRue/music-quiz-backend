@@ -115,15 +115,6 @@ export class Room{
         this.adminPassword = randomString(10);
     }
 
-    isAdminInRoom(): boolean {
-        let isAdminInRoom = true;
-        const admin = this.users.find(user => user.isAdmin === true);
-        if (admin === undefined) {
-            isAdminInRoom = false;
-        }
-        return isAdminInRoom;
-    }
-
     getUser(id:string):User{
         if(this.users != undefined){
             for(let i = 0; i < this.users.length; i++){
@@ -145,7 +136,13 @@ export class Room{
         return iUsers;
     }
 
-    removeUser(id:string){
-        this.users = this.users.filter(user => user.id != id);
+    removeUser(id:string): number{
+        const index = this.users.findIndex(user => user.id === id);
+        this.users.splice(index, 1);
+        return index;
+    }
+
+    setAdmin() {
+        this.users[0].isAdmin = true;
     }
 }

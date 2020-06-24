@@ -151,11 +151,10 @@ io.on('connection', socket => {
         if(index == -1) return;
 
         const room:Room = rooms[index];
-        room.removeUser(socket.id);
-
-        if (!room.isAdminInRoom()) {
-            console.log("No admin");
+        if (room.removeUser(socket.id) === 0) {
+            room.setAdmin();
         }
+
         if (room.users.length === 0) {
             rooms.splice(index, 1);
         }
