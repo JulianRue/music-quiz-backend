@@ -4,6 +4,7 @@ export interface ICreateRoom{
     roomName: string;
     password : string;
     username: string;
+    maxRounds: number;
 }
 
 export interface IJoinRoom{
@@ -104,15 +105,21 @@ export class Room{
     adminPassword : string;
     users: User[];
     isInGame: boolean;
+    isSongPlaying: boolean;
+    currentRound: number;
+    maxRounds: number;
 
-    constructor(roomName: string, password: string, userId: string, username: string, adminPassword: string = "") {
+    constructor(roomName: string, password: string, userId: string, username: string, cadminPassword: string = "") {
         this.currentSong = new Song();
         this.roomName = roomName;
         this.password = password;
         this.users = Array();
         this.users.push(new User(userId, username, true));
         this.isInGame = false;
+        this.isSongPlaying = false;
         this.adminPassword = randomString(10);
+        this.currentRound = 0;
+        this.maxRounds = -1;
     }
 
     getUser(id:string):User{
@@ -127,6 +134,7 @@ export class Room{
     }
 
     newRound(){
+        this.currentRound++;
         this.users.forEach(user => user.newRound());
     }
 
