@@ -31,7 +31,7 @@ const https = require("https"),
 //     key: fs.readFileSync("/etc/letsencrypt/live/monalit.de/privkey.pem"),
 //     cert: fs.readFileSync("/etc/letsencrypt/live/monalit.de/fullchain.pem")
 // };
-// 
+
 // const server = https.createServer(options);
 const server = http.createServer();
 const io = socketio(server);

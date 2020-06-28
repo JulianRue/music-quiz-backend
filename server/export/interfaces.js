@@ -37,22 +37,17 @@ class Song {
 }
 exports.Song = Song;
 class Room {
-    constructor(roomName, password, userId, username, adminPassword = "") {
+    constructor(roomName, password, userId, username, cadminPassword = "") {
         this.currentSong = new Song();
         this.roomName = roomName;
         this.password = password;
         this.users = Array();
         this.users.push(new User(userId, username, true));
         this.isInGame = false;
+        this.isSongPlaying = false;
         this.adminPassword = engine_1.randomString(10);
-    }
-    isAdminInRoom() {
-        let isAdminInRoom = true;
-        const admin = this.users.find(user => user.isAdmin === true);
-        if (admin === undefined) {
-            isAdminInRoom = false;
-        }
-        return isAdminInRoom;
+        this.currentRound = 0;
+        this.maxRounds = -1;
     }
     getUser(id) {
         if (this.users != undefined) {
@@ -65,6 +60,7 @@ class Room {
         return new User("-1", "");
     }
     newRound() {
+        this.currentRound++;
         this.users.forEach(user => user.newRound());
     }
     getUsers() {
@@ -73,7 +69,12 @@ class Room {
         return iUsers;
     }
     removeUser(id) {
-        this.users = this.users.filter(user => user.id != id);
+        const index = this.users.findIndex(user => user.id === id);
+        this.users.splice(index, 1);
+        return index;
+    }
+    setAdmin() {
+        this.users[0].isAdmin = true;
     }
 }
 exports.Room = Room;
