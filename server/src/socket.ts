@@ -23,6 +23,7 @@ import engine, {
     getUsername, removeUserGlobal
 } from './engine';
 
+/*
 const https = require("https"),
     fs = require("fs");
 
@@ -33,6 +34,8 @@ const options = {
 };
 
 const server = https.createServer(options);
+*/
+const server = http.createServer();
 const io = socketio(server);
 const rooms: Room[] = [];
 

@@ -1,5 +1,6 @@
 import { Client, Query } from 'pg';
 import {Request, Response} from 'express'
+const fs = require('fs');
 import { request } from 'http';
 
 const client: Client = new Client({
@@ -67,6 +68,44 @@ async function getPlaylistSongsFromIds(playlistIds : number[]){
     return res.rows;
 }
 
+//createPlaylist();
+async function createPlaylist(){
+    let rawData = fs.readFileSync('C:/Users/Julian/Downloads/top100-german-infos.json');
+    let tempPlaylist = JSON.parse(rawData);
+    let playlistName = "Top 100 Deutschland";
+    let creatorName = "admin";
+
+    let temppp = await client.query("SELECT * FROM playlist WHERE name LIKE $1 AND creatorname LIKE $2", [playlistName, creatorName]);
+    if(temppp.rows.length == 0)
+        client.query('INSERT INTO playlist(name, description, creatorname, country, popularity) VALUES($1, $2, $3, $4, $5)', [playlistName, "Top100 Germany playlist", creatorName, "DE", 0]);
+
+    const tempPlaylistId = await client.query('SELECT id FROM playlist WHERE name LIKE $1 AND creatorname LIKE $2', [playlistName,creatorName]);
+    let playlistId = tempPlaylistId.rows[0].id;
+
+    for(let i = 0; i < tempPlaylist.length; i++){
+        let tempSongId = await client.query('SELECT id FROM song WHERE url LIKE $1', [tempPlaylist[i].results[0].previewUrl]);
+        if(tempSongId.rows.length == 0){
+            client.query('INSERT INTO song(name, interpret, url, genre, album) VALUES($1, $2, $3, $4, $5)',
+                [tempPlaylist[i].results[0].trackName, tempPlaylist[i].results[0].artistName, tempPlaylist[i].results[0].previewUrl,
+                    tempPlaylist[i].results[0].primaryGenreName, tempPlaylist[i].results[0].collectionName]);
+
+            tempSongId = await client.query('SELECT id FROM song WHERE url LIKE $1', [tempPlaylist[i].results[0].previewUrl]);
+        }
+        else{
+            console.log(tempPlaylist[i].results[0].trackName + " " + tempPlaylist[i].results[0].artistName + " is already saved!");
+        }
+
+        let songId = tempSongId.rows[0].id;
+
+        let testIndex = await client.query('SELECT * FROM songlist WHERE songid = $1 AND playlistid = $2', [songId,playlistId]);
+        if(testIndex.rows.length == 0)
+            client.query('INSERT INTO songlist(songid, playlistid) VALUES($1,$2)', [songId, playlistId]);
+        else
+            console.log(tempPlaylist[i].results[0].trackName + " " + tempPlaylist[i].results[0].artistName + " is already in playlist no " + playlistId);
+    }
+
+
+}
 export default {
     getPlaylists: getPlaylists,
     getPlaylistSongsById: getPlaylistSongsById,

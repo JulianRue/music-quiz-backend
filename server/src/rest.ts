@@ -6,11 +6,13 @@ export const app = express();
 
 const https = require("https"),
     fs = require("fs");
-
+/*
 const options = {
     key: fs.readFileSync("/etc/letsencrypt/live/monalit.de/privkey.pem"),
     cert: fs.readFileSync("/etc/letsencrypt/live/monalit.de/fullchain.pem")
 };
+ */
+
 const Keycloak =  require("keycloak-connect");
 var session = require('express-session');
 var cors = require('cors');
@@ -27,6 +29,8 @@ app.use(keycloak.middleware());
 var originsWhitelist = [
     'http://localhost:4200'
   ];
+
+/*
 var corsOptions = {
     origin: function(origin: any, callback: any){
           var isWhitelisted = originsWhitelist.indexOf(origin) !== -1;
@@ -35,7 +39,7 @@ var corsOptions = {
   }
    
   app.use(cors(corsOptions));
-
+*/
 /*
 const keycloak = require('../config/keycloak-config.js').initKeycloak();
 app.use(keycloak.middleware());
@@ -66,6 +70,6 @@ function run(){
 
 }
 
-https.createServer(options, app).listen(3001);
+//https.createServer(options, app).listen(3001);
 
 export default {}
