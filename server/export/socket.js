@@ -22,6 +22,7 @@ const options = {
     cert: fs.readFileSync("/etc/letsencrypt/live/monalit.de/fullchain.pem")
 };
 const server = https.createServer(options);
+// const server = http.createServer();
 const io = socket_io_1.default(server);
 const rooms = [];
 io.on('connection', socket => {
@@ -30,10 +31,11 @@ io.on('connection', socket => {
     console.log("Total Users: " + Object.keys(io.sockets.connected).length);
     socket.on('start-game', (data) => {
         console.log("Game started");
-        io.in(data.roomName).emit('game-started', "Game started");
+        io.in(data.roomName).emit('game-started', { maxRounds: data.roundCount });
         const index = engine_1.getRoomIndex(rooms, data.roomName);
         let room = rooms[index];
         room.isInGame = true;
+        room.maxRounds = data.roundCount;
         startGame(data, room);
     });
     socket.on('create-room', (data) => {
@@ -41,7 +43,7 @@ io.on('connection', socket => {
             const length = rooms.push(new interfaces_1.Room(data.roomName, data.password, socket.id, data.username));
             socket.join(data.roomName);
             console.log("Room created");
-            socket.emit('room-connection', { connected: true, message: "Room created", room: data.roomName, username: data.username, isAdmin: true, isInGame: false });
+            socket.emit('room-connection', { connected: true, message: "Room created", room: data.roomName, username: data.username, isAdmin: true, isInGame: false, currentRound: 0, maxRounds: -1 });
             io.in(data.roomName).emit('clients-updated', rooms[length - 1].getUsers());
         }
         else {
@@ -62,7 +64,7 @@ io.on('connection', socket => {
             rooms[index].users.push(new interfaces_1.User(socket.id, username));
             socket.join(data.roomName);
             console.log("Room joined");
-            socket.emit('room-connection', { connected: true, message: "Room joined", room: data.roomName, username: username, isAdmin: false, isInGame: rooms[index].isInGame });
+            socket.emit('room-connection', { connected: true, message: "Room joined", room: data.roomName, username: username, isAdmin: false, isInGame: rooms[index].isInGame, currentRound: rooms[index].currentRound, maxRounds: rooms[index].maxRounds });
             io.in(data.roomName).emit('clients-updated', rooms[index].getUsers());
         }
     });
@@ -79,43 +81,46 @@ io.on('connection', socket => {
             //TODO ERROR LOG
             return;
         }
-        if (!user.guessedTitle && room.isInGame) {
+        if (!user.guessedTitle && room.isSongPlaying) {
             let guess = engine_1.validateGuess(text, room.currentSong.name, 15, 30);
             if (guess == 1) {
                 user.addPoints(1);
                 user.guessedTitle = true;
-                const message = { username: user.name, text: "Successfully guessed the Title and got " + 1 + " points!" };
+                const message = { username: user.name, type: "Title", points: 1 };
                 io.in(data.room).emit('user-guessed-correct', message);
                 return;
             }
             else if (guess == 2) {
-                socket.emit('guess-response', "Song title was close! Try again");
+                const message = { type: "Song" };
+                socket.emit('guess-response', message);
             }
         }
-        if (!user.guessedIntrepret && room.isInGame) {
+        if (!user.guessedIntrepret && room.isSongPlaying) {
             let guess = engine_1.validateGuess(text, room.currentSong.interpret, 10, 25);
             if (guess == 1) {
                 user.addPoints(1);
                 user.guessedIntrepret = true;
-                const message = { username: user.name, text: "Successfully guessed the Interpret and got " + 1 + " points!" };
+                const message = { username: user.name, type: "Interpret", points: 1 };
                 io.in(data.room).emit('user-guessed-correct', message);
                 return;
             }
             else if (guess == 2) {
-                socket.emit('guess-response', "Intrepret was close! Try again");
+                const message = { type: "Intrepret" };
+                socket.emit('guess-response', message);
             }
         }
-        if (!user.guessedAlbum && room.isInGame) {
+        if (!user.guessedAlbum && room.isSongPlaying) {
             let guess = engine_1.validateGuess(text, room.currentSong.album, 15, 30);
             if (guess == 1) {
                 user.addPoints(1);
                 user.guessedAlbum = true;
-                const message = { username: user.name, text: "Successfully guessed the Album and got " + 1 + " points!" };
+                const message = { username: user.name, type: "Album", points: 1 };
                 io.in(data.room).emit('user-guessed-correct', message);
                 return;
             }
             else if (guess == 2) {
-                socket.emit('guess-response', "Album was close! Try again");
+                const message = { type: "Album" };
+                socket.emit('guess-response', message);
             }
         }
         let chat = { text: data.text, username: user.name };
@@ -127,14 +132,14 @@ io.on('connection', socket => {
         if (index == -1)
             return;
         const room = rooms[index];
-        room.removeUser(socket.id);
-        if (!room.isAdminInRoom()) {
-            console.log("No admin");
-        }
+        const removedIndex = room.removeUser(socket.id);
         if (room.users.length === 0) {
             rooms.splice(index, 1);
         }
         else {
+            if (removedIndex === 0) {
+                room.setAdmin();
+            }
             io.in(data.roomName).emit('clients-updated', room.getUsers());
         }
         console.log("Room left");
@@ -155,13 +160,14 @@ function startGame(params, room) {
                 io.in(params.roomName).emit('song-started', { url: room.currentSong.url, timestamp: timestamp });
                 for (let j = 0; j < 4 && room.getUsers().length > 0; j++)
                     yield engine_1.delay(1000); // delay damit alle gleichzeitig starten!
-                room.isInGame = true; // wenn lied dann läuft auf true setzen
+                room.isSongPlaying = true; // wenn lied dann läuft auf true setzen
                 for (let j = 0; j < 30 && room.getUsers().length > 0; j++)
                     yield engine_1.delay(1000); //lied läuft 30 sekunden
-                room.isInGame = false;
+                room.isSongPlaying = false;
                 for (let j = 0; j < 5 && room.getUsers().length > 0; j++)
                     yield engine_1.delay(1000); //pause zwischen den runden
             }
+            room.isInGame = false;
         }
         catch (e) {
             console.log(e);

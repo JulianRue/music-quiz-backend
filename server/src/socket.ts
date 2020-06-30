@@ -23,18 +23,16 @@ import engine, {
     getUsername, removeUserGlobal
 } from './engine';
 
-/*
 const https = require("https"),
     fs = require("fs");
 
 
-const options = {
-    key: fs.readFileSync("/etc/letsencrypt/live/monalit.de/privkey.pem"),
-    cert: fs.readFileSync("/etc/letsencrypt/live/monalit.de/fullchain.pem")
-};
+// const options = {
+//     key: fs.readFileSync("/etc/letsencrypt/live/monalit.de/privkey.pem"),
+//     cert: fs.readFileSync("/etc/letsencrypt/live/monalit.de/fullchain.pem")
+// };
 
-const server = https.createServer(options);
-*/
+// const server = https.createServer(options);
 const server = http.createServer();
 const io = socketio(server);
 const rooms: Room[] = [];
@@ -47,11 +45,12 @@ io.on('connection', socket => {
 
     socket.on('start-game', (data : IStartGame) => {
         console.log("Game started");
-        io.in(data.roomName).emit('game-started', "Game started");
+        io.in(data.roomName).emit('game-started', {maxRounds: data.roundCount});
 
         const index = getRoomIndex(rooms, data.roomName);
         let room:Room = rooms[index];
         room.isInGame = true;
+        room.maxRounds = data.roundCount;
         startGame(data, room);
     });
 
@@ -60,7 +59,7 @@ io.on('connection', socket => {
             const length = rooms.push(new Room(data.roomName, data.password, socket.id, data.username));
             socket.join(data.roomName);
             console.log("Room created");
-            socket.emit('room-connection', {connected: true, message: "Room created", room: data.roomName, username: data.username, isAdmin: true, isInGame: false});
+            socket.emit('room-connection', {connected: true, message: "Room created", room: data.roomName, username: data.username, isAdmin: true, isInGame: false, currentRound: 0, maxRounds: -1});
             io.in(data.roomName).emit('clients-updated', rooms[length - 1].getUsers());
         } else {
             console.log("Room already exists");
@@ -79,7 +78,7 @@ io.on('connection', socket => {
             rooms[index].users.push(new User(socket.id, username));
             socket.join(data.roomName);
             console.log("Room joined");
-            socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, username: username, isAdmin: false, isInGame: rooms[index].isInGame});
+            socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, username: username, isAdmin: false, isInGame: rooms[index].isInGame, currentRound: rooms[index].currentRound, maxRounds: rooms[index].maxRounds});
             io.in(data.roomName).emit('clients-updated', rooms[index].getUsers());
         }
     });
@@ -99,7 +98,7 @@ io.on('connection', socket => {
             return;
         }
 
-        if(!user.guessedTitle && room.isInGame){
+        if(!user.guessedTitle && room.isSongPlaying){
             let guess = validateGuess(text, room.currentSong.name, 15, 30);
             if(guess == 1){
                 user.addPoints(1);
@@ -114,7 +113,7 @@ io.on('connection', socket => {
             }
         }
 
-        if(!user.guessedIntrepret && room.isInGame){
+        if(!user.guessedIntrepret && room.isSongPlaying){
             let guess = validateGuess(text, room.currentSong.interpret, 10, 25);
             if(guess == 1){
                 user.addPoints(1);
@@ -129,7 +128,7 @@ io.on('connection', socket => {
             }
         }
 
-        if(!user.guessedAlbum && room.isInGame){
+        if(!user.guessedAlbum && room.isSongPlaying){
             let guess = validateGuess(text, room.currentSong.album, 15, 30);
             if(guess == 1){
                 user.addPoints(1);
@@ -189,15 +188,17 @@ function startGame(params : IStartGame, room:Room) : void{
                 for(let j = 0; j < 4 && room.getUsers().length > 0; j++)
                     await delay(1000); // delay damit alle gleichzeitig starten!
 
-                room.isInGame = true;   // wenn lied dann läuft auf true setzen
+                room.isSongPlaying = true;   // wenn lied dann läuft auf true setzen
 
                 for(let j = 0; j < 30 && room.getUsers().length > 0; j++)
                     await delay(1000);   //lied läuft 30 sekunden
-                room.isInGame = false;
+
+                room.isSongPlaying = false;
 
                 for(let j = 0; j < 5 && room.getUsers().length > 0; j++)
                     await delay(1000) //pause zwischen den runden
             }
+            room.isInGame = false;
         }
         catch (e) {
             console.log(e);
