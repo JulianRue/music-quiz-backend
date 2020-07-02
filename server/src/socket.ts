@@ -99,7 +99,7 @@ io.on('connection', socket => {
         }
 
         if(!user.guessedTitle && room.isSongPlaying){
-            let guess = validateGuess(text, room.currentSong.name, 15, 30);
+            let guess = validateGuess(text, room.currentSong.name, 0, 30);
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedTitle = true;
@@ -114,22 +114,22 @@ io.on('connection', socket => {
         }
 
         if(!user.guessedIntrepret && room.isSongPlaying){
-            let guess = validateGuess(text, room.currentSong.interpret, 10, 25);
+            let guess = validateGuess(text, room.currentSong.interpret, 0, 30);
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedIntrepret = true;
-                const message:IGuessedCorrect = {username:user.name, type: "interpret", points:1};
+                const message:IGuessedCorrect = {username:user.name, type: "artist", points:1};
                 io.in(data.room).emit('user-guessed-correct', message);
                 return;
             }
             else if(guess == 2){
-                const message: IGuessedClose = {type:"intrepret", text:data.text};
+                const message: IGuessedClose = {type:"artist", text:data.text};
                 socket.emit('guess-response', message);
             }
         }
 
         if(!user.guessedAlbum && room.isSongPlaying){
-            let guess = validateGuess(text, room.currentSong.album, 15, 30);
+            let guess = validateGuess(text, room.currentSong.album, 0, 30);
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedAlbum = true;

@@ -18,7 +18,7 @@ export function validateGuess(guess:string, correct:string, percent:number, perc
     percentClose = percentClose / 100.0;
     var count = levenshtein(guess,correct);
 
-    if(count / correct.length < percent){
+    if(count === 0){
         return 1;
     }
     else if(count / correct.length < percentClose){
