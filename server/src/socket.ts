@@ -118,12 +118,12 @@ io.on('connection', socket => {
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedIntrepret = true;
-                const message:IGuessedCorrect = {username:user.name, type: "interpret", points:1};
+                const message:IGuessedCorrect = {username:user.name, type: "artist", points:1};
                 io.in(data.room).emit('user-guessed-correct', message);
                 return;
             }
             else if(guess == 2){
-                const message: IGuessedClose = {type:"intrepret", text:data.text};
+                const message: IGuessedClose = {type:"artist", text:data.text};
                 socket.emit('guess-response', message);
             }
         }
@@ -188,7 +188,7 @@ function startGame(params : IStartGame, room:Room) : void{
                 for(let j = 0; j < 4 && room.getUsers().length > 0; j++)
                     await delay(1000); // delay damit alle gleichzeitig starten!
 
-                console.log("Nor playing in Room: " + room.roomName);
+                console.log("Now playing in Room: " + room.roomName);
                 console.log(room.currentSong.interpret + " | " + room.currentSong.name);
                 console.log("-------------------------");
                 room.isSongPlaying = true;   // wenn lied dann läuft auf true setzen
