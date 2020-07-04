@@ -99,7 +99,7 @@ io.on('connection', socket => {
         }
 
         if(!user.guessedTitle && room.isSongPlaying){
-            let guess = validateGuess(text, room.currentSong.name, 15, 30);
+            let guess = validateGuess(text, room.currentSong.name, 20, 30);
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedTitle = true;
@@ -114,7 +114,7 @@ io.on('connection', socket => {
         }
 
         if(!user.guessedIntrepret && room.isSongPlaying){
-            let guess = validateGuess(text, room.currentSong.interpret, 10, 25);
+            let guess = validateGuess(text, room.currentSong.interpret, 20, 30);
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedIntrepret = true;
@@ -129,7 +129,7 @@ io.on('connection', socket => {
         }
 
         if(!user.guessedAlbum && room.isSongPlaying){
-            let guess = validateGuess(text, room.currentSong.album, 15, 30);
+            let guess = validateGuess(text, room.currentSong.album, 20, 30);
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedAlbum = true;
@@ -188,6 +188,9 @@ function startGame(params : IStartGame, room:Room) : void{
                 for(let j = 0; j < 4 && room.getUsers().length > 0; j++)
                     await delay(1000); // delay damit alle gleichzeitig starten!
 
+                console.log("Nor playing in Room: " + room.roomName);
+                console.log(room.currentSong.interpret + " | " + room.currentSong.name);
+                console.log("-------------------------");
                 room.isSongPlaying = true;   // wenn lied dann läuft auf true setzen
 
                 for(let j = 0; j < 30 && room.getUsers().length > 0; j++)
