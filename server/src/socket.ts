@@ -103,12 +103,12 @@ io.on('connection', socket => {
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedTitle = true;
-                const message:IGuessedCorrect = {username:user.name, type: "Title", points:1};
+                const message:IGuessedCorrect = {username:user.name, type: "title", points:1};
                 io.in(data.room).emit('user-guessed-correct', message);
                 return;
             }
             else if(guess == 2){
-                const message: IGuessedClose = {type:"Song"};
+                const message: IGuessedClose = {type:"title", text:data.text};
                 socket.emit('guess-response', message);
             }
         }
@@ -118,12 +118,12 @@ io.on('connection', socket => {
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedIntrepret = true;
-                const message:IGuessedCorrect = {username:user.name, type: "Interpret", points:1};
+                const message:IGuessedCorrect = {username:user.name, type: "interpret", points:1};
                 io.in(data.room).emit('user-guessed-correct', message);
                 return;
             }
             else if(guess == 2){
-                const message: IGuessedClose = {type:"Intrepret"};
+                const message: IGuessedClose = {type:"intrepret", text:data.text};
                 socket.emit('guess-response', message);
             }
         }
@@ -133,12 +133,12 @@ io.on('connection', socket => {
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedAlbum = true;
-                const message:IGuessedCorrect = {username:user.name, type: "Album", points:1};
+                const message:IGuessedCorrect = {username:user.name, type: "album", points:1};
                 io.in(data.room).emit('user-guessed-correct', message);
                 return;
             }
             else if(guess == 2){
-                const message: IGuessedClose = {type:"Album"};
+                const message: IGuessedClose = {type:"album", text:data.text};
                 socket.emit('guess-response', message);
             }
         }
