@@ -25,6 +25,7 @@ export interface IChat {
 
 export interface IGuessedClose{
     type:string;
+    text:string;
 }
 
 export interface IGuessedCorrect{
