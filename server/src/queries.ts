@@ -57,15 +57,45 @@ function getPlaylistSongsByName(request : Request , response : Response) {
     })
 };
 
-async function getPlaylistSongsFromIds(playlistIds : number[]){
+async function getPlaylistSongsFromIds(playlistIds : number[]): Promise<string[]>{
     const query = {
-        text: 'SELECT song.* FROM song INNER JOIN songlist ON songlist.songid = song.id WHERE playlistId = ANY ($1)',
+        text: 'SELECT songid FROM songlist WHERE playlistId = ANY ($1)',
         values: [playlistIds],
     };
-
     client.query(query);
     const res = await client.query(query);
-    return res.rows;
+    const data: string[] = new Array();
+    res.rows.forEach(entry => data.push(entry.songid));
+
+    return data;
+}
+
+//addPlaylist();
+async function addPlaylist(){
+    /*
+    let rawData = fs.readFileSync('C:/Users/Julian/Downloads/1111143121.json');
+    let tempPlaylist = JSON.parse(rawData);
+    let playlistName = "Top 100 Deutschland";
+    let creatorName = "admin";
+    */
+
+    let rawData = fs.readFileSync('C:/Users/Julian/Downloads/146820791.json');
+    let tempPlaylist = JSON.parse(rawData);
+    let playlistName = "HYPED HIPHOP/RAP Deutschland";
+    let creatorName = "admin";
+
+    let temppp = await client.query("SELECT * FROM playlist WHERE name LIKE $1 AND creatorname LIKE $2", [playlistName, creatorName]);
+    if(temppp.rows.length == 0)
+        client.query('INSERT INTO playlist(name, description, creatorname, country, popularity) VALUES($1, $2, $3, $4, $5)', [playlistName, playlistName +" playlist", creatorName, "DE", 0]);
+
+    const tempPlaylistId = await client.query('SELECT id FROM playlist WHERE name LIKE $1 AND creatorname LIKE $2', [playlistName,creatorName]);
+    let playlistId = tempPlaylistId.rows[0].id;
+
+    client.query('DELETE FROM songlist WHERE playlistid = $1', [playlistId]);
+
+    for(let i = 0; i < tempPlaylist.tracks.data.length; i++) {
+        client.query('INSERT INTO songlist(songid, playlistid) VALUES($1,$2)', [tempPlaylist.tracks.data[i].id, playlistId]);
+    }//
 }
 
 //createPlaylist();

@@ -1,4 +1,4 @@
-import http from 'http';
+import http, {ClientRequest, IncomingMessage, request} from 'http';
 import socketio from 'socket.io';
 import db from './queries';
 import {
@@ -11,7 +11,7 @@ import {
     IStartGame, IUser, IGuessedClose,
     Room,
     Song,
-    User
+    User, IMusicEntry
 } from './interfaces'
 
 import engine, {
@@ -177,11 +177,11 @@ server.listen(8000, () => {
 
 function startGame(params : IStartGame, room:Room) : void{
     (async () => {
-        var songs : Song[] = await db.getPlaylistSongsFromIds(params.playlist);
+        var songsIds : string[] = await db.getPlaylistSongsFromIds(params.playlist);
         try{
             for(var i = 0; i < params.roundCount && room.getUsers().length > 0; i++){
                 room.newRound();
-                room.currentSong = getRandomSong(songs);
+                room.currentSong = await getRandomSong(songsIds);
                 const timestamp = Date.now();
                 io.in(params.roomName).emit('song-started', {url: room.currentSong.url, timestamp: timestamp});
 
@@ -209,7 +209,5 @@ function startGame(params : IStartGame, room:Room) : void{
 
     })();
 }
-
-
 
 export default {this:this}

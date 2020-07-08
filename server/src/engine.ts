@@ -1,4 +1,5 @@
-import {Room, Song, User} from "./interfaces";
+import {IMusicEntry, Room, Song, User} from "./interfaces";
+import axios from 'axios';
 
 export function randomString(length:number):string {
     var result           = '';
@@ -130,11 +131,23 @@ export function formatString(s:string):string{
     return s;
 }
 
-export function getRandomSong(songs:Song[]) : Song{
+export async function getRandomSong(songs:string[]) : Promise<Song>{
+    const apiClient = axios.create({
+        baseURL: 'http://api.deezer.com/',
+        responseType: 'json',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+
     const number = Math.floor(Math.random() * songs.length);
-    const json = songs[number];
+    const id = songs[number];
     songs.splice(number,1);
-    return json;
+    const response = await apiClient.get<IMusicEntry>('/track/' + id);
+
+    const tempSong: IMusicEntry = response.data;
+    const song: Song = new Song(tempSong.id, tempSong.title_short, tempSong.artist.name, tempSong.preview, tempSong.album.title);
+    return song;
 }
 
 export function getRoomIndex(rooms:Room[], name:string):number{

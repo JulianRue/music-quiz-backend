@@ -1,5 +1,40 @@
 import {randomString} from "./engine";
 
+export interface IMusicEntry{
+    id: string;
+    title_short: string;
+    explicit_lyrics: boolean;
+    preview: string;
+    bpm: string;
+
+    contributors: [
+        {
+            id: string,
+            name: string,
+            type: string,
+            role: string,
+        }
+    ];
+    artist: {
+        id: string,
+        name: string,
+        type: string,
+        picture: string,
+        picture_small: string,
+        picture_medium: string,
+        picture_big: string
+    };
+    album: {
+        id: string;
+        title: string,
+        cover: string,
+        cover_small: string,
+        cover_medium: string,
+        cover_big: string,
+        release_date: string
+    };
+}
+
 export interface ICreateRoom{
     roomName: string;
     password : string;
@@ -82,19 +117,17 @@ export class User {
 }
 
 export class Song{
-    id:number;
+    id:string;
     name:string;
     interpret:string;
     url:string;
-    genre:string;
     album:string;
 
-    constructor(id: number = 0, name: string = "", interpret: string = "", url: string = "", genre: string = "", album: string = "") {
+    constructor(id: string = "0", name: string = "", interpret: string = "", url: string = "", album: string = "") {
         this.id = id;
         this.name = name;
         this.interpret = interpret;
         this.url = url;
-        this.genre = genre;
         this.album = album;
     }
 }
