@@ -190,6 +190,7 @@ function startGame(params : IStartGame, room:Room) : void{
 
                 console.log("Now playing in Room: " + room.roomName);
                 console.log(room.currentSong.interpret + " | " + room.currentSong.name);
+                console.log("Url: " + room.currentSong.url);
                 console.log("-------------------------");
                 room.isSongPlaying = true;   // wenn lied dann läuft auf true setzen
 
