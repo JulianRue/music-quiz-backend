@@ -13,6 +13,21 @@ const client: Client = new Client({
 
 client.connect();
 
+function createPlaylist(request: any, response : Response){
+    let username: string = request.kauth.grant.access_token.content.preferred_username;
+    let name: string = request.body.name;
+    let description: string = request.body.description;
+    let country: string = request.body.country;
+
+    client.query('INSERT INTO playlist(name, description, creatorname, country, popularity) VALUES($1, $2, $3, $4, $5)', [name, description, username, country, 0]);
+    let result = client.query("SELECT * FROM playlist WHERE creatorname LIKE $1", [username], (error, results) => {
+        if (error) {
+            throw error;
+        }
+        response.status(200).json(results.rows);
+    })
+}
+
 function getPlaylists(request : Request, response : Response) {
     const query = {
         text: 'SELECT * FROM playlist ORDER BY popularity DESC LIMIT $1',
@@ -70,8 +85,8 @@ async function getPlaylistSongsFromIds(playlistIds : number[]): Promise<string[]
     return data;
 }
 
-//addPlaylist();
-async function addPlaylist(){
+//addStaticPlaylist();
+async function addStaticPlaylist(){
     /*
     let rawData = fs.readFileSync('C:/Users/Julian/Downloads/1111143121.json');
     let tempPlaylist = JSON.parse(rawData);
@@ -98,8 +113,8 @@ async function addPlaylist(){
     }//
 }
 
-//createPlaylist();
-async function createPlaylist(){
+//createStaticPlaylist();
+async function createStaticPlaylist(){
     let rawData = fs.readFileSync('C:/Users/Julian/Downloads/top100-german-infos.json');
     let tempPlaylist = JSON.parse(rawData);
     let playlistName = "Top 100 Deutschland";
@@ -140,5 +155,6 @@ export default {
     getPlaylists: getPlaylists,
     getPlaylistSongsById: getPlaylistSongsById,
     getPlaylistSongsByName : getPlaylistSongsByName,
-    getPlaylistSongsFromIds : getPlaylistSongsFromIds
+    getPlaylistSongsFromIds : getPlaylistSongsFromIds,
+    createPlaylist : createPlaylist
 }

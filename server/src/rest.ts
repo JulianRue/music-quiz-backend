@@ -61,6 +61,7 @@ app.get('/api/', (request, response) => {
 app.get('/api/playlist/:count', keycloak.protect('user', 'admin'), db.getPlaylists);
 app.get('/api/playlist/id/:id', keycloak.protect('user', 'admin') ,db.getPlaylistSongsById);
 app.get('/api/playlist/user/:name', keycloak.protect('user', 'admin'), db.getPlaylistSongsByName);
+app.post('/api/playlist/', keycloak.protect('user', 'admin'), db.createPlaylist);
 
 app.listen(port, () => {
     console.log(`REST Interface is running on port ${port}.`)
