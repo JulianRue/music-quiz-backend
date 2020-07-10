@@ -19,6 +19,11 @@ function createPlaylist(request: any, response : Response){
     let description: string = request.body.description;
     let country: string = request.body.country;
 
+    console.log("Create called!");
+    console.log("username: " + username);
+    console.log("name: " + name);
+    console.log("description: " + description);
+    console.log("country: " + country);
     client.query('INSERT INTO playlist(name, description, creatorname, country, popularity) VALUES($1, $2, $3, $4, $5)', [name, description, username, country, 0]);
     let result = client.query("SELECT * FROM playlist WHERE creatorname LIKE $1", [username], (error, results) => {
         if (error) {
