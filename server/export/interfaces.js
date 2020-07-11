@@ -26,12 +26,11 @@ class User {
 }
 exports.User = User;
 class Song {
-    constructor(id = 0, name = "", interpret = "", url = "", genre = "", album = "") {
+    constructor(id = "0", name = "", interpret = "", url = "", album = "") {
         this.id = id;
         this.name = name;
         this.interpret = interpret;
         this.url = url;
-        this.genre = genre;
         this.album = album;
     }
 }

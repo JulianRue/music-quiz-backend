@@ -27,19 +27,24 @@ app.use(session({
 app.use(keycloak.middleware());
 
 var originsWhitelist = [
-    'http://localhost:4200'
+    'http://localhost:4200',
+    'http://monalit.de/musicquiz/',
+    'https://monalit.de/musicquiz/',
+    'http://monalit.de/',
+    'https://monalit.de/',
+    'http://monalit.de',
+    'https://monalit.de',
   ];
 
-/*
+
 var corsOptions = {
     origin: function(origin: any, callback: any){
           var isWhitelisted = originsWhitelist.indexOf(origin) !== -1;
           callback(null, isWhitelisted);
     }
   }
-   
   app.use(cors(corsOptions));
-*/
+
 /*
 const keycloak = require('../config/keycloak-config.js').initKeycloak();
 app.use(keycloak.middleware());

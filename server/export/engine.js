@@ -1,6 +1,20 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.delay = exports.isSamePassword = exports.getRoomIndex = exports.getRandomSong = exports.formatString = exports.getUsername = exports.removeUserGlobal = exports.validateGuess = exports.randomString = void 0;
+const interfaces_1 = require("./interfaces");
+const axios_1 = __importDefault(require("axios"));
 function randomString(length) {
     var result = '';
     var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -16,8 +30,9 @@ function validateGuess(guess, correct, percent, percentClose) {
     guess = formatString(guess);
     correct = formatString(correct);
     percent = percent / 100.0;
+    percentClose = percentClose / 100.0;
     var count = levenshtein(guess, correct);
-    if (count / correct.length < percent) {
+    if (count === 0) {
         return 1;
     }
     else if (count / correct.length < percentClose) {
@@ -106,20 +121,38 @@ function removeEnd(s, sub) {
 function formatString(s) {
     s = s.toUpperCase();
     s = s.replace("'", "");
+    s = s.replace("!", "");
+    s = s.replace("?", "");
+    s = s.replace("-", "");
+    s = s.replace(".", "");
+    s = s.replace("/", "");
+    s = s.replace("|", "");
     s = removeSub(s, "(", ")");
     s = removeSub(s, "[", "]");
     s = removeSub(s, "{", "}");
-    s = removeEnd(s, "ft.");
-    s = removeEnd(s, "feat.");
-    s = removeEnd(s, "-");
+    //s = removeEnd(s, "ft");
+    //s = removeEnd(s, "feat");
+    //s = removeEnd(s, "-");
     return s;
 }
 exports.formatString = formatString;
 function getRandomSong(songs) {
-    const number = Math.floor(Math.random() * songs.length);
-    const json = songs[number];
-    songs.splice(number, 1);
-    return json;
+    return __awaiter(this, void 0, void 0, function* () {
+        const apiClient = axios_1.default.create({
+            baseURL: 'http://api.deezer.com/',
+            responseType: 'json',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const number = Math.floor(Math.random() * songs.length);
+        const id = songs[number];
+        songs.splice(number, 1);
+        const response = yield apiClient.get('/track/' + id);
+        const tempSong = response.data;
+        const song = new interfaces_1.Song(tempSong.id, tempSong.title_short, tempSong.artist.name, tempSong.preview, tempSong.album.title);
+        return song;
+    });
 }
 exports.getRandomSong = getRandomSong;
 function getRoomIndex(rooms, name) {

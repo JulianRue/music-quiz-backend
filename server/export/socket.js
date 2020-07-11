@@ -12,17 +12,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const http_1 = __importDefault(require("http"));
 const socket_io_1 = __importDefault(require("socket.io"));
 const queries_1 = __importDefault(require("./queries"));
 const interfaces_1 = require("./interfaces");
 const engine_1 = require("./engine");
 const https = require("https"), fs = require("fs");
-const options = {
-    key: fs.readFileSync("/etc/letsencrypt/live/monalit.de/privkey.pem"),
-    cert: fs.readFileSync("/etc/letsencrypt/live/monalit.de/fullchain.pem")
-};
-const server = https.createServer(options);
-// const server = http.createServer();
+// const options = {
+//     key: fs.readFileSync("/etc/letsencrypt/live/monalit.de/privkey.pem"),
+//     cert: fs.readFileSync("/etc/letsencrypt/live/monalit.de/fullchain.pem")
+// };
+// const server = https.createServer(options);
+const server = http_1.default.createServer();
 const io = socket_io_1.default(server);
 const rooms = [];
 io.on('connection', socket => {
@@ -82,44 +83,44 @@ io.on('connection', socket => {
             return;
         }
         if (!user.guessedTitle && room.isSongPlaying) {
-            let guess = engine_1.validateGuess(text, room.currentSong.name, 15, 30);
+            let guess = engine_1.validateGuess(text, room.currentSong.name, 20, 30);
             if (guess == 1) {
                 user.addPoints(1);
                 user.guessedTitle = true;
-                const message = { username: user.name, type: "Title", points: 1 };
+                const message = { username: user.name, type: "title", points: 1 };
                 io.in(data.room).emit('user-guessed-correct', message);
                 return;
             }
             else if (guess == 2) {
-                const message = { type: "Song" };
+                const message = { type: "title", text: data.text };
                 socket.emit('guess-response', message);
             }
         }
         if (!user.guessedIntrepret && room.isSongPlaying) {
-            let guess = engine_1.validateGuess(text, room.currentSong.interpret, 10, 25);
+            let guess = engine_1.validateGuess(text, room.currentSong.interpret, 20, 30);
             if (guess == 1) {
                 user.addPoints(1);
                 user.guessedIntrepret = true;
-                const message = { username: user.name, type: "Interpret", points: 1 };
+                const message = { username: user.name, type: "artist", points: 1 };
                 io.in(data.room).emit('user-guessed-correct', message);
                 return;
             }
             else if (guess == 2) {
-                const message = { type: "Intrepret" };
+                const message = { type: "artist", text: data.text };
                 socket.emit('guess-response', message);
             }
         }
         if (!user.guessedAlbum && room.isSongPlaying) {
-            let guess = engine_1.validateGuess(text, room.currentSong.album, 15, 30);
+            let guess = engine_1.validateGuess(text, room.currentSong.album, 20, 30);
             if (guess == 1) {
                 user.addPoints(1);
                 user.guessedAlbum = true;
-                const message = { username: user.name, type: "Album", points: 1 };
+                const message = { username: user.name, type: "album", points: 1 };
                 io.in(data.room).emit('user-guessed-correct', message);
                 return;
             }
             else if (guess == 2) {
-                const message = { type: "Album" };
+                const message = { type: "album", text: data.text };
                 socket.emit('guess-response', message);
             }
         }
@@ -151,15 +152,19 @@ server.listen(8000, () => {
 });
 function startGame(params, room) {
     (() => __awaiter(this, void 0, void 0, function* () {
-        var songs = yield queries_1.default.getPlaylistSongsFromIds(params.playlist);
+        var songsIds = yield queries_1.default.getPlaylistSongsFromIds(params.playlist);
         try {
             for (var i = 0; i < params.roundCount && room.getUsers().length > 0; i++) {
                 room.newRound();
-                room.currentSong = engine_1.getRandomSong(songs);
+                room.currentSong = yield engine_1.getRandomSong(songsIds);
                 const timestamp = Date.now();
                 io.in(params.roomName).emit('song-started', { url: room.currentSong.url, timestamp: timestamp });
                 for (let j = 0; j < 4 && room.getUsers().length > 0; j++)
                     yield engine_1.delay(1000); // delay damit alle gleichzeitig starten!
+                console.log("Now playing in Room: " + room.roomName);
+                console.log(room.currentSong.interpret + " | " + room.currentSong.name);
+                console.log("Url: " + room.currentSong.url);
+                console.log("-------------------------");
                 room.isSongPlaying = true; // wenn lied dann läuft auf true setzen
                 for (let j = 0; j < 30 && room.getUsers().length > 0; j++)
                     yield engine_1.delay(1000); //lied läuft 30 sekunden

@@ -9,10 +9,12 @@ const body_parser_1 = __importDefault(require("body-parser"));
 const queries_1 = __importDefault(require("./queries"));
 exports.app = express_1.default();
 const https = require("https"), fs = require("fs");
+/*
 const options = {
     key: fs.readFileSync("/etc/letsencrypt/live/monalit.de/privkey.pem"),
     cert: fs.readFileSync("/etc/letsencrypt/live/monalit.de/fullchain.pem")
 };
+ */
 const Keycloak = require("keycloak-connect");
 var session = require('express-session');
 var cors = require('cors');
@@ -26,7 +28,13 @@ exports.app.use(session({
 }));
 exports.app.use(keycloak.middleware());
 var originsWhitelist = [
-    'http://localhost:4200'
+    'http://localhost:4200',
+    'http://monalit.de/musicquiz/',
+    'https://monalit.de/musicquiz/',
+    'http://monalit.de/',
+    'https://monalit.de/',
+    'http://monalit.de',
+    'https://monalit.de',
 ];
 var corsOptions = {
     origin: function (origin, callback) {
@@ -51,10 +59,11 @@ exports.app.get('/api/', (request, response) => {
 exports.app.get('/api/playlist/:count', keycloak.protect('user', 'admin'), queries_1.default.getPlaylists);
 exports.app.get('/api/playlist/id/:id', keycloak.protect('user', 'admin'), queries_1.default.getPlaylistSongsById);
 exports.app.get('/api/playlist/user/:name', keycloak.protect('user', 'admin'), queries_1.default.getPlaylistSongsByName);
+exports.app.post('/api/playlist/', keycloak.protect('user', 'admin'), queries_1.default.createPlaylist);
 exports.app.listen(exports.port, () => {
     console.log(`REST Interface is running on port ${exports.port}.`);
 });
 function run() {
 }
-https.createServer(options, exports.app).listen(3001);
+//https.createServer(options, app).listen(3001);
 exports.default = {};
