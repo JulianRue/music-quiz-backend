@@ -110,6 +110,7 @@ io.on('connection', socket => {
             else if(guess == 2){
                 const message: IGuessedClose = {type:"title", text:data.text};
                 socket.emit('guess-response', message);
+                return;
             }
         }
 
@@ -125,6 +126,7 @@ io.on('connection', socket => {
             else if(guess == 2){
                 const message: IGuessedClose = {type:"artist", text:data.text};
                 socket.emit('guess-response', message);
+                return;
             }
         }
 
@@ -140,6 +142,7 @@ io.on('connection', socket => {
             else if(guess == 2){
                 const message: IGuessedClose = {type:"album", text:data.text};
                 socket.emit('guess-response', message);
+                return;
             }
         }
 
