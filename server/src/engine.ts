@@ -118,14 +118,21 @@ function removeEnd(s:string, sub:string):string{
 
 export function formatString(s:string):string{
     s = s.toUpperCase();
+
     s = s.replace("'","");
+    s = s.replace("!","");
+    s = s.replace("?","");
+    s = s.replace("-","");
+    s = s.replace(".","");
+    s = s.replace("/","");
+    s = s.replace("|","");
 
     s = removeSub(s, "(", ")");
     s = removeSub(s, "[", "]");
     s = removeSub(s, "{", "}");
 
-    s = removeEnd(s, "ft");
-    s = removeEnd(s, "feat");
+    //s = removeEnd(s, "ft");
+    //s = removeEnd(s, "feat");
     //s = removeEnd(s, "-");
 
     return s;
