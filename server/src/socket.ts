@@ -105,6 +105,7 @@ io.on('connection', socket => {
                 user.guessedTitle = true;
                 const message:IGuessedCorrect = {username:user.name, type: "title", points:1};
                 io.in(data.room).emit('user-guessed-correct', message);
+                socket.emit('guessed-correct', message);
                 return;
             }
             else if(guess == 2){
@@ -121,6 +122,7 @@ io.on('connection', socket => {
                 user.guessedIntrepret = true;
                 const message:IGuessedCorrect = {username:user.name, type: "artist", points:1};
                 io.in(data.room).emit('user-guessed-correct', message);
+                socket.emit('guessed-correct', message);
                 return;
             }
             else if(guess == 2){
@@ -137,6 +139,7 @@ io.on('connection', socket => {
                 user.guessedAlbum = true;
                 const message:IGuessedCorrect = {username:user.name, type: "album", points:1};
                 io.in(data.room).emit('user-guessed-correct', message);
+                socket.emit('guessed-correct', message);
                 return;
             }
             else if(guess == 2){

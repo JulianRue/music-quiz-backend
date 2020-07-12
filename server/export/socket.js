@@ -89,11 +89,13 @@ io.on('connection', socket => {
                 user.guessedTitle = true;
                 const message = { username: user.name, type: "title", points: 1 };
                 io.in(data.room).emit('user-guessed-correct', message);
+                socket.emit('guessed-correct', message);
                 return;
             }
             else if (guess == 2) {
                 const message = { type: "title", text: data.text };
                 socket.emit('guess-response', message);
+                return;
             }
         }
         if (!user.guessedIntrepret && room.isSongPlaying) {
@@ -103,11 +105,13 @@ io.on('connection', socket => {
                 user.guessedIntrepret = true;
                 const message = { username: user.name, type: "artist", points: 1 };
                 io.in(data.room).emit('user-guessed-correct', message);
+                socket.emit('guessed-correct', message);
                 return;
             }
             else if (guess == 2) {
                 const message = { type: "artist", text: data.text };
                 socket.emit('guess-response', message);
+                return;
             }
         }
         if (!user.guessedAlbum && room.isSongPlaying) {
@@ -117,11 +121,13 @@ io.on('connection', socket => {
                 user.guessedAlbum = true;
                 const message = { username: user.name, type: "album", points: 1 };
                 io.in(data.room).emit('user-guessed-correct', message);
+                socket.emit('guessed-correct', message);
                 return;
             }
             else if (guess == 2) {
                 const message = { type: "album", text: data.text };
                 socket.emit('guess-response', message);
+                return;
             }
         }
         let chat = { text: data.text, username: user.name };
