@@ -1,5 +1,28 @@
 import {randomString} from "./engine";
 
+export interface IPlaylist{
+    data: IPlaylistSingle[];
+}
+
+export interface IPlaylistSongs{
+    data: IMusicEntry[];
+    next: string;
+    prev: string;
+}
+
+export interface IPlaylistSingle{
+    id: string;
+    title: string;
+    nb_tracks: number;
+    picture: string;
+    picture_small: string;
+    picture_medium: string;
+    user: {
+        id: string;
+        name: string;
+    };
+}
+
 export interface IMusicEntry{
     id: string;
     title_short: string;
@@ -79,7 +102,7 @@ export interface ILeave{
 }
 
 export interface IStartGame{
-    playlist:number[];
+    playlist:IPlaylistSingle[];
     adminPassword : string;
     roundCount:number;
     roomName:string;

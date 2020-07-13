@@ -20,7 +20,7 @@ import engine, {
     getRoomIndex,
     isSamePassword,
     validateGuess,
-    getUsername, removeUserGlobal
+    getUsername, removeUserGlobal, getSongs
 } from './engine';
 
 const https = require("https"),
@@ -183,11 +183,14 @@ server.listen(8000, () => {
 
 function startGame(params : IStartGame, room:Room) : void{
     (async () => {
-        var songsIds : string[] = await db.getPlaylistSongsFromIds(params.playlist);
+        params.playlist.forEach(a => console.log(a.id + " | " + a.title));
+        let songs : Song[] = await getSongs(params.playlist);
+        console.log("Song counter: " + songs.length);
         try{
             for(var i = 0; i < params.roundCount && room.getUsers().length > 0; i++){
                 room.newRound();
-                room.currentSong = await getRandomSong(songsIds);
+                room.currentSong = await getRandomSong(songs);
+                console.log("Song counter: " + songs.length);
                 const timestamp = Date.now();
                 io.in(params.roomName).emit('song-started', {url: room.currentSong.url, timestamp: timestamp});
 

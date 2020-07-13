@@ -1,6 +1,40 @@
-import {IMusicEntry, Room, Song, User} from "./interfaces";
+import {IMusicEntry, IPlaylist, IPlaylistSingle, IPlaylistSongs, Room, Song, User} from "./interfaces";
 import axios from 'axios';
 
+export async function getSongs(playlists: IPlaylistSingle[]): Promise<Song[]>{
+    let val: Song[] = new Array();
+    const apiClient = axios.create({
+        baseURL: 'http://api.deezer.com/',
+        responseType: 'json',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+
+    for(let i = 0; i < playlists.length; i++){
+        const response = await apiClient.get<IPlaylistSongs>('/playlist/' + playlists[i].id + '/tracks');
+        const tempSongs: IPlaylistSongs = response.data;
+        /*
+        while(tempSongs.next != ""){
+            const nextApiClient = axios.create({
+                baseURL: tempSongs.next,
+                responseType: 'json',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const response = await apiClient.get<IPlaylistSongs>('/playlist/' + playlists[i].id + '/tracks');
+            const tempSongs: IPlaylistSongs = response.data;
+        }
+         */
+        console.log('Index: ' + i + ' | Length -> ' + tempSongs.data.length);
+        tempSongs.data.forEach( s => val.push(new Song(s.id, s.title_short, s.artist.name, s.preview, s.album.title)))
+        await delay(50);
+    }
+
+    console.log("Länge lan: " + val.length);
+    return val.filter(function(elem, index, self) {return index === self.indexOf(elem);})
+}
 export function randomString(length:number):string {
     var result           = '';
     var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -138,22 +172,10 @@ export function formatString(s:string):string{
     return s;
 }
 
-export async function getRandomSong(songs:string[]) : Promise<Song>{
-    const apiClient = axios.create({
-        baseURL: 'http://api.deezer.com/',
-        responseType: 'json',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    });
-
+export async function getRandomSong(songs:Song[]) : Promise<Song>{
     const number = Math.floor(Math.random() * songs.length);
-    const id = songs[number];
+    const song: Song = songs[number];
     songs.splice(number,1);
-    const response = await apiClient.get<IMusicEntry>('/track/' + id);
-
-    const tempSong: IMusicEntry = response.data;
-    const song: Song = new Song(tempSong.id, tempSong.title_short, tempSong.artist.name, tempSong.preview, tempSong.album.title);
     return song;
 }
 
