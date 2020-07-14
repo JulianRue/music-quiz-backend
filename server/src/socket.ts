@@ -5,10 +5,11 @@ import {
     IChat,
     ICreateRoom,
     IGuess,
-    IGuessedCorrect,
     IJoinRoom,
     ILeave,
-    IStartGame, IUser, IGuessedClose,
+    IGuessInfo,
+    IGuessedCorrect,
+    IStartGame,
     Room,
     Song,
     User, IMusicEntry
@@ -103,14 +104,15 @@ io.on('connection', socket => {
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedTitle = true;
-                const message:IGuessedCorrect = {username:user.name, type: "title", points:1};
-                io.in(data.room).emit('user-guessed-correct', message);
-                socket.emit('guessed-correct', message);
+                const correctGuess: IGuessedCorrect = {username:user.name, type:"title", points:1};
+                io.in(data.room).emit('user-guessed-correct', correctGuess);
+                const guessInfo:IGuessInfo = {type:"title", status:"correct", text:data.text, correctValue:room.currentSong.name};
+                socket.emit('guess-info', guessInfo);
                 return;
             }
             else if(guess == 2){
-                const message: IGuessedClose = {type:"title", text:data.text};
-                socket.emit('guess-response', message);
+                const guessInfo:IGuessInfo = {type:"title", status:"close", text:data.text, correctValue:""};
+                socket.emit('guess-info', guessInfo);
                 return;
             }
         }
@@ -120,14 +122,15 @@ io.on('connection', socket => {
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedIntrepret = true;
-                const message:IGuessedCorrect = {username:user.name, type: "artist", points:1};
-                io.in(data.room).emit('user-guessed-correct', message);
-                socket.emit('guessed-correct', message);
+                const correctGuess:IGuessedCorrect = {username:user.name, type:"artist", points:1};
+                io.in(data.room).emit('user-guessed-correct', correctGuess);
+                const guessInfo:IGuessInfo = {type:"artist", status:"correct", text:data.text, correctValue:room.currentSong.interpret};
+                socket.emit('guess-info', guessInfo);
                 return;
             }
             else if(guess == 2){
-                const message: IGuessedClose = {type:"artist", text:data.text};
-                socket.emit('guess-response', message);
+                const guessInfo:IGuessInfo = {type:"artist", status:"close", text:data.text, correctValue:""};
+                socket.emit('guess-info', guessInfo);
                 return;
             }
         }
@@ -137,19 +140,20 @@ io.on('connection', socket => {
             if(guess == 1){
                 user.addPoints(1);
                 user.guessedAlbum = true;
-                const message:IGuessedCorrect = {username:user.name, type: "album", points:1};
-                io.in(data.room).emit('user-guessed-correct', message);
-                socket.emit('guessed-correct', message);
+                const correctGuess:IGuessedCorrect = {username:user.name, type: "album", points:1};
+                io.in(data.room).emit('user-guessed-correct', correctGuess);
+                const guessInfo:IGuessInfo = {type:"album", status:"correct", text:data.text, correctValue:room.currentSong.album};
+                socket.emit('guess-info', guessInfo);
                 return;
             }
             else if(guess == 2){
-                const message: IGuessedClose = {type:"album", text:data.text};
-                socket.emit('guess-response', message);
+                const guessInfo:IGuessInfo = {type:"album", status:"close", text:data.text, correctValue:""};
+                socket.emit('guess-info', guessInfo);
                 return;
             }
         }
 
-        let chat : IChat = {text : data.text, username : user.name};
+        let chat:IChat = {text:data.text, username:user.name};
         io.in(data.room).emit('chat', chat);
     });
 

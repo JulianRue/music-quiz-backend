@@ -81,15 +81,17 @@ export interface IChat {
     username: string;
 }
 
-export interface IGuessedClose{
-    type:string;
-    text:string;
-}
-
 export interface IGuessedCorrect{
     username:string;
     type:string;
     points:number;
+}
+
+export interface IGuessInfo{
+    type:string;
+    status:string;
+    text:string;
+    correctValue:string;
 }
 
 export interface IUser {
