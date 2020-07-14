@@ -98,6 +98,8 @@ export interface IUser {
     username:string;
     points:number;
     isAdmin:boolean;
+    correctTitle:boolean;
+    correctArtist:boolean;
 }
 export interface ILeave{
     roomName:string;
@@ -199,7 +201,7 @@ export class Room{
 
     getUsers() : IUser[]{
         let iUsers:IUser[] = Array();
-        this.users.forEach(user => iUsers.push({username : user.name, isAdmin : user.isAdmin, points : user.points}));
+        this.users.forEach(user => iUsers.push({username : user.name, isAdmin : user.isAdmin, points : user.points, correctTitle: user.guessedTitle, correctArtist: user.guessedIntrepret}));
         return iUsers;
     }
 
