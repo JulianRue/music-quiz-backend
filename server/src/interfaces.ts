@@ -89,7 +89,7 @@ export interface IGuessedCorrect{
 
 export interface IGuessInfo{
     type:string;
-    status:string;
+    isCorrect:boolean;
     text:string;
     correctValue:string;
 }
