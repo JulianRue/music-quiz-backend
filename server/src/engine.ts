@@ -151,8 +151,11 @@ function removeEnd(s:string, sub:string):string{
 }
 
 export function formatString(s:string):string{
-    s = s.toUpperCase();
 
+    s = s.toLowerCase();
+
+    s = s.replace("<3","");
+    s = s.replace("und","&");
     s = s.replace("'","");
     s = s.replace("!","");
     s = s.replace("?","");
@@ -160,7 +163,46 @@ export function formatString(s:string):string{
     s = s.replace(".","");
     s = s.replace("/","");
     s = s.replace("|","");
+    s = s.replace("$","s");
+    s = s.replace("€","e");
+    s = s.replace("@","a");
+    s = s.replace(" ","");
+    s = s.replace("~","");
+    s = s.replace("#","");
+    s = s.replace("+","");
+    s = s.replace("`","");
+    s = s.replace("´","");
+    s = s.replace("%","");
+    s = s.replace("§","");
+    s = s.replace("\"","");
+    s = s.replace("=","");
+    s = s.replace("<","");
+    s = s.replace("|","");
+    s = s.replace(";","");
+    s = s.replace(",","");
 
+    s = s.replace("ä","a");
+    s = s.replace("ä","a");
+    s = s.replace("ä","a");
+    s = s.replace("ä","a");
+    s = s.replace("ä","a");
+
+
+    s = s.replace("e","e");
+    s = s.replace("e","e");
+    s = s.replace("e","e");
+    s = s.replace("e","e");
+    s = s.replace("e","e");
+
+    // ėêëèé
+    // ūùúûü
+    // ōøõœóòôö
+    // æãåāäâàá
+    // šßś
+    // ñń
+    // îíì
+
+    //TODO testen
     s = removeSub(s, "(", ")");
     s = removeSub(s, "[", "]");
     s = removeSub(s, "{", "}");

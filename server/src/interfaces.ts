@@ -1,5 +1,10 @@
 import {randomString} from "./engine";
 
+    export interface IPlaylistSingleNetwork{
+        playlist: IPlaylistSingle;
+        room: string;
+    }
+
 export interface IPlaylist{
     data: IPlaylistSingle[];
 }

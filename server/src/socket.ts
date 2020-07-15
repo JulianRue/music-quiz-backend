@@ -12,7 +12,7 @@ import {
     IStartGame,
     Room,
     Song,
-    User, IMusicEntry
+    User, IMusicEntry, IPlaylistSingle, IPlaylistSingleNetwork
 } from './interfaces'
 
 import engine, {
@@ -44,6 +44,22 @@ io.on('connection', socket => {
     socket.emit('connected', socket.id);
     console.log("Total Users: " + Object.keys(io.sockets.connected).length);
 
+    socket.on('playlist-selected', (data: IPlaylistSingleNetwork) => {
+        console.log(data.playlist.title + " selected");
+        io.in(data.room).emit('playlist-selected', data.playlist);
+    });
+    socket.on('playlist-suggested', (data: IPlaylistSingleNetwork) => {
+        console.log(data.playlist.title + " suggested");
+        io.in(data.room).emit('playlist-suggested', data.playlist);
+    });
+    socket.on('playlist-selected-removed', (data: IPlaylistSingleNetwork) => {
+        console.log(data.playlist.title + " selected-removed");
+        io.in(data.room).emit('playlist-selected-removed', data.playlist);
+    });
+    socket.on('playlist-suggested-removed', (data: IPlaylistSingleNetwork) => {
+        console.log(data.playlist.title + " suggested-removed");
+        io.in(data.room).emit('playlist-suggested-removed', data.playlist);
+    });
     socket.on('start-game', (data : IStartGame) => {
         console.log("Game started");
         io.in(data.roomName).emit('game-started', {maxRounds: data.roundCount});
