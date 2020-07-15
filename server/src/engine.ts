@@ -1,6 +1,67 @@
-import {IMusicEntry, IPlaylist, IPlaylistSingle, IPlaylistSongs, Room, Song, User} from "./interfaces";
+import {
+    IChat,
+    IGuessedCorrect,
+    IGuessInfo,
+    IMusicEntry,
+    IPlaylist,
+    IPlaylistSingle,
+    IPlaylistSongs,
+    Room,
+    Song,
+    User
+} from "./interfaces";
 import axios from 'axios';
+import SocketIO from "socket.io";
 
+export function checkGuess(user: User, text:string, room:Room, socket: any, io: any): any{
+    let time = Math.floor((Date.now() - room.startStamp)/1000);
+    let timePoints = (30-time);
+
+    if(!user.guessedTitle && room.isSongPlaying){
+        let guess = validateGuess(text, room.currentSong.name, 20, 30);
+        if(guess == 1){
+            let positionPoints = room.users.length - room.titleCount;
+            room.titleCount++;
+            let points = positionPoints+timePoints;
+            user.addPoints(points);
+            user.guessedTitle = true;
+            const correctGuess: IGuessedCorrect = {username:user.name, type:"title", points:points};
+            io.in(room.roomName).emit('user-guessed-correct', correctGuess);
+            const guessInfo:IGuessInfo = {type:"title", isCorrect:true, text:text, correctValue:room.currentSong.name};
+            socket.emit('guess-info', guessInfo);
+            return;
+        }
+        else if(guess == 2){
+            const guessInfo:IGuessInfo = {type:"title", isCorrect:false, text:text, correctValue:""};
+            socket.emit('guess-info', guessInfo);
+            return;
+        }
+    }
+    else if(!user.guessedIntrepret && room.isSongPlaying){
+        let guess = validateGuess(text, room.currentSong.interpret[0], 20, 30);
+        if(guess == 1){
+            let positionPoints = room.users.length - room.artistCount;
+            room.artistCount++;
+            let points = positionPoints+timePoints;
+            user.addPoints(points);
+            user.guessedIntrepret = true;
+            const correctGuess:IGuessedCorrect = {username:user.name, type:"artist", points:points};
+            io.in(room.roomName).emit('user-guessed-correct', correctGuess);
+            const guessInfo:IGuessInfo = {type:"artist", isCorrect:true, text:text, correctValue:room.currentSong.interpret[0]};
+            socket.emit('guess-info', guessInfo);
+            return;
+        }
+        else if(guess == 2){
+            const guessInfo:IGuessInfo = {type:"artist", isCorrect:false, text:text, correctValue:""};
+            socket.emit('guess-info', guessInfo);
+            return;
+        }
+    }
+    else{
+        let chat:IChat = {text:text, username:user.name};
+        io.in(room.roomName).emit('chat', chat);
+    }
+}
 export async function getSongs(playlists: IPlaylistSingle[]): Promise<Song[]>{
     let val: Song[] = new Array();
     const apiClient = axios.create({
@@ -28,7 +89,7 @@ export async function getSongs(playlists: IPlaylistSingle[]): Promise<Song[]>{
         }
          */
         console.log('Index: ' + i + ' | Length -> ' + tempSongs.data.length);
-        tempSongs.data.forEach( s => val.push(new Song(s.id, s.title_short, s.artist.name, s.preview, s.album.title)))
+        tempSongs.data.forEach( s => val.push(new Song(s.id, s.title_short, [s.artist.name], s.preview, s.album.title)))
         await delay(50);
     }
 
@@ -49,19 +110,31 @@ export function validateGuess(guess:string, correct:string, percent:number, perc
     //percent -> 20 = 20% etc
     guess = formatString(guess);
     correct = formatString(correct);
+
+    console.log("Checking " + guess + " | For: " + correct);
     percent = percent / 100.0;
     percentClose = percentClose / 100.0;
-    var count = levenshtein(guess,correct);
 
-    if(count === 0){
-        return 1;
+    let subs: string[] = guess.split(' ');
+    for(let i = 0; i < subs.length; i++){
+        for(let j = i; j < subs.length; j++){
+            let sub: string = "";
+            for(let x = i; x <= j; x++){
+                sub = sub + subs[x];
+                if(x < j)
+                    sub = sub + " ";
+            }
+
+            var count = levenshtein(sub,correct);
+            if(count === 0){
+                return 1;
+            }
+            else if(count / correct.length < percentClose){
+                return 2;
+            }
+        }
     }
-    else if(count / correct.length < percentClose){
-        return 2;
-    }
-    else{
-        return 0;
-    }
+    return 0;
 }
 
 export function removeUserGlobal(id:string, rooms:Room[]){
@@ -136,8 +209,9 @@ function removeSub(s:string, start:string, end:string) :string{
     let index2:number = s.indexOf(end);
     if(index1 < index2 && index1 != -1){
         let subStr:string = s.slice(index1,index2+1);
-        s.replace(subStr, "");
+        s = s.replace(subStr, "");
     }
+
     return s;
 }
 
@@ -166,7 +240,6 @@ export function formatString(s:string):string{
     s = s.replace("$","s");
     s = s.replace("€","e");
     s = s.replace("@","a");
-    s = s.replace(" ","");
     s = s.replace("~","");
     s = s.replace("#","");
     s = s.replace("+","");

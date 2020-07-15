@@ -21,7 +21,7 @@ import engine, {
     getRoomIndex,
     isSamePassword,
     validateGuess,
-    getUsername, removeUserGlobal, getSongs
+    getUsername, removeUserGlobal, getSongs, checkGuess
 } from './engine';
 
 const https = require("https"),
@@ -115,62 +115,10 @@ io.on('connection', socket => {
             return;
         }
 
-        if(!user.guessedTitle && room.isSongPlaying){
-            let guess = validateGuess(text, room.currentSong.name, 20, 30);
-            if(guess == 1){
-                user.addPoints(1);
-                user.guessedTitle = true;
-                const correctGuess: IGuessedCorrect = {username:user.name, type:"title", points:1};
-                io.in(data.room).emit('user-guessed-correct', correctGuess);
-                const guessInfo:IGuessInfo = {type:"title", isCorrect:true, text:data.text, correctValue:room.currentSong.name};
-                socket.emit('guess-info', guessInfo);
-                return;
-            }
-            else if(guess == 2){
-                const guessInfo:IGuessInfo = {type:"title", isCorrect:false, text:data.text, correctValue:""};
-                socket.emit('guess-info', guessInfo);
-                return;
-            }
-        }
+        checkGuess(user, text, room, socket, io);
 
-        if(!user.guessedIntrepret && room.isSongPlaying){
-            let guess = validateGuess(text, room.currentSong.interpret, 20, 30);
-            if(guess == 1){
-                user.addPoints(1);
-                user.guessedIntrepret = true;
-                const correctGuess:IGuessedCorrect = {username:user.name, type:"artist", points:1};
-                io.in(data.room).emit('user-guessed-correct', correctGuess);
-                const guessInfo:IGuessInfo = {type:"artist", isCorrect:true, text:data.text, correctValue:room.currentSong.interpret};
-                socket.emit('guess-info', guessInfo);
-                return;
-            }
-            else if(guess == 2){
-                const guessInfo:IGuessInfo = {type:"artist", isCorrect:false, text:data.text, correctValue:""};
-                socket.emit('guess-info', guessInfo);
-                return;
-            }
-        }
 
-        if(!user.guessedAlbum && room.isSongPlaying){
-            let guess = validateGuess(text, room.currentSong.album, 20, 30);
-            if(guess == 1){
-                user.addPoints(1);
-                user.guessedAlbum = true;
-                const correctGuess:IGuessedCorrect = {username:user.name, type: "album", points:1};
-                io.in(data.room).emit('user-guessed-correct', correctGuess);
-                const guessInfo:IGuessInfo = {type:"album", isCorrect:true, text:data.text, correctValue:room.currentSong.album};
-                socket.emit('guess-info', guessInfo);
-                return;
-            }
-            else if(guess == 2){
-                const guessInfo:IGuessInfo = {type:"album", isCorrect:false, text:data.text, correctValue:""};
-                socket.emit('guess-info', guessInfo);
-                return;
-            }
-        }
 
-        let chat:IChat = {text:data.text, username:user.name};
-        io.in(data.room).emit('chat', chat);
     });
 
     socket.on('leave', (data : ILeave) => {
@@ -217,6 +165,7 @@ function startGame(params : IStartGame, room:Room) : void{
                 for(let j = 0; j < 4 && room.getUsers().length > 0; j++)
                     await delay(1000); // delay damit alle gleichzeitig starten!
 
+                room.startStamp = Date.now();
                 console.log("Now playing in Room: " + room.roomName);
                 console.log(room.currentSong.interpret + " | " + room.currentSong.name);
                 console.log("Url: " + room.currentSong.url);
@@ -227,7 +176,6 @@ function startGame(params : IStartGame, room:Room) : void{
                     await delay(1000);   //lied läuft 30 sekunden
 
                 room.isSongPlaying = false;
-
                 for(let j = 0; j < 5 && room.getUsers().length > 0; j++)
                     await delay(1000) //pause zwischen den runden
             }

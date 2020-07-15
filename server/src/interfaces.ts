@@ -151,11 +151,11 @@ export class User {
 export class Song{
     id:string;
     name:string;
-    interpret:string;
+    interpret:string[];
     url:string;
     album:string;
 
-    constructor(id: string = "0", name: string = "", interpret: string = "", url: string = "", album: string = "") {
+    constructor(id: string = "0", name: string = "", interpret: string[] = [""], url: string = "", album: string = "") {
         this.id = id;
         this.name = name;
         this.interpret = interpret;
@@ -174,6 +174,9 @@ export class Room{
     isSongPlaying: boolean;
     currentRound: number;
     maxRounds: number;
+    titleCount: number;
+    artistCount: number;
+    startStamp: number;
 
     constructor(roomName: string, password: string, userId: string, username: string, cadminPassword: string = "") {
         this.currentSong = new Song();
@@ -186,6 +189,9 @@ export class Room{
         this.adminPassword = randomString(10);
         this.currentRound = 0;
         this.maxRounds = -1;
+        this.titleCount = 0;
+        this.artistCount = 0;
+        this.startStamp = 0;
     }
 
     getUser(id:string):User{
@@ -202,6 +208,8 @@ export class Room{
     newRound(){
         this.currentRound++;
         this.users.forEach(user => user.newRound());
+        this.titleCount = 0;
+        this.artistCount = 0;
     }
 
     getUsers() : IUser[]{
