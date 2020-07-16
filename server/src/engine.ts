@@ -30,12 +30,12 @@ export function checkGuess(user: User, text:string, room:Room, socket: any, io: 
             user.guessedTitle = true;
             const correctGuess: IGuessedCorrect = {username:user.name, type:"title", points:points};
             io.in(room.roomName).emit('user-guessed-correct', correctGuess);
-            const guessInfo:IGuessInfo = {type:"title", isCorrect:true, text:text, correctValue:room.currentSong.name};
+            const guessInfo:IGuessInfo = {type:"title", isCorrect:true, text:text, correctValue:[room.currentSong.name]};
             socket.emit('guess-info', guessInfo);
             guessed = true;
         }
         else if(guess == 2){
-            const guessInfo:IGuessInfo = {type:"title", isCorrect:false, text:text, correctValue:""};
+            const guessInfo:IGuessInfo = {type:"title", isCorrect:false, text:text, correctValue:[]};
             socket.emit('guess-info', guessInfo);
             guessed = true;
         }
@@ -51,12 +51,12 @@ export function checkGuess(user: User, text:string, room:Room, socket: any, io: 
             user.guessedIntrepret = true;
             const correctGuess:IGuessedCorrect = {username:user.name, type:"artist", points:points};
             io.in(room.roomName).emit('user-guessed-correct', correctGuess);
-            const guessInfo:IGuessInfo = {type:"artist", isCorrect:true, text:text, correctValue:room.currentSong.interpret[0]};
+            const guessInfo:IGuessInfo = {type:"artist", isCorrect:true, text:text, correctValue:room.currentSong.interpret};
             socket.emit('guess-info', guessInfo);
             guessed = true;
         }
         else if(guess == 2){
-            const guessInfo:IGuessInfo = {type:"artist", isCorrect:false, text:text, correctValue:""};
+            const guessInfo:IGuessInfo = {type:"artist", isCorrect:false, text:text, correctValue:[]};
             socket.emit('guess-info', guessInfo);
             guessed = true;
         }

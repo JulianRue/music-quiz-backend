@@ -96,7 +96,7 @@ export interface IGuessInfo{
     type:string;
     isCorrect:boolean;
     text:string;
-    correctValue:string;
+    correctValue:string[];
 }
 
 export interface IUser {
