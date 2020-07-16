@@ -102,7 +102,6 @@ io.on('connection', socket => {
 
     socket.on('guess', (data : IGuess) => {
         let index = getRoomIndex(rooms,data.room);
-        const text = data.text.toUpperCase();
         if(index == -1){
             //TODO ERROR LOG
             return;
@@ -115,10 +114,7 @@ io.on('connection', socket => {
             return;
         }
 
-        checkGuess(user, text, room, socket, io);
-
-
-
+        checkGuess(user, data.text, room, socket, io);
     });
 
     socket.on('leave', (data : ILeave) => {
