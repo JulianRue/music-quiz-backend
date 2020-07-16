@@ -154,13 +154,19 @@ export class Song{
     interpret:string[];
     url:string;
     album:string;
+    cover_small: string;
+    cover_medium: string;
+    cover_big: string;
 
-    constructor(id: string = "0", name: string = "", interpret: string[] = [""], url: string = "", album: string = "") {
+    constructor(id: string = "0", name: string = "", interpret: string[] = [""], url: string = "", album: string = "", cover_small: string = "", cover_medium: string = "", cover_big: string = "") {
         this.id = id;
         this.name = name;
         this.interpret = interpret;
         this.url = url;
         this.album = album;
+        this.cover_small = cover_small;
+        this.cover_medium = cover_medium;
+        this.cover_big = cover_big;
     }
 }
 

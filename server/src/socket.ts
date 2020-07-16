@@ -172,6 +172,7 @@ function startGame(params : IStartGame, room:Room) : void{
                     await delay(1000);   //lied läuft 30 sekunden
 
                 room.isSongPlaying = false;
+                io.in(params.roomName).emit('round-end',room.currentSong);
                 for(let j = 0; j < 5 && room.getUsers().length > 0; j++)
                     await delay(1000) //pause zwischen den runden
             }
