@@ -17,6 +17,8 @@ export function checkGuess(user: User, text:string, room:Room, socket: any, io: 
     let time = Math.floor((Date.now() - room.startStamp)/1000);
     let timePoints = (30-time);
 
+    let chatMessage = '' + text;
+
     let guessed:boolean = false;
     if(!user.guessedTitle && room.isSongPlaying){
         let guess = validateGuess(text, room.currentSong.name, 20, 30);
@@ -65,7 +67,7 @@ export function checkGuess(user: User, text:string, room:Room, socket: any, io: 
     }
 
     if(!guessed){
-        let chat:IChat = {text:text, username:user.name};
+        let chat:IChat = {text:chatMessage, username:user.name};
         io.in(room.roomName).emit('chat', chat);
     }
 }
@@ -117,6 +119,7 @@ export function validateGuess(guess:string, correct:string, percent:number, perc
     //percent -> 20 = 20% etc
     guess = formatString(guess);
     correct = formatString(correct);
+    correct = correct.replace(' ', '');
 
     console.log("Checking " + guess + " | For: " + correct);
     percent = percent / 100.0;
@@ -129,8 +132,6 @@ export function validateGuess(guess:string, correct:string, percent:number, perc
             let sub: string = "";
             for(let x = i; x <= j; x++){
                 sub = sub + subs[x];
-                if(x < j)
-                    sub = sub + " ";
             }
 
             var count = levenshtein(sub,correct);
@@ -237,7 +238,8 @@ export function formatString(s:string):string{
     s = s.toLowerCase();
 
     s = s.replace("<3","");
-    s = s.replace("und","&");
+    s = s.replace("ß","ss");
+    s = s.replace("&","und");
     s = s.replace("'","");
     s = s.replace("!","");
     s = s.replace("?","");
@@ -262,35 +264,54 @@ export function formatString(s:string):string{
     s = s.replace(";","");
     s = s.replace(",","");
 
+    s = s.replace("æ","a");
+    s = s.replace("ã","a");
+    s = s.replace("å","a");
+    s = s.replace("ā","a");
     s = s.replace("ä","a");
     s = s.replace("ä","a");
-    s = s.replace("ä","a");
-    s = s.replace("ä","a");
-    s = s.replace("ä","a");
+    s = s.replace("â","a");
+    s = s.replace("à","a");
+    s = s.replace("á","a");
 
 
-    s = s.replace("e","e");
-    s = s.replace("e","e");
-    s = s.replace("e","e");
-    s = s.replace("e","e");
-    s = s.replace("e","e");
+    s = s.replace("ė","e");
+    s = s.replace("ê","e");
+    s = s.replace("ë","e");
+    s = s.replace("è","e");
+    s = s.replace("é","e");
 
-    // ėêëèé
-    // ūùúûü
-    // ōøõœóòôö
-    // æãåāäâàá
-    // šßś
-    // ñń
-    // îíì
 
-    //TODO testen
+    s = s.replace("ū","u");
+    s = s.replace("ù","u");
+    s = s.replace("ú","u");
+    s = s.replace("è","u");
+    s = s.replace("û","u");
+    s = s.replace("ü","u");
+
+
+    s = s.replace("ō","o");
+    s = s.replace("ø","o");
+    s = s.replace("õ","o");
+    s = s.replace("œ","o");
+    s = s.replace("ó","o");
+    s = s.replace("ò","o");
+    s = s.replace("ô","o");
+    s = s.replace("ö","o");
+
+    s = s.replace("î","i");
+    s = s.replace("í","i");
+    s = s.replace("ì","i");
+
+    s = s.replace("š","s");
+    s = s.replace("ś","s");
+
+    s = s.replace("ñ","n");
+    s = s.replace("ń","n");
+
     s = removeSub(s, "(", ")");
     s = removeSub(s, "[", "]");
     s = removeSub(s, "{", "}");
-
-    //s = removeEnd(s, "ft");
-    //s = removeEnd(s, "feat");
-    //s = removeEnd(s, "-");
 
     return s;
 }
