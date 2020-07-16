@@ -115,7 +115,7 @@ export function validateGuess(guess:string, correct:string, percent:number, perc
     //percent -> 20 = 20% etc
     guess = formatString(guess);
     correct = formatString(correct);
-    correct = correct.replace(' ', '');
+    correct = correct.split(' ').join('');
 
     console.log("Checking " + guess + " | For: " + correct);
     percent = percent / 100.0;
