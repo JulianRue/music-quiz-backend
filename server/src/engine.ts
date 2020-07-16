@@ -94,7 +94,7 @@ export async function getSongs(playlists: IPlaylistSingle[]): Promise<Song[]>{
         }
          */
         console.log('Index: ' + i + ' | Length -> ' + tempSongs.data.length);
-        tempSongs.data.forEach( s => val.push(new Song(s.id, s.title_short, [s.artist.name], s.preview, s.album.title)))
+        tempSongs.data.forEach( s => val.push(new Song(s.id, s.title_short, [s.artist.name], s.preview, s.album.title, s.album.cover_small, s.album.cover_medium, s.album.cover_big)))
         await delay(50);
     }
 
