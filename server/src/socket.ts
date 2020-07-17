@@ -147,13 +147,12 @@ server.listen(8000, () => {
 
 function startGame(params : IStartGame, room:Room) : void{
     (async () => {
-        params.playlist.forEach(a => console.log(a.id + " | " + a.title));
-        let songs : Song[] = await getSongs(params.playlist);
+        let songs : string[] = params.ids;
         console.log("Song counter: " + songs.length);
         try{
             for(var i = 0; i < params.roundCount && room.getUsers().length > 0; i++){
                 room.newRound();
-                room.currentSong = await getRandomSong(songs);
+                room.currentSong = await getRandomSong(songs[i]);
                 console.log("Song counter: " + songs.length);
                 const timestamp = Date.now();
                 io.in(params.roomName).emit('song-started', {url: room.currentSong.url, timestamp: timestamp});
