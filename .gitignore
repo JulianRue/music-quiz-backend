@@ -10,3 +10,7 @@
 .idea/misc.xml
 .idea/modules.xml
 .idea/
+
+/server/export/*
+/server/export
+/server/export/
