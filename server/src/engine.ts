@@ -312,17 +312,21 @@ export function formatString(s:string):string{
     return s;
 }
 
-export async function getRandomSong(songs:Song[]) : Promise<Song>{
-    while(songs.length>0){
-        const number = Math.floor(Math.random() * songs.length);
-        const song: Song = songs[number];
-        songs.splice(number,1);
-        if(song.url !== ""){
-            return song;
+export async function getRandomSong(id:string) : Promise<Song>{
+    const apiClient = axios.create({
+        baseURL: 'http://api.deezer.com/',
+        responseType: 'json',
+        headers: {
+            'Content-Type': 'application/json'
         }
-    }
+    });
 
-    return new Song();
+    const response = await apiClient.get<IMusicEntry>('/track/' + id);
+    const tempSong: IMusicEntry = response.data;
+
+    let features: string[] = new Array();
+    tempSong.contributors.forEach(data => features.push(data.name));
+    return new Song(tempSong.id, tempSong.title_short, features, tempSong.preview, tempSong.album.title, tempSong.album.cover_small, tempSong.album.cover_medium, tempSong.album.cover_big);
 }
 
 export function getRoomIndex(rooms:Room[], name:string):number{
