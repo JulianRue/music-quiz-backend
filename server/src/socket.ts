@@ -2,7 +2,7 @@ import http from 'http';
 // import https from 'https';
 // import fs from 'fs';
 import socketio from 'socket.io';
-import { configure, getLogger } from "log4js";
+import { getLogger } from "log4js";
 import {
     ICreateRoom,
     IGuess,
@@ -22,10 +22,6 @@ import {
     checkGuess
 } from './engine';
 
-configure({
-    appenders: { fileAppender: { type: "file", filename: "logs/musicquiz.log" } },
-    categories: { default: { appenders: ["fileAppender"], level: "all" } }
-});
 const logger = getLogger();
 
 // const options = {
