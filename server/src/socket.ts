@@ -44,19 +44,19 @@ io.on('connection', socket => {
     socket.emit('connected', socket.id);
 
     socket.on('playlist-selected', (data: IPlaylistSingleNetwork) => {
-        console.log(data.playlist.title + " selected");
+        logger.info(`Playlist ${data.playlist.title} selected in room ${data.room}`);
         io.in(data.room).emit('playlist-selected', data.playlist);
     });
     socket.on('playlist-suggested', (data: IPlaylistSingleNetwork) => {
-        console.log(data.playlist.title + " suggested");
+        logger.info(`Playlist ${data.playlist.title} suggested in room ${data.room}`);
         io.in(data.room).emit('playlist-suggested', data.playlist);
     });
     socket.on('playlist-selected-removed', (data: IPlaylistSingleNetwork) => {
-        console.log(data.playlist.title + " selected-removed");
+        logger.info(`Playlist ${data.playlist.title} removed from selected in room ${data.room}`);
         io.in(data.room).emit('playlist-selected-removed', data.playlist);
     });
     socket.on('playlist-suggested-removed', (data: IPlaylistSingleNetwork) => {
-        console.log(data.playlist.title + " suggested-removed");
+        logger.info(`Playlist ${data.playlist.title} removed from suggested in room ${data.room}`);
         io.in(data.room).emit('playlist-suggested-removed', data.playlist);
     });
     socket.on('start-game', (data : IStartGame) => {
@@ -145,8 +145,6 @@ io.on('connection', socket => {
 
 });
 
-//console.log("Return -> " + levenshtein("justin bieber (feat deine mum) ft. 187", "justin biebes (feat deine mum)"));
-
 server.listen(8000, () => {
     console.log("Socket.io Server is listening on port 8000");
 });
@@ -154,12 +152,11 @@ server.listen(8000, () => {
 function startGame(params : IStartGame, room:Room) : void{
     (async () => {
         let songs : string[] = params.ids;
-        logger.debug(`Song counter: ${songs.length}`);
         try{
             for(var i = 0; i < params.roundCount && room.getUsers().length > 0; i++){
                 room.newRound();
                 room.currentSong = await getRandomSong(songs[i]);
-                console.log("Song counter: " + songs.length);
+                logger.debug(`Song counter: ${songs.length}`);
                 const timestamp = Date.now();
                 io.in(params.roomName).emit('song-started', {url: room.currentSong.url, timestamp: timestamp});
 
@@ -167,8 +164,7 @@ function startGame(params : IStartGame, room:Room) : void{
                     await delay(1000); // delay damit alle gleichzeitig starten!
 
                 room.startStamp = Date.now();
-                logger.info(`Song ${room.currentSong.name} | ${room.currentSong.interpret} playing in room ${params.roomName}`);
-                logger.debug("Song url: " + room.currentSong.url);
+                logger.info(`"${room.currentSong.name} - ${room.currentSong.interpret}" playing in room ${params.roomName}`);
                 room.isSongPlaying = true;   // wenn lied dann läuft auf true setzen
 
                 for(let j = 0; j < 30 && room.getUsers().length > 0; j++)
@@ -182,7 +178,7 @@ function startGame(params : IStartGame, room:Room) : void{
             room.isInGame = false;
         }
         catch (e) {
-            console.log(e);
+            logger.error(e);
         }
 
     })();

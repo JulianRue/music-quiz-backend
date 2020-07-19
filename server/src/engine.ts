@@ -15,7 +15,6 @@ import { getLogger } from "log4js";
 const logger = getLogger();
 
 export function checkGuess(user: User, text:string, room:Room, socket: any, io: any): any{
-    logger.info("guess checked");
     let time = Math.floor((Date.now() - room.startStamp)/1000);
     let timePoints = (30-time);
 
@@ -95,12 +94,12 @@ export async function getSongs(playlists: IPlaylistSingle[]): Promise<Song[]>{
             const tempSongs: IPlaylistSongs = response.data;
         }
          */
-        console.log('Index: ' + i + ' | Length -> ' + tempSongs.data.length);
+        // console.log('Index: ' + i + ' | Length -> ' + tempSongs.data.length);
         tempSongs.data.forEach( s => val.push(new Song(s.id, s.title_short, [s.artist.name], s.preview, s.album.title, s.album.cover_small, s.album.cover_medium, s.album.cover_big)))
         await delay(50);
     }
 
-    console.log("Länge lan: " + val.length);
+    // console.log("Länge lan: " + val.length);
     return val.filter(function(elem, index, self) {return index === self.indexOf(elem);})
 }
 export function randomString(length:number):string {
@@ -118,8 +117,7 @@ export function validateGuess(guess:string, correct:string, percent:number, perc
     guess = formatString(guess);
     correct = formatString(correct);
     correct = correct.split(' ').join('');
-
-    console.log("Checking " + guess + " | For: " + correct);
+    logger.debug(`Checking guess: "${guess}" for "${correct}"`);
     percent = percent / 100.0;
     percentClose = percentClose / 100.0;
 
