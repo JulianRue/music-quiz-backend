@@ -3,7 +3,6 @@ import {
     IGuessedCorrect,
     IGuessInfo,
     IMusicEntry,
-    IPlaylist,
     IPlaylistSingle,
     IPlaylistSongs,
     Room,
@@ -11,9 +10,12 @@ import {
     User
 } from "./interfaces";
 import axios from 'axios';
-import SocketIO from "socket.io";
+import { getLogger } from "log4js";
+
+const logger = getLogger();
 
 export function checkGuess(user: User, text:string, room:Room, socket: any, io: any): any{
+    logger.info("guess checked");
     let time = Math.floor((Date.now() - room.startStamp)/1000);
     let timePoints = (30-time);
 

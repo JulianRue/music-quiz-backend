@@ -1,32 +1,32 @@
-import http, {ClientRequest, IncomingMessage, request} from 'http';
+import http from 'http';
+// import https from 'https';
+// import fs from 'fs';
 import socketio from 'socket.io';
-import db from './queries';
+import { configure, getLogger } from "log4js";
 import {
-    IChat,
     ICreateRoom,
     IGuess,
     IJoinRoom,
     ILeave,
-    IGuessInfo,
-    IGuessedCorrect,
     IStartGame,
     Room,
-    Song,
-    User, IMusicEntry, IPlaylistSingle, IPlaylistSingleNetwork
+    User,
+    IPlaylistSingleNetwork
 } from './interfaces'
-
-import engine, {
+import {
     delay,
     getRandomSong,
     getRoomIndex,
     isSamePassword,
-    validateGuess,
-    getUsername, removeUserGlobal, getSongs, checkGuess
+    getUsername,
+    checkGuess
 } from './engine';
 
-const https = require("https"),
-    fs = require("fs");
-
+configure({
+    appenders: { fileAppender: { type: "file", filename: "logs/musicquiz.log" } },
+    categories: { default: { appenders: ["fileAppender"], level: "all" } }
+});
+const logger = getLogger();
 
 // const options = {
 //     key: fs.readFileSync("/etc/letsencrypt/live/monalit.de/privkey.pem"),
@@ -38,11 +38,10 @@ const server = http.createServer();
 const io = socketio(server);
 const rooms: Room[] = [];
 
-
 io.on('connection', socket => {
-    console.log("User connected");
+    logger.info("User connected");
+    logger.info("Total users: " + Object.keys(io.sockets.connected).length);
     socket.emit('connected', socket.id);
-    console.log("Total Users: " + Object.keys(io.sockets.connected).length);
 
     socket.on('playlist-selected', (data: IPlaylistSingleNetwork) => {
         console.log(data.playlist.title + " selected");
@@ -61,7 +60,7 @@ io.on('connection', socket => {
         io.in(data.room).emit('playlist-suggested-removed', data.playlist);
     });
     socket.on('start-game', (data : IStartGame) => {
-        console.log("Game started");
+        logger.info(`Game started in room ${data.roomName}`);
         io.in(data.roomName).emit('game-started', {maxRounds: data.roundCount});
 
         const index = getRoomIndex(rooms, data.roomName);
@@ -75,11 +74,11 @@ io.on('connection', socket => {
         if (io.sockets.adapter.rooms[data.roomName] === undefined) {
             const length = rooms.push(new Room(data.roomName, data.password, socket.id, data.username));
             socket.join(data.roomName);
-            console.log("Room created");
+            logger.info(`User ${data.username} created room ${data.roomName}`);
             socket.emit('room-connection', {connected: true, message: "Room created", room: data.roomName, username: data.username, isAdmin: true, isInGame: false, currentRound: 0, maxRounds: -1});
             io.in(data.roomName).emit('clients-updated', rooms[length - 1].getUsers());
         } else {
-            console.log("Room already exists");
+            logger.warn(`User ${data.username} cannot create room ${data.roomName}: Room already exists`);
             socket.emit('room-connection', {connected: false, message: "Room already exists"});
         }
     });
@@ -88,13 +87,15 @@ io.on('connection', socket => {
         const index = getRoomIndex(rooms, data.roomName);
         if (index === -1) {
             socket.emit('room-connection', {connected: false, message: "Room does not exist"});
+            logger.warn(`User ${data.username} cannot join room ${data.roomName}: Room doesnt exist`);
         } else if (!isSamePassword(rooms[index].password, data.password)) {
             socket.emit('room-connection', {connected: false, message: "Wrong password"});
+            logger.warn(`User ${data.username} cannot join room ${data.roomName}: Wrong password`);
         } else {
             const username = getUsername(data.username, rooms[index].users);
             rooms[index].users.push(new User(socket.id, username));
             socket.join(data.roomName);
-            console.log("Room joined");
+            logger.info(`User ${data.username} joined room ${data.roomName}`);
             socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, username: username, isAdmin: false, isInGame: rooms[index].isInGame, currentRound: rooms[index].currentRound, maxRounds: rooms[index].maxRounds});
             io.in(data.roomName).emit('clients-updated', rooms[index].getUsers());
         }
@@ -103,14 +104,14 @@ io.on('connection', socket => {
     socket.on('guess', (data : IGuess) => {
         let index = getRoomIndex(rooms,data.room);
         if(index == -1){
-            //TODO ERROR LOG
+            logger.error(`Room ${data.room} cannot be found (socket on guess)`);
             return;
         }
         let room = rooms[index];
         let user = room.getUser(socket.id);
 
         if(user.id == "-1"){
-            //TODO ERROR LOG
+            logger.error(`User who guessed cannot be found (socket on guess)`);
             return;
         }
 
@@ -119,22 +120,27 @@ io.on('connection', socket => {
 
     socket.on('leave', (data : ILeave) => {
         socket.leave(data.roomName);
+        logger.info(`User left room ${data.roomName}`);
         const index = getRoomIndex(rooms, data.roomName);
-        if(index == -1) return;
+        if(index == -1) {
+            logger.error(`Room ${data.roomName} cannot be found (socket on leave)`);
+            return;
+        }
 
         const room:Room = rooms[index];
         const removedIndex = room.removeUser(socket.id);
         
         if (room.users.length === 0) {
             rooms.splice(index, 1);
+            logger.info(`Room ${data.roomName} removed`);
         }
         else{
             if (removedIndex === 0) {
                 room.setAdmin();
+                logger.info(`New admin set in room ${data.roomName}`);
             }
             io.in(data.roomName).emit('clients-updated', room.getUsers());
         }
-        console.log("Room left");
     });
 
 });
@@ -148,7 +154,7 @@ server.listen(8000, () => {
 function startGame(params : IStartGame, room:Room) : void{
     (async () => {
         let songs : string[] = params.ids;
-        console.log("Song counter: " + songs.length);
+        logger.debug(`Song counter: ${songs.length}`);
         try{
             for(var i = 0; i < params.roundCount && room.getUsers().length > 0; i++){
                 room.newRound();
@@ -161,10 +167,8 @@ function startGame(params : IStartGame, room:Room) : void{
                     await delay(1000); // delay damit alle gleichzeitig starten!
 
                 room.startStamp = Date.now();
-                console.log("Now playing in Room: " + room.roomName);
-                console.log(room.currentSong.interpret + " | " + room.currentSong.name);
-                console.log("Url: " + room.currentSong.url);
-                console.log("-------------------------");
+                logger.info(`Song ${room.currentSong.name} | ${room.currentSong.interpret} playing in room ${params.roomName}`);
+                logger.debug("Song url: " + room.currentSong.url);
                 room.isSongPlaying = true;   // wenn lied dann läuft auf true setzen
 
                 for(let j = 0; j < 30 && room.getUsers().length > 0; j++)
