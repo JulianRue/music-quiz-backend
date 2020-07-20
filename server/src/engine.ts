@@ -22,7 +22,7 @@ export function checkGuess(user: User, text:string, room:Room, socket: any, io: 
 
     let guessed:boolean = false;
     if(!user.guessedTitle && room.isSongPlaying){
-        let guess = validateGuess(text, room.currentSong.name, 20, 30);
+        let guess = validateGuess(text, [room.currentSong.name], 20, 30);
         if(guess == 1){
             let positionPoints = room.users.length - room.titleCount;
             room.titleCount++;
@@ -43,7 +43,7 @@ export function checkGuess(user: User, text:string, room:Room, socket: any, io: 
     }
 
     if(!user.guessedIntrepret && room.isSongPlaying){
-        let guess = validateGuess(text, room.currentSong.interpret[0], 20, 30);
+        let guess = validateGuess(text, room.currentSong.interpret, 20, 30);
         if(guess == 1){
             let positionPoints = room.users.length - room.artistCount;
             room.artistCount++;
@@ -112,33 +112,39 @@ export function randomString(length:number):string {
     return result;
 }
 
-export function validateGuess(guess:string, correct:string, percent:number, percentClose:number) : number{
+export function validateGuess(guess:string, corrects:string[], percent:number, percentClose:number) : number{
     //percent -> 20 = 20% etc
     guess = formatString(guess);
-    correct = formatString(correct);
-    correct = correct.split(' ').join('');
-    logger.debug(`Checking guess: "${guess}" for "${correct}"`);
     percent = percent / 100.0;
     percentClose = percentClose / 100.0;
-
-    let subs: string[] = guess.split(' ');
     let points: number = 0;
-    for(let i = 0; i < subs.length; i++){
-        for(let j = i; j < subs.length; j++){
-            let sub: string = "";
-            for(let x = i; x <= j; x++){
-                sub = sub + subs[x];
-            }
+    let subs: string[] = guess.split(' ');
 
-            var count = levenshtein(sub,correct);
-            if(count === 0){
-                return 1;
-            }
-            else if(count / correct.length < percentClose){
-                points = 2;
+    corrects.forEach(correct => {
+        correct = formatString(correct);
+        correct = correct.split(' ').join('');
+
+
+        for(let i = 0; i < subs.length && points != 1; i++){
+            for(let j = i; j < subs.length  && points != 1; j++){
+                let sub: string = "";
+                for(let x = i; x <= j; x++){
+                    sub = sub + subs[x];
+                }
+                var count = levenshtein(sub,correct);
+                if(count === 0){
+                    console.log("correct " + sub + " | For: " + correct);
+                    points = 1;
+                    break;
+                }
+                else if(count / correct.length < percentClose){
+                    console.log("close " + sub + " | For: " + correct);
+                    points = 2;
+                }
             }
         }
-    }
+    });
+
     return points;
 }
 
