@@ -183,7 +183,7 @@ export class Room{
     titleCount: number;
     artistCount: number;
     startStamp: number;
-
+    songs: Song[];
     constructor(roomName: string, password: string, userId: string, username: string, cadminPassword: string = "") {
         this.currentSong = new Song();
         this.roomName = roomName;
@@ -198,6 +198,7 @@ export class Room{
         this.titleCount = 0;
         this.artistCount = 0;
         this.startStamp = 0;
+        this.songs = new Array();
     }
 
     getUser(id:string):User{
