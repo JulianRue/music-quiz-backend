@@ -11,7 +11,7 @@ import {
     IStartGame,
     Room,
     User,
-    IPlaylistSingleNetwork
+    IPlaylistSingleNetwork, Song
 } from './interfaces'
 import {
     delay,
@@ -56,7 +56,10 @@ io.on('connection', socket => {
         io.in(data.room).emit('playlist-suggested-removed', data.playlist);
     });
     socket.on('start-game', (data : IStartGame) => {
-        logger.info(`Game started in room ${data.roomName} with ${data.ids.length} songs`);
+        logger.info(`Game started in room ${data.roomName} with ${data.songs.length} songs`);
+
+        //TODO runden größe checken => genug songs?
+
         io.in(data.roomName).emit('game-started', {maxRounds: data.roundCount});
 
         const index = getRoomIndex(rooms, data.roomName);
@@ -65,7 +68,12 @@ io.on('connection', socket => {
         room.maxRounds = data.roundCount;
         startGame(data, room);
     });
-
+    socket.on('add-songs', (data: IStartGame) => {
+        const index = getRoomIndex(rooms, data.roomName);
+        let room:Room = rooms[index];
+        data.songs.forEach(a => room.songs.push(a));
+        console.log("Songs added -> count now " + room.songs.length);
+    });
     socket.on('create-room', (data : ICreateRoom) => {
         if (io.sockets.adapter.rooms[data.roomName] === undefined) {
             const length = rooms.push(new Room(data.roomName, data.password, socket.id, data.username));
@@ -147,11 +155,11 @@ server.listen(8000, () => {
 
 function startGame(params : IStartGame, room:Room) : void{
     (async () => {
-        let songs : string[] = params.ids;
+        params.songs.forEach(a => room.songs.push(a));
         try{
             for(var i = 0; i < params.roundCount && room.getUsers().length > 0; i++){
                 room.newRound();
-                room.currentSong = await getRandomSong(songs[i]);
+                room.currentSong = await getRandomSong(room.songs);
                 const timestamp = Date.now();
                 io.in(params.roomName).emit('song-started', {url: room.currentSong.url, timestamp: timestamp});
 
