@@ -75,17 +75,17 @@ io.on('connection', socket => {
             io.in(data.roomName).emit('clients-updated', rooms[length - 1].getUsers());
         } else {
             logger.warn(`User ${data.username} cannot create room ${data.roomName}: Room already exists`);
-            socket.emit('room-connection', {connected: false, message: "Room already exists"});
+            socket.emit('room-connection', {connected: false, message: "room"});
         }
     });
 
     socket.on('join-room', (data : IJoinRoom) => {
         const index = getRoomIndex(rooms, data.roomName);
         if (index === -1) {
-            socket.emit('room-connection', {connected: false, message: "Room does not exist"});
+            socket.emit('room-connection', {connected: false, message: "no-room"});
             logger.warn(`User ${data.username} cannot join room ${data.roomName}: Room doesnt exist`);
         } else if (!isSamePassword(rooms[index].password, data.password)) {
-            socket.emit('room-connection', {connected: false, message: "Wrong password"});
+            socket.emit('room-connection', {connected: false, message: "password"});
             logger.warn(`User ${data.username} cannot join room ${data.roomName}: Wrong password`);
         } else {
             const username = getUsername(data.username, rooms[index].users);
