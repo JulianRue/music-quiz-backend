@@ -111,7 +111,7 @@ export interface ILeave{
 }
 
 export interface IStartGame{
-    ids:string[];
+    songs: Song[];
     adminPassword : string;
     roundCount:number;
     roomName:string;
