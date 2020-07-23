@@ -71,26 +71,27 @@ io.on('connection', socket => {
         let user: User = room.getUser(socket.id);
         if(user.id === '-1') return;
         if(!user.isAdmin) return;
-        let playlist: IPlaylistSingle | undefined = room.selectedPlaylists.find(a => a.id == data.playlist.id);
-        if(playlist === undefined) return;
-        // @ts-ignore
-        let index: number = room.selectedPlaylists.findIndex(playlist);
+        let index: number = room.selectedPlaylists.findIndex( a => a.id == data.playlist.id);
         if(index < 0) return;
         room.selectedPlaylists.splice(index,1);
         io.in(data.room).emit('playlist-selected-removed', data.playlist);
     });
     socket.on('playlist-suggested-removed', (data: IPlaylistSingleNetwork) => {
         let room:Room | undefined = getRoom(rooms, data.room);
+        console.log('0');
         if(room === undefined) return;
+        console.log('1');
         if(room.suggestedPlaylists.length == 0) return;
         let user: User = room.getUser(socket.id);
+        console.log('2');
         if(user.id === '-1') return;
+        console.log('3');
         if(!user.isAdmin) return;
-        let playlist: IPlaylistSingle | undefined = room.suggestedPlaylists.find(a => a.id == data.playlist.id);
-        if(playlist === undefined) return;
-        // @ts-ignore
-        let index: number = room.suggestedPlaylists.findIndex(playlist);
+        console.log('4');
+        let index: number = room.suggestedPlaylists.findIndex( a => a.id == data.playlist.id);
+        console.log('5');
         if(index < 0) return;
+        console.log('6');
         room.suggestedPlaylists.splice(index,1);
         io.in(data.room).emit('playlist-suggested-removed', data.playlist);
     });
