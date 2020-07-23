@@ -57,11 +57,11 @@ io.on('connection', socket => {
     socket.on('playlist-suggested', (data: IPlaylistSingleNetwork) => {
         let room:Room | undefined = getRoom(rooms, data.room);
         if(room === undefined) return;
-        if(room.suggested.length > suggestLimit) return;
-        if(room.suggested.filter( local => local.id == data.playlist.id).length > 0) return;
+        if(room.suggestedPlaylists.length > suggestLimit) return;
+        if(room.suggestedPlaylists.filter(local => local.id == data.playlist.id).length > 0) return;
         let user: User = room.getUser(socket.id);
         if(user.id === '-1') return;
-        room.suggested.push(data.playlist);
+        room.suggestedPlaylists.push(data.playlist);
         io.in(data.room).emit('playlist-suggested', data.playlist);
     });
     socket.on('playlist-selected-removed', (data: IPlaylistSingleNetwork) => {
@@ -82,16 +82,16 @@ io.on('connection', socket => {
     socket.on('playlist-suggested-removed', (data: IPlaylistSingleNetwork) => {
         let room:Room | undefined = getRoom(rooms, data.room);
         if(room === undefined) return;
-        if(room.suggested.length == 0) return;
+        if(room.suggestedPlaylists.length == 0) return;
         let user: User = room.getUser(socket.id);
         if(user.id === '-1') return;
         if(!user.isAdmin) return;
-        let playlist: IPlaylistSingle | undefined = room.suggested.find(a => a.id == data.playlist.id);
+        let playlist: IPlaylistSingle | undefined = room.suggestedPlaylists.find(a => a.id == data.playlist.id);
         if(playlist === undefined) return;
         // @ts-ignore
-        let index: number = room.suggested.findIndex(playlist);
+        let index: number = room.suggestedPlaylists.findIndex(playlist);
         if(index < 0) return;
-        room.suggested.splice(index,1);
+        room.suggestedPlaylists.splice(index,1);
         io.in(data.room).emit('playlist-suggested-removed', data.playlist);
     });
     socket.on('start-game', (data : IStartGame) => {
@@ -100,11 +100,11 @@ io.on('connection', socket => {
         let user: User = room.getUser(socket.id);
         if(user.id === '-1') return;
         if(!user.isAdmin) return;
-
         logger.info(`Game started in room ${data.roomName} with ${data.songs.length} songs`);
         //TODO runden größe checken => genug songs?
         io.in(data.roomName).emit('game-started', {maxRounds: data.roundCount});
-
+        room.selectedPlaylists = new Array();
+        room.suggestedPlaylists = new Array();
         room.isInGame = true;
         room.maxRounds = data.roundCount;
         startGame(data, room);
@@ -143,7 +143,7 @@ io.on('connection', socket => {
             socket.join(data.roomName);
             logger.info(`User ${data.username} joined room ${data.roomName}`);
             socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, username: username, isAdmin: false, isInGame: rooms[index].isInGame, currentRound: rooms[index].currentRound, maxRounds: rooms[index].maxRounds});
-            socket.emit('connect-playlists', {selected: room.selectedPlaylists, suggested: room.suggested});
+            socket.emit('connect-playlists', {selected: room.selectedPlaylists, suggested: room.suggestedPlaylists});
             io.in(data.roomName).emit('clients-updated', room.getUsers());
 
         }

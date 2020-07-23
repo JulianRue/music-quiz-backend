@@ -185,7 +185,7 @@ export class Room{
     startStamp: number;
     songs: Song[];
     selectedPlaylists: IPlaylistSingle[];
-    suggested: IPlaylistSingle[];
+    suggestedPlaylists: IPlaylistSingle[];
 
     constructor(roomName: string, password: string, userId: string, username: string, cadminPassword: string = "") {
         this.currentSong = new Song();
@@ -203,7 +203,7 @@ export class Room{
         this.startStamp = 0;
         this.songs = new Array();
         this.selectedPlaylists = new Array();
-        this.suggested = new Array();
+        this.suggestedPlaylists = new Array();
     }
 
     getUser(id:string):User{
