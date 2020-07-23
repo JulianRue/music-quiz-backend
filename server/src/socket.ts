@@ -11,7 +11,7 @@ import {
     IStartGame,
     Room,
     User,
-    IPlaylistSingleNetwork, Song
+    IPlaylistSingleNetwork, Song, IPlaylistSingle
 } from './interfaces'
 import {
     delay,
@@ -19,7 +19,7 @@ import {
     getRoomIndex,
     isSamePassword,
     getUsername,
-    checkGuess
+    checkGuess, getRoom
 } from './engine';
 
 const logger = getLogger();
@@ -40,30 +40,68 @@ io.on('connection', socket => {
     socket.emit('connected', socket.id);
 
     socket.on('playlist-selected', (data: IPlaylistSingleNetwork) => {
-        logger.info(`Playlist "${data.playlist.title}" selected in room ${data.room}`);
-        io.in(data.room).emit('playlist-selected', data.playlist);
+        let room:Room | undefined = getRoom(rooms, data.room);
+        if(room === undefined) return;
+        if(room.selectedPlaylists.length > 8) return;
+        if(room.selectedPlaylists.filter( local => local.id == data.playlist.id) !== undefined) return;
+        let user: User = room.getUser(socket.id);
+        if(user === undefined) return;
+        if(user.isAdmin){
+            room.selectedPlaylists.push(data.playlist);
+            io.in(data.room).emit('playlist-selected', data.playlist);
+        }
     });
     socket.on('playlist-suggested', (data: IPlaylistSingleNetwork) => {
-        logger.info(`Playlist "${data.playlist.title}" suggested in room ${data.room}`);
+        let room:Room | undefined = getRoom(rooms, data.room);
+        if(room === undefined) return;
+        if(room.suggested.length > 8) return;
+        if(room.suggested.filter( local => local.id == data.playlist.id) !== undefined) return;
+        let user: User = room.getUser(socket.id);
+        if(user === undefined) return;
+        room.suggested.push(data.playlist);
         io.in(data.room).emit('playlist-suggested', data.playlist);
     });
     socket.on('playlist-selected-removed', (data: IPlaylistSingleNetwork) => {
-        logger.info(`Playlist "${data.playlist.title}" removed from selected in room ${data.room}`);
+        let room:Room | undefined = getRoom(rooms, data.room);
+        if(room === undefined) return;
+        if(room.selectedPlaylists.length == 0) return;
+        let user: User = room.getUser(socket.id);
+        if(user === undefined) return;
+        if(!user.isAdmin) return;
+        let playlist: IPlaylistSingle | undefined = room.selectedPlaylists.find(a => a.id == data.playlist.id);
+        if(playlist === undefined) return;
+        // @ts-ignore
+        let index: number = room.selectedPlaylists.findIndex(playlist);
+        if(index < 0) return;
+        room.selectedPlaylists.splice(index,1);
         io.in(data.room).emit('playlist-selected-removed', data.playlist);
     });
     socket.on('playlist-suggested-removed', (data: IPlaylistSingleNetwork) => {
-        logger.info(`Playlist "${data.playlist.title}" removed from suggested in room ${data.room}`);
+        let room:Room | undefined = getRoom(rooms, data.room);
+        if(room === undefined) return;
+        if(room.suggested.length == 0) return;
+        let user: User = room.getUser(socket.id);
+        if(user === undefined) return;
+        if(!user.isAdmin) return;
+        let playlist: IPlaylistSingle | undefined = room.suggested.find(a => a.id == data.playlist.id);
+        if(playlist === undefined) return;
+        // @ts-ignore
+        let index: number = room.suggested.findIndex(playlist);
+        if(index < 0) return;
+        room.suggested.splice(index,1);
         io.in(data.room).emit('playlist-suggested-removed', data.playlist);
     });
     socket.on('start-game', (data : IStartGame) => {
+        let room:Room | undefined = getRoom(rooms, data.roomName);
+        if(room === undefined) return;
+        let user: User = room.getUser(socket.id);
+        if(user === undefined) return;
+        if(!user.isAdmin) return;
+
         logger.info(`Game started in room ${data.roomName} with ${data.songs.length} songs`);
-
         //TODO runden größe checken => genug songs?
-
         io.in(data.roomName).emit('game-started', {maxRounds: data.roundCount});
 
-        const index = getRoomIndex(rooms, data.roomName);
-        let room:Room = rooms[index];
         room.isInGame = true;
         room.maxRounds = data.roundCount;
         startGame(data, room);
@@ -96,12 +134,15 @@ io.on('connection', socket => {
             socket.emit('room-connection', {connected: false, message: "password"});
             logger.warn(`User ${data.username} cannot join room ${data.roomName}: Wrong password`);
         } else {
-            const username = getUsername(data.username, rooms[index].users);
-            rooms[index].users.push(new User(socket.id, username));
+            let room: Room = rooms[index];
+            const username = getUsername(data.username, room.users);
+            room.users.push(new User(socket.id, username));
             socket.join(data.roomName);
             logger.info(`User ${data.username} joined room ${data.roomName}`);
             socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, username: username, isAdmin: false, isInGame: rooms[index].isInGame, currentRound: rooms[index].currentRound, maxRounds: rooms[index].maxRounds});
-            io.in(data.roomName).emit('clients-updated', rooms[index].getUsers());
+            socket.emit('connect-playlists', {selected: room.selectedPlaylists, suggested: room.suggested});
+            io.in(data.roomName).emit('clients-updated', room.getUsers());
+
         }
     });
 

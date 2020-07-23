@@ -337,10 +337,17 @@ export function getRoomIndex(rooms:Room[], name:string):number{
             return i;
         }
     }
-
     return -1;
 }
 
+export function getRoom(rooms:Room[], name:string): Room | undefined{
+    for(var i = 0; i < rooms.length; i++){
+        if(rooms[i].roomName == name){
+            return rooms[i];
+        }
+    }
+    return undefined;
+}
 export function isSamePassword(str1: string, str2: string): boolean {
     if (!str1) {
         str1 = "";
