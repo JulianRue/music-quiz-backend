@@ -34,7 +34,7 @@ export function checkGuess(user: User, text:string, room:Room, socket: any, io: 
             const guessInfo:IGuessInfo = {type:"title", isCorrect:true, text:text, correctValue:[room.currentSong.name]};
             socket.emit('guess-info', guessInfo);
             if(user.guessedIntrepret){
-                socket.emit('guess-picture', room.currentSong.cover_small);
+                socket.emit('guess-picture', room.currentSong.cover_medium);
             }
             guessed = true;
         }
@@ -58,7 +58,7 @@ export function checkGuess(user: User, text:string, room:Room, socket: any, io: 
             const guessInfo:IGuessInfo = {type:"artist", isCorrect:true, text:text, correctValue:room.currentSong.interpret};
             socket.emit('guess-info', guessInfo);
             if(user.guessedTitle){
-                socket.emit('guess-picture', room.currentSong.cover_small);
+                socket.emit('guess-picture', room.currentSong.cover_medium);
             }
             guessed = true;
         }
