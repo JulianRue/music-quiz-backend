@@ -78,20 +78,13 @@ io.on('connection', socket => {
     });
     socket.on('playlist-suggested-removed', (data: IPlaylistSingleNetwork) => {
         let room:Room | undefined = getRoom(rooms, data.room);
-        console.log('0');
         if(room === undefined) return;
-        console.log('1');
         if(room.suggestedPlaylists.length == 0) return;
         let user: User = room.getUser(socket.id);
-        console.log('2');
         if(user.id === '-1') return;
-        console.log('3');
         if(!user.isAdmin) return;
-        console.log('4');
         let index: number = room.suggestedPlaylists.findIndex( a => a.id == data.playlist.id);
-        console.log('5');
         if(index < 0) return;
-        console.log('6');
         room.suggestedPlaylists.splice(index,1);
         io.in(data.room).emit('playlist-suggested-removed', data.playlist);
     });
