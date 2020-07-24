@@ -103,6 +103,10 @@ io.on('connection', socket => {
         room.maxRounds = data.roundCount;
         startGame(data, room);
     });
+    socket.on('join-lobby', (room) => {
+        // setze Raumstatus auf "lobby"
+        io.in(room).emit('lobby-joined');
+    })
     socket.on('add-songs', (data: IStartGame) => {
         const index = getRoomIndex(rooms, data.roomName);
         let room:Room = rooms[index];
