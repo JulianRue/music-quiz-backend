@@ -99,13 +99,16 @@ io.on('connection', socket => {
         io.in(data.roomName).emit('game-started', {maxRounds: data.roundCount});
         room.selectedPlaylists = new Array();
         room.suggestedPlaylists = new Array();
-        room.isInGame = true;
+        room.status = "game";
         room.maxRounds = data.roundCount;
         startGame(data, room);
     });
-    socket.on('join-lobby', (room) => {
-        // setze Raumstatus auf "lobby"
-        io.in(room).emit('lobby-joined');
+    socket.on('join-lobby', (roomName) => {
+        let room:Room | undefined = getRoom(rooms, roomName);
+        if (room !== undefined) {
+            room.status = "lobby";
+        }
+        io.in(roomName).emit('lobby-joined');
     })
     socket.on('add-songs', (data: IStartGame) => {
         const index = getRoomIndex(rooms, data.roomName);
@@ -118,7 +121,7 @@ io.on('connection', socket => {
             const length = rooms.push(new Room(data.roomName, data.password, socket.id, data.username));
             socket.join(data.roomName);
             logger.info(`User ${data.username} created room ${data.roomName}`);
-            socket.emit('room-connection', {connected: true, message: "Room created", room: data.roomName, username: data.username, isAdmin: true, isInGame: false, currentRound: 0, maxRounds: -1});
+            socket.emit('room-connection', {connected: true, message: "Room created", room: data.roomName, username: data.username, isAdmin: true, status: "lobby", currentRound: 0, maxRounds: -1});
             io.in(data.roomName).emit('clients-updated', rooms[length - 1].getUsers());
         } else {
             logger.warn(`User ${data.username} cannot create room ${data.roomName}: Room already exists`);
@@ -140,7 +143,7 @@ io.on('connection', socket => {
             room.users.push(new User(socket.id, username));
             socket.join(data.roomName);
             logger.info(`User ${data.username} joined room ${data.roomName}`);
-            socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, username: username, isAdmin: false, isInGame: rooms[index].isInGame, currentRound: rooms[index].currentRound, maxRounds: rooms[index].maxRounds});
+            socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, username: username, isAdmin: false, status: rooms[index].status, currentRound: rooms[index].currentRound, maxRounds: rooms[index].maxRounds});
             socket.emit('connect-playlists', {selected: room.selectedPlaylists, suggested: room.suggestedPlaylists});
             io.in(data.roomName).emit('clients-updated', room.getUsers());
 
@@ -220,7 +223,8 @@ function startGame(params : IStartGame, room:Room) : void{
                 for(let j = 0; j < 5 && room.getUsers().length > 0; j++)
                     await delay(1000) //pause zwischen den runden
             }
-            room.isInGame = false;
+            room.status = "endscreen";
+            io.in(room.roomName).emit('game-ended');
         }
         catch (e) {
             logger.error(e);

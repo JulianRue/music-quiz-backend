@@ -176,7 +176,7 @@ export class Room{
     password: string;
     adminPassword : string;
     users: User[];
-    isInGame: boolean;
+    status: string;
     isSongPlaying: boolean;
     currentRound: number;
     maxRounds: number;
@@ -193,7 +193,7 @@ export class Room{
         this.password = password;
         this.users = Array();
         this.users.push(new User(userId, username, true));
-        this.isInGame = false;
+        this.status = "lobby";
         this.isSongPlaying = false;
         this.adminPassword = randomString(10);
         this.currentRound = 0;
