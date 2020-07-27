@@ -105,9 +105,8 @@ io.on('connection', socket => {
     });
     socket.on('join-lobby', (roomName) => {
         let room:Room | undefined = getRoom(rooms, roomName);
-        if (room !== undefined) {
-            room.status = "lobby";
-        }
+        if(room === undefined) return;
+        room.status = "lobby";
         io.in(roomName).emit('lobby-joined');
     })
     socket.on('add-songs', (data: IStartGame) => {

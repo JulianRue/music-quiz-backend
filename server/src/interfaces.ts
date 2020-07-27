@@ -67,7 +67,6 @@ export interface ICreateRoom{
     roomName: string;
     password : string;
     username: string;
-    maxRounds: number;
 }
 
 export interface IJoinRoom{
