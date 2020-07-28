@@ -170,6 +170,7 @@ export class Song{
 }
 
 export class Room{
+    createTime: number;
     currentSong:Song;
     roomName:string;
     password: string;
@@ -203,6 +204,7 @@ export class Room{
         this.songs = new Array();
         this.selectedPlaylists = new Array();
         this.suggestedPlaylists = new Array();
+        this.createTime = Date.now();
     }
 
     getUser(id:string):User{

@@ -10,10 +10,27 @@ import {
     User
 } from "./interfaces";
 import axios from 'axios';
-import { getLogger } from "log4js";
+import {getLogger, Logger} from "log4js";
 
 const logger = getLogger();
 
+export async function removeIdleRooms(rooms: Room[]){
+    let timeout: number = 1000*60*30; //30 min
+    while(true){
+        let now = Date.now();
+        rooms.forEach(room => {
+            if(room.status === 'lobby'
+                && now - room.createTime > timeout){
+                let index = rooms.indexOf(room);
+                if(index > -1){
+                    rooms.splice(index,1);
+                    logger.info(`room ${room.roomName} timedout with ${room.users.length} users`);
+                }
+            }
+        })
+        await delay(1000);
+    }
+}
 export function checkGuess(user: User, text:string, room:Room, socket: any, io: any): any{
     let time = Math.floor((Date.now() - room.startStamp)/1000);
     let timePoints = (30-time);
