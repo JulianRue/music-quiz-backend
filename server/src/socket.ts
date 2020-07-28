@@ -38,17 +38,31 @@ const suggestLimit = 8;
 const playerLimit = 30;
 
 io.on('connection', socket => {
-    logger.info("User connected");
-    logger.info("Total users: " + Object.keys(io.sockets.connected).length);
-    socket.emit('connected', socket.id);
+    logger.info(`connection: user connected (${Object.keys(io.sockets.connected).length} total users)`);
+
+    socket.on('disconnect', () => {
+        logger.info(`disconnect: user disconnected (${Object.keys(io.sockets.connected).length} total users)`);
+    });
 
     socket.on('playlist-selected', (data: IPlaylistSingleNetwork) => {
         let room:Room | undefined = getRoom(rooms, data.room);
-        if(room === undefined) return;
-        if(room.selectedPlaylists.length > selectedLimit) return;
-        if(room.selectedPlaylists.filter( local => local.id == data.playlist.id).length > 0) return;
+        if(room === undefined) {
+            logger.error(`playlist-selected: room "${data.room}" is undefined`);
+            return;
+        }
+        if(room.selectedPlaylists.length > selectedLimit) {
+            logger.error(`playlist-selected: too many playlists selected in room "${data.room}"`);
+            return;
+        }
+        if(room.selectedPlaylists.filter( local => local.id == data.playlist.id).length > 0) {
+            logger.error(`playlist-selected: kp lol`);
+            return;
+        }
         let user: User = room.getUser(socket.id);
-        if(user.id === '-1') return;
+        if(user.id === '-1') {
+            logger.error(`playlist-selected: user not found in room "${data.room}"`);
+            return;
+        }
         if(user.isAdmin){
             room.selectedPlaylists.push(data.playlist);
             io.in(data.room).emit('playlist-selected', data.playlist);
@@ -56,45 +70,96 @@ io.on('connection', socket => {
     });
     socket.on('playlist-suggested', (data: IPlaylistSingleNetwork) => {
         let room:Room | undefined = getRoom(rooms, data.room);
-        if(room === undefined) return;
-        if(room.suggestedPlaylists.length > suggestLimit) return;
-        if(room.suggestedPlaylists.filter(local => local.id == data.playlist.id).length > 0) return;
+        if(room === undefined) {
+            logger.error(`playlist-suggested: room "${data.room}" is undefined`);
+            return;
+        }
+        if(room.suggestedPlaylists.length > suggestLimit) {
+            logger.error(`playlist-suggested: too many playlists suggested in room "${data.room}"`);
+            return;
+        }
+        if(room.suggestedPlaylists.filter(local => local.id == data.playlist.id).length > 0) {
+            logger.error(`playlist-suggested: kp lol`);
+            return;
+        }
         let user: User = room.getUser(socket.id);
-        if(user.id === '-1') return;
+        if(user.id === '-1') {
+            logger.error(`playlist-suggested: user not found in room "${data.room}"`);
+            return;
+        }
         room.suggestedPlaylists.push(data.playlist);
         io.in(data.room).emit('playlist-suggested', data.playlist);
     });
     socket.on('playlist-selected-removed', (data: IPlaylistSingleNetwork) => {
         let room:Room | undefined = getRoom(rooms, data.room);
-        if(room === undefined) return;
-        if(room.selectedPlaylists.length == 0) return;
+        if(room === undefined) {
+            logger.error(`playlist-selected-removed: room "${data.room}" is undefined`);
+            return;
+        }
+        if(room.selectedPlaylists.length == 0) {
+            logger.error(`playlist-selected-removed: not enough playlists in room "${data.room}"`);
+            return;
+        }
         let user: User = room.getUser(socket.id);
-        if(user.id === '-1') return;
-        if(!user.isAdmin) return;
+        if(user.id === '-1') {
+            logger.error(`playlist-selected-removed: user not found in room "${data.room}"`);
+            return;
+        }
+        if(!user.isAdmin) {
+            logger.error(`playlist-selected-removed: "${user.name}" is not the admin in room "${data.room}"`);
+            return;
+        }
         let index: number = room.selectedPlaylists.findIndex( a => a.id == data.playlist.id);
-        if(index < 0) return;
+        if(index < 0) {
+            logger.error(`playlist-selected-removed: playlist could not be removed in room "${data.room}"`);
+            return;
+        }
         room.selectedPlaylists.splice(index,1);
         io.in(data.room).emit('playlist-selected-removed', data.playlist);
     });
     socket.on('playlist-suggested-removed', (data: IPlaylistSingleNetwork) => {
         let room:Room | undefined = getRoom(rooms, data.room);
-        if(room === undefined) return;
-        if(room.suggestedPlaylists.length == 0) return;
+        if(room === undefined) {
+            logger.error(`playlist-suggested-removed: room "${data.room}" is undefined`);
+            return;
+        }
+        if(room.suggestedPlaylists.length == 0) {
+            logger.error(`playlist-suggested-removed: not enough playlists in room "${data.room}"`);
+            return;
+        }
         let user: User = room.getUser(socket.id);
-        if(user.id === '-1') return;
-        if(!user.isAdmin) return;
+        if(user.id === '-1') {
+            logger.error(`playlist-suggested-removed: user not found in room "${data.room}"`);
+            return;
+        }
+        if(!user.isAdmin) {
+            logger.error(`playlist-suggested-removed: "${user.name}" is not the admin in room "${data.room}"`);
+            return;
+        }
         let index: number = room.suggestedPlaylists.findIndex( a => a.id == data.playlist.id);
-        if(index < 0) return;
+        if(index < 0) {
+            logger.error(`playlist-suggested-removed: playlist could not be removed in room "${data.room}"`);
+            return;
+        }
         room.suggestedPlaylists.splice(index,1);
         io.in(data.room).emit('playlist-suggested-removed', data.playlist);
     });
     socket.on('start-game', (data : IStartGame) => {
         let room:Room | undefined = getRoom(rooms, data.roomName);
-        if(room === undefined) return;
+        if(room === undefined) {
+            logger.error(`start-game: room "${data.roomName}" is undefined`);
+            return;
+        }
         let user: User = room.getUser(socket.id);
-        if(user.id === '-1') return;
-        if(!user.isAdmin) return;
-        logger.info(`Game started in room ${data.roomName} with ${data.songs.length} songs`);
+        if(user.id === '-1') {
+            logger.error(`start-game: user not found in room "${data.roomName}"`);
+            return;
+        }
+        if(!user.isAdmin) {
+            logger.error(`start-game: "${user.name}" is not the admin in room "${data.roomName}"`);
+            return;
+        }
+        logger.info(`start-game: game started in room "${data.roomName}" with "${data.songs.length}" songs`);
         //TODO runden größe checken => genug songs?
         io.in(data.roomName).emit('game-started', {maxRounds: data.roundCount});
         room.selectedPlaylists = new Array();
@@ -105,7 +170,10 @@ io.on('connection', socket => {
     });
     socket.on('join-lobby', (roomName) => {
         let room:Room | undefined = getRoom(rooms, roomName);
-        if(room === undefined) return;
+        if(room === undefined) {
+            logger.error(`join-lobby: room "${roomName}" cannot be found`);
+            return;
+        }
         room.status = "lobby";
         io.in(roomName).emit('lobby-joined');
     })
@@ -119,11 +187,11 @@ io.on('connection', socket => {
         if (io.sockets.adapter.rooms[data.roomName] === undefined) {
             const length = rooms.push(new Room(data.roomName, data.password, socket.id, data.username));
             socket.join(data.roomName);
-            logger.info(`User ${data.username} created room ${data.roomName}`);
+            logger.info(`create-room: user "${data.username}" created room "${data.roomName}"`);
             socket.emit('room-connection', {connected: true, message: "Room created", room: data.roomName, username: data.username, isAdmin: true, status: "lobby", currentRound: 0, maxRounds: -1});
             io.in(data.roomName).emit('clients-updated', rooms[length - 1].getUsers());
         } else {
-            logger.warn(`User ${data.username} cannot create room ${data.roomName}: Room already exists`);
+            logger.warn(`create-room: user "${data.username}" cannot create room "${data.roomName}" (Room already exists)`);
             socket.emit('room-connection', {connected: false, message: "room"});
         }
     });
@@ -132,16 +200,16 @@ io.on('connection', socket => {
         const index = getRoomIndex(rooms, data.roomName);
         if (index === -1) {
             socket.emit('room-connection', {connected: false, message: "no-room"});
-            logger.warn(`User ${data.username} cannot join room ${data.roomName}: Room doesnt exist`);
+            logger.warn(`join-room: user "${data.username}" cannot join room "${data.roomName}" (room doesn't exist)`);
         } else if (!isSamePassword(rooms[index].password, data.password)) {
             socket.emit('room-connection', {connected: false, message: "password"});
-            logger.warn(`User ${data.username} cannot join room ${data.roomName}: Wrong password`);
+            logger.warn(`join-room: user "${data.username}" cannot join room "${data.roomName}" (wrong password)`);
         } else {
             let room: Room = rooms[index];
             const username = getUsername(data.username, room.users);
             room.users.push(new User(socket.id, username));
             socket.join(data.roomName);
-            logger.info(`User ${data.username} joined room ${data.roomName}`);
+            logger.info(`join-room: user "${data.username}" joined room "${data.roomName}"`);
             socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, username: username, isAdmin: false, status: rooms[index].status, currentRound: rooms[index].currentRound, maxRounds: rooms[index].maxRounds});
             socket.emit('connect-playlists', {selected: room.selectedPlaylists, suggested: room.suggestedPlaylists});
             io.in(data.roomName).emit('clients-updated', room.getUsers());
@@ -152,14 +220,14 @@ io.on('connection', socket => {
     socket.on('guess', (data : IGuess) => {
         let index = getRoomIndex(rooms,data.room);
         if(index == -1){
-            logger.error(`Room ${data.room} cannot be found (socket on guess)`);
+            logger.error(`guess: room "${data.room}" cannot be found`);
             return;
         }
         let room = rooms[index];
         let user = room.getUser(socket.id);
 
         if(user.id == "-1"){
-            logger.error(`User who guessed cannot be found (socket on guess)`);
+            logger.error(`guess: user cannot be found in room "${data.room}"`);
             return;
         }
 
@@ -168,10 +236,10 @@ io.on('connection', socket => {
 
     socket.on('leave', (data : ILeave) => {
         socket.leave(data.roomName);
-        logger.info(`User left room ${data.roomName}`);
+        logger.info(`leave: user left room "${data.roomName}"`);
         const index = getRoomIndex(rooms, data.roomName);
         if(index == -1) {
-            logger.error(`Room ${data.roomName} cannot be found (socket on leave)`);
+            logger.error(`leave: room "${data.roomName}" cannot be found`);
             return;
         }
 
@@ -180,12 +248,12 @@ io.on('connection', socket => {
         
         if (room.users.length === 0) {
             rooms.splice(index, 1);
-            logger.info(`Room ${data.roomName} removed`);
+            logger.info(`leave: room "${data.roomName}" removed`);
         }
         else{
             if (removedIndex === 0) {
                 room.setAdmin();
-                logger.info(`New admin set in room ${data.roomName}`);
+                logger.info(`leave: new admin set in room "${data.roomName}"`);
             }
             io.in(data.roomName).emit('clients-updated', room.getUsers());
         }
@@ -211,7 +279,7 @@ function startGame(params : IStartGame, room:Room) : void{
                     await delay(1000); // delay damit alle gleichzeitig starten!
 
                 room.startStamp = Date.now();
-                logger.info(`${room.currentSong.id} playing in room ${params.roomName}`);
+                logger.info(`function startGame: "${room.currentSong.id}" playing in room "${params.roomName}"`);
                 room.isSongPlaying = true;   // wenn lied dann läuft auf true setzen
 
                 for(let j = 0; j < 30 && room.getUsers().length > 0; j++)
