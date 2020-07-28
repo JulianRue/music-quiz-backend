@@ -38,7 +38,7 @@ const suggestLimit = 8;
 const playerLimit = 30;
 
 io.on('connection', socket => {
-    logger.info(`connection: user connected (${Object.keys(io.sockets.connected).length} total users)`);
+    logger.info(`connection: user connected (${Object.keys(io.sockets.connected).length} total users in ${rooms.length} rooms)`);
 
     socket.on('disconnect', () => {
         logger.info(`disconnect: user disconnected (${Object.keys(io.sockets.connected).length} total users)`);
