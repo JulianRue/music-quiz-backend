@@ -295,6 +295,8 @@ function startGame(params : IStartGame, room:Room) : void{
         }
         catch (e) {
             logger.error(e);
+            room.status = "endscreen";
+            io.in(room.roomName).emit('game-ended');
         }
 
     })();
