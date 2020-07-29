@@ -248,7 +248,7 @@ io.on('connection', socket => {
         
         if (room.users.length === 0) {
             rooms.splice(index, 1);
-            logger.info(`leave: room "${data.roomName}" removed`);
+            logger.info(`leave: room "${data.roomName}" removed (${rooms.length} rooms left)`);
         }
         else{
             if (removedIndex === 0) {
