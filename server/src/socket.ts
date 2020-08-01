@@ -35,7 +35,7 @@ const io = socketio(server);
 const rooms: Room[] = [];
 const selectedLimit = 8;
 const suggestLimit = 8;
-const playerLimit = 30;
+const playerLimit = 12;
 
 io.on('connection', socket => {
     logger.info(`connection: user connected (${Object.keys(io.sockets.connected).length} total users in ${rooms.length} rooms)`);
@@ -198,14 +198,17 @@ io.on('connection', socket => {
 
     socket.on('join-room', (data : IJoinRoom) => {
         const index = getRoomIndex(rooms, data.roomName);
+        let room: Room = rooms[index];
         if (index === -1) {
             socket.emit('room-connection', {connected: false, message: "no-room"});
             logger.warn(`join-room: user "${data.username}" cannot join room "${data.roomName}" (room doesn't exist)`);
         } else if (!isSamePassword(rooms[index].password, data.password)) {
             socket.emit('room-connection', {connected: false, message: "password"});
             logger.warn(`join-room: user "${data.username}" cannot join room "${data.roomName}" (wrong password)`);
+        } else if (room.getUsers().length >= playerLimit) {
+            socket.emit('room-connection', {connected: false, message: "full-room"});
+            logger.warn(`join-room: user "${data.username}" cannot join room "${data.roomName}" (room is full)`);
         } else {
-            let room: Room = rooms[index];
             const username = getUsername(data.username, room.users);
             room.users.push(new User(socket.id, username));
             socket.join(data.roomName);
@@ -213,7 +216,6 @@ io.on('connection', socket => {
             socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, username: username, isAdmin: false, status: rooms[index].status, currentRound: rooms[index].currentRound, maxRounds: rooms[index].maxRounds});
             socket.emit('connect-playlists', {selected: room.selectedPlaylists, suggested: room.suggestedPlaylists});
             io.in(data.roomName).emit('clients-updated', room.getUsers());
-
         }
     });
 
