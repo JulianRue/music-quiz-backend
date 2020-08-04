@@ -55,7 +55,7 @@ io.on('connection', socket => {
             return;
         }
         if(room.selectedPlaylists.filter( local => local.id == data.playlist.id).length > 0) {
-            logger.error(`playlist-selected: kp lol`);
+            logger.error(`playlist-selected: selected playlist already selected`);
             return;
         }
         let user: User = room.getUser(socket.id);
@@ -79,7 +79,7 @@ io.on('connection', socket => {
             return;
         }
         if(room.suggestedPlaylists.filter(local => local.id == data.playlist.id).length > 0) {
-            logger.error(`playlist-suggested: kp lol`);
+            logger.error(`playlist-selected: suggested playlist already selected`);
             return;
         }
         let user: User = room.getUser(socket.id);
