@@ -145,6 +145,10 @@ export class User {
         this.guessedIntrepret = false;
         this.guessedAlbum = false;
     }
+    newGame(){
+        this.newRound()
+        this.points = 0;
+    }
 }
 
 export class Song{
@@ -225,6 +229,13 @@ export class Room{
         this.artistCount = 0;
     }
 
+    newGame(){
+        this.users.forEach(user => user.newGame());
+        this.titleCount = 0;
+        this.artistCount = 0;
+        this.currentRound = 0;
+        this.createTime = Date.now();
+    }
     getUsers() : IUser[]{
         let iUsers:IUser[] = Array();
         this.users.forEach(user => iUsers.push({username : user.name, isAdmin : user.isAdmin, points : user.points, correctTitle: user.guessedTitle, correctArtist: user.guessedIntrepret}));

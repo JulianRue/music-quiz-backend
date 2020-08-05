@@ -45,12 +45,10 @@ io.on('connection', socket => {
         let room = rooms.find(r => r.users.find(u => u.id == socket.id) !== undefined)
         if(room !== undefined){
             room.removeUser(socket.id)
-            if(room.users.length == 0){
-                console.log("Room deleted! " + room.roomName)// @ts-ignore
+            if(room.users.length == 0){// @ts-ignore
                 let index = rooms.findIndex( r => r.roomName === room.roomName);
                 if(index != -1){
                     rooms.splice(index, 1);
-                    console.log("Aktuell: " + rooms.length + " Räume!")
                 }
             }
         }
@@ -176,6 +174,7 @@ io.on('connection', socket => {
         io.in(data.roomName).emit('game-started', {maxRounds: data.roundCount});
         room.selectedPlaylists = new Array();
         room.suggestedPlaylists = new Array();
+        room.newGame();
         room.status = "game";
         room.maxRounds = data.roundCount;
         startGame(data, room);
