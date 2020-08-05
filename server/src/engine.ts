@@ -15,8 +15,8 @@ import {rooms} from "./socket";
 
 const logger = getLogger();
 
-export async function removeIdleRooms(IOS){
-    let timeout: number = 1000*60*5; //30 min
+export async function removeIdleRooms(){
+    let timeout: number = 1000*60*30; //30 min
     while(true){
         let now = Date.now();
         rooms.forEach(room => {
