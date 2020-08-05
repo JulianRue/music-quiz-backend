@@ -267,7 +267,8 @@ export function formatString(s:string):string{
 
     s = s.replace("<3","");
     s = s.replace("ß","ss");
-    s = s.replace("&","und");
+    s = s.replace("und","&");
+    s = s.replace("and","&");
     s = s.replace("'","");
     s = s.replace("!","");
     s = s.replace("?","");
@@ -289,6 +290,7 @@ export function formatString(s:string):string{
     s = s.replace("=","");
     s = s.replace("<","");
     s = s.replace("|","");
+    s = s.replace("*","");
     s = s.replace(";","");
     s = s.replace(",","");
 
