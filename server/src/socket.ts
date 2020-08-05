@@ -19,7 +19,7 @@ import {
     getRoomIndex,
     isSamePassword,
     getUsername,
-    checkGuess, getRoom
+    checkGuess, getRoom, removeIdleRooms
 } from './engine';
 
 const logger = getLogger();
@@ -32,10 +32,12 @@ const logger = getLogger();
 // const server = https.createServer(options);
 const server = http.createServer();
 const io = socketio(server);
-const rooms: Room[] = [];
+export const rooms: Room[] = [];
 const selectedLimit = 8;
 const suggestLimit = 8;
 const playerLimit = 12;
+
+removeIdleRooms();
 
 io.on('connection', socket => {
     logger.info(`connection: user connected (${Object.keys(io.sockets.connected).length} total users in ${rooms.length} rooms)`);
