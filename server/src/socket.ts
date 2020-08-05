@@ -291,7 +291,7 @@ function startGame(params : IStartGame, room:Room) : void{
                 io.in(params.roomName).emit('song-started', {url: room.currentSong.url, timestamp: timestamp});
 
                 for(let j = 0; j < 4 && room.getUsers().length > 0; j++)
-                    await delay(1000); // delay damit alle gleichzeitig starten!
+                    await delay(1020); // delay damit alle gleichzeitig starten!
 
                 room.startStamp = Date.now();
                 logger.info(`function startGame: "${room.currentSong.id}" playing in room "${params.roomName}"`);
