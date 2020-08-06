@@ -287,6 +287,10 @@ function startGame(params : IStartGame, room:Room) : void{
             for(var i = 0; i < params.roundCount && room.getUsers().length > 0; i++){
                 room.newRound();
                 room.currentSong = await getRandomSong(room.songs);
+                if(room.currentSong === undefined){
+                    console.log("Thrown!")
+                    throw new Error('Something bad happened');
+                }
                 const timestamp = Date.now();
                 io.in(params.roomName).emit('song-started', {url: room.currentSong.url, timestamp: timestamp});
 
@@ -302,7 +306,7 @@ function startGame(params : IStartGame, room:Room) : void{
 
                 room.isSongPlaying = false;
                 io.in(params.roomName).emit('round-end',room.currentSong);
-                for(let j = 0; j < 5 && room.getUsers().length > 0 && (i+1) < params.roundCount; j++)
+                for(let j = 0; j < 5 && room.getUsers().length > 0; j++)
                     await delay(1000) //pause zwischen den runden
             }
             room.status = "endscreen";
@@ -310,6 +314,7 @@ function startGame(params : IStartGame, room:Room) : void{
         }
         catch (e) {
             logger.error(e);
+            console.log("SENT!")
             room.status = "endscreen";
             io.in(room.roomName).emit('game-ended');
         }
