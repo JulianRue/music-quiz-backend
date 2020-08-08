@@ -69,7 +69,7 @@ app.get('/api/', (request, response) => {
 //app.post('/api/playlist/', keycloak.protect('user', 'admin'), db.createPlaylist);
 
 app.get('/api/time', function (request: any, res : Response) {
-    res.status(200).send("" + Date.now());
+    res.status(200).json({"unixtime" : Date.now()});
 });
 
 app.listen(port, () => {
