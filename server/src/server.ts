@@ -1,5 +1,6 @@
 import './socket';
 import { configure } from "log4js";
+import './rest'
 
 configure({
     appenders: {
