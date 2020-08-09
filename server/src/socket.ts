@@ -46,7 +46,8 @@ io.on('connection', socket => {
         logger.info(`disconnect: user disconnected (${Object.keys(io.sockets.connected).length} total users)`);
         let room = rooms.find(r => r.users.find(u => u.id == socket.id) !== undefined)
         if(room !== undefined){
-            room.removeUser(socket.id)
+            room.removeUser(socket.id);
+            io.in(room.roomName).emit('clients-updated', room.getUsers());
             if(room.users.length == 0){// @ts-ignore
                 let index = rooms.findIndex( r => r.roomName === room.roomName);
                 if(index != -1){
