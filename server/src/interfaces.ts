@@ -113,6 +113,11 @@ export interface IStartGame{
     roomName:string;
 }
 
+export interface IAddSongs{
+    songs: Song[];
+    roomName: string;
+}
+
 export class User {
     id:string;
     name:string;

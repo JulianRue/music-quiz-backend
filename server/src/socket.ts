@@ -11,7 +11,8 @@ import {
     IStartGame,
     Room,
     User,
-    IPlaylistSingleNetwork
+    IPlaylistSingleNetwork,
+    IAddSongs
 } from './interfaces'
 import {
     delay,
@@ -193,7 +194,7 @@ io.on('connection', socket => {
         room.status = "lobby";
         io.in(roomName).emit('lobby-joined');
     })
-    socket.on('add-songs', (data: IStartGame) => {
+    socket.on('add-songs', (data: IAddSongs) => {
         const index = getRoomIndex(rooms, data.roomName);
         let room:Room = rooms[index];
         data.songs.forEach(a => room.songs.push(a));
@@ -289,7 +290,7 @@ function startGame(params : IStartGame, room:Room) : void{
         try{
             for(var i = 0; i < params.roundCount && room.getUsers().length > 0; i++){
                 room.newRound();
-                room.currentSong = await getRandomSong(room.songs);
+                room.currentSong = getRandomSong(room.songs);
                 if(room.currentSong === undefined){
                     console.log("Thrown!")
                     throw new Error('Something bad happened');

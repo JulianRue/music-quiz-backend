@@ -2,13 +2,10 @@ import {
     IChat,
     IGuessedCorrect,
     IGuessInfo,
-    IPlaylistSingle,
-    IPlaylistSongs,
     Room,
     Song,
     User
 } from "./interfaces";
-import axios from 'axios';
 import {getLogger} from "log4js";
 import {rooms} from "./socket";
 
@@ -92,49 +89,6 @@ export function checkGuess(user: User, text:string, room:Room, socket: any, io: 
         let chat:IChat = {text:chatMessage, username:user.name};
         io.in(room.roomName).emit('chat', chat);
     }
-}
-export async function getSongs(playlists: IPlaylistSingle[]): Promise<Song[]>{
-    let val: Song[] = new Array();
-    const apiClient = axios.create({
-        baseURL: 'http://api.deezer.com/',
-        responseType: 'json',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    });
-
-    for(let i = 0; i < playlists.length; i++){
-        const response = await apiClient.get<IPlaylistSongs>('/playlist/' + playlists[i].id + '/tracks');
-        const tempSongs: IPlaylistSongs = response.data;
-        /*
-        while(tempSongs.next != ""){
-            const nextApiClient = axios.create({
-                baseURL: tempSongs.next,
-                responseType: 'json',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            const response = await apiClient.get<IPlaylistSongs>('/playlist/' + playlists[i].id + '/tracks');
-            const tempSongs: IPlaylistSongs = response.data;
-        }
-         */
-        // console.log('Index: ' + i + ' | Length -> ' + tempSongs.data.length);
-        tempSongs.data.forEach( s => val.push(new Song(s.id, s.title_short, [s.artist.name], s.preview, s.album.title, s.album.cover_small, s.album.cover_medium, s.album.cover_big)))
-        await delay(50);
-    }
-
-    // console.log("Länge lan: " + val.length);
-    return val.filter(function(elem, index, self) {return index === self.indexOf(elem);})
-}
-export function randomString(length:number):string {
-    var result           = '';
-    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    var charactersLength = characters.length;
-    for ( var i = 0; i < length; i++ ) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
 }
 
 export function validateGuess(guess:string, corrects:string[], percent:number, percentClose:number) : number{
