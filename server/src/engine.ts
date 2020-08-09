@@ -2,7 +2,6 @@ import {
     IChat,
     IGuessedCorrect,
     IGuessInfo,
-    IMusicEntry,
     IPlaylistSingle,
     IPlaylistSongs,
     Room,
@@ -10,7 +9,7 @@ import {
     User
 } from "./interfaces";
 import axios from 'axios';
-import {getLogger, Logger} from "log4js";
+import {getLogger} from "log4js";
 import {rooms} from "./socket";
 
 const logger = getLogger();
