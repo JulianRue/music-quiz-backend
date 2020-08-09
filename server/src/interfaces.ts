@@ -111,7 +111,6 @@ export interface ILeave{
 
 export interface IStartGame{
     songs: Song[];
-    adminPassword : string;
     roundCount:number;
     roomName:string;
 }
@@ -178,7 +177,6 @@ export class Room{
     currentSong:Song;
     roomName:string;
     password: string;
-    adminPassword : string;
     users: User[];
     status: string;
     isSongPlaying: boolean;
@@ -191,7 +189,7 @@ export class Room{
     selectedPlaylists: IPlaylistSingle[];
     suggestedPlaylists: IPlaylistSingle[];
 
-    constructor(roomName: string, password: string, userId: string, username: string, cadminPassword: string = "") {
+    constructor(roomName: string, password: string, userId: string, username: string) {
         this.currentSong = new Song();
         this.roomName = roomName;
         this.password = password;
@@ -199,7 +197,6 @@ export class Room{
         this.users.push(new User(userId, username, true));
         this.status = "lobby";
         this.isSongPlaying = false;
-        this.adminPassword = randomString(10);
         this.currentRound = 0;
         this.maxRounds = -1;
         this.titleCount = 0;
