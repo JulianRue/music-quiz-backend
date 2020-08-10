@@ -195,6 +195,7 @@ io.on('connection', socket => {
         io.in(roomName).emit('lobby-joined');
     })
     socket.on('add-songs', (data: IAddSongs) => {
+        logger.info(data.songs.length + " Songs wurden hinzugefügt");
         const index = getRoomIndex(rooms, data.roomName);
         let room:Room = rooms[index];
         data.songs.forEach(a => room.songs.push(a));

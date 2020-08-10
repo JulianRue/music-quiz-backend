@@ -124,8 +124,6 @@ export class User {
     id:string;
     name:string;
     points:number;
-    oldPoints:number;
-    counto:any;
     isAdmin:boolean;
     guessedTitle:boolean;
     guessedIntrepret:boolean;
@@ -135,8 +133,6 @@ export class User {
         this.id = id;
         this.name = name;
         this.points = 0;
-        this.oldPoints = 0;
-        this.counto = 0;
         this.isAdmin = isAdmin;
         this.guessedTitle = false;
         this.guessedIntrepret = false;
@@ -156,8 +152,6 @@ export class User {
     newGame(){
         this.newRound()
         this.points = 0;
-        this.oldPoints = 0;
-        this.counto = 0;
     }
 }
 
@@ -246,7 +240,7 @@ export class Room{
     }
     getUsers() : IUser[]{
         let iUsers:IUser[] = Array();
-        this.users.forEach(user => iUsers.push({username : user.name, isAdmin : user.isAdmin, points : user.points, oldPoints: user.oldPoints, counto: user.counto, correctTitle: user.guessedTitle, correctArtist: user.guessedIntrepret}));
+        this.users.forEach(user => iUsers.push({username : user.name, isAdmin : user.isAdmin, points : user.points, oldPoints: 0, counto: 0, correctTitle: user.guessedTitle, correctArtist: user.guessedIntrepret}));
         return iUsers;
     }
 
