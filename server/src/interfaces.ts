@@ -99,8 +99,6 @@ export interface IGuessInfo{
 export interface IUser {
     username:string;
     points:number;
-    oldPoints:number;
-    counto:any;
     isAdmin:boolean;
     correctTitle:boolean;
     correctArtist:boolean;
@@ -240,7 +238,7 @@ export class Room{
     }
     getUsers() : IUser[]{
         let iUsers:IUser[] = Array();
-        this.users.forEach(user => iUsers.push({username : user.name, isAdmin : user.isAdmin, points : user.points, oldPoints: 0, counto: 0, correctTitle: user.guessedTitle, correctArtist: user.guessedIntrepret}));
+        this.users.forEach(user => iUsers.push({username : user.name, isAdmin : user.isAdmin, points : user.points, correctTitle: user.guessedTitle, correctArtist: user.guessedIntrepret}));
         return iUsers;
     }
 
