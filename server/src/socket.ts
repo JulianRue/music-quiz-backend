@@ -46,6 +46,8 @@ io.on('connection', socket => {
     logger.info(`connection: user connected (${Object.keys(io.sockets.connected).length} total users in ${rooms.length} rooms)`);
 
     socket.on('disconnect', () => {
+        return;
+        /*
         logger.info(`disconnect: user disconnected (${Object.keys(io.sockets.connected).length} total users)`);
         let room = rooms.find(r => r.users.find(u => u.id == socket.id) !== undefined)
         if(room !== undefined){
@@ -58,6 +60,7 @@ io.on('connection', socket => {
                 }
             }
         }
+        */
     });
 
     socket.on('playlist-selected', (data: IPlaylistSingleNetwork) => {
@@ -199,7 +202,7 @@ io.on('connection', socket => {
         const index = getRoomIndex(rooms, data.roomName);
         let room:Room = rooms[index];
         data.songs.forEach(a => room.songs.push(a));
-        console.log("Songs added -> count now " + room.songs.length);
+        console.log(data.songs.length + " Songs added -> count now " + room.songs.length);
     });
     socket.on('create-room', (data : ICreateRoom) => {
         if (io.sockets.adapter.rooms[data.roomName] === undefined) {

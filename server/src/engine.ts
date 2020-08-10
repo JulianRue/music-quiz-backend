@@ -27,7 +27,7 @@ export async function removeIdleRooms(io: any){
                 }
             }
         })
-        await delay(5000);
+        await delay(10000);
     }
 }
 export function checkGuess(user: User, text:string, room:Room, socket: any, io: any): any{
