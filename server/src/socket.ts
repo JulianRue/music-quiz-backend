@@ -314,14 +314,14 @@ function startGame(params : IStartGame, room:Room) : void{
                 for(let j = 0; j < 5 && room.getUsers().length > 0; j++)
                     await delay(1000) //pause zwischen den runden
             }
-            room.status = "endscreen";
             room.createTime = Date.now();
+            room.status = "endscreen";
             io.in(room.roomName).emit('game-ended');
         }
         catch (e) {
             logger.error(e);
-            room.status = "endscreen";
             room.createTime = Date.now();
+            room.status = "endscreen";
             io.in(room.roomName).emit('game-ended');
         }
 
