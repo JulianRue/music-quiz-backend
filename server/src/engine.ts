@@ -214,27 +214,28 @@ function removeEnd(s:string, sub:string):string{
     return s;
 }
 
+console.log("Word: " + formatString("a/b/c"));
 export function formatString(s:string):string{
 
     s = s.toLowerCase();
 
-    s = s.replace("<3","");
-    s = s.replace("ß","ss");
-    s = s.replace("und","&");
-    s = s.replace("and","&");
-    s = s.replace("'","");
-    s = s.replace("!","");
-    s = s.replace("?","");
-    s = s.replace("-","");
-    s = s.replace(".","");
-    s = s.replace("/","");
-    s = s.replace("|","");
-    s = s.replace("$","s");
-    s = s.replace("€","e");
-    s = s.replace("@","a");
-    s = s.replace("~","");
-    s = s.replace("#","");
-    s = s.replace("+","");
+    s = s.replace(/<3/g,"");
+    s = s.replace(/ß/g,"ss");
+    s = s.replace(/und/g,"&");
+    s = s.replace(/and/g,"&");
+    s = s.replace(/'/g,"");
+    s = s.replace(/!/g,"");
+    s = s.replace(/\?/g,"");
+    s = s.replace(/-/g,"");
+    s = s.replace(/\./g,"");
+    s = s.replace(/\//g,"");
+    s = s.replace(/\|/g,"");
+    s = s.replace(/$/g,"s");
+    s = s.replace(/€/g,"e");
+    s = s.replace(/@/g,"a");
+    s = s.replace(/~/g,"");
+    s = s.replace(/#/g,"");
+    s = s.replace(/\+/g,"");
     s = s.replace("`","");
     s = s.replace("´","");
     s = s.replace("%","");
