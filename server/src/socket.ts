@@ -40,7 +40,7 @@ const selectedLimit = 8;
 const suggestLimit = 8;
 const playerLimit = 12;
 
-removeIdleRooms();
+removeIdleRooms(io);
 
 io.on('connection', socket => {
     logger.info(`connection: user connected (${Object.keys(io.sockets.connected).length} total users in ${rooms.length} rooms)`);
@@ -315,11 +315,13 @@ function startGame(params : IStartGame, room:Room) : void{
                     await delay(1000) //pause zwischen den runden
             }
             room.status = "endscreen";
+            room.createTime = Date.now();
             io.in(room.roomName).emit('game-ended');
         }
         catch (e) {
             logger.error(e);
             room.status = "endscreen";
+            room.createTime = Date.now();
             io.in(room.roomName).emit('game-ended');
         }
 

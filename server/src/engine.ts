@@ -11,7 +11,7 @@ import {rooms} from "./socket";
 
 const logger = getLogger();
 
-export async function removeIdleRooms(){
+export async function removeIdleRooms(io: any){
     let timeout: number = 1000*60*30; //30 min
     while(true){
         let now = Date.now();
@@ -20,7 +20,7 @@ export async function removeIdleRooms(){
                 && now - room.createTime > timeout){
                 let index = rooms.indexOf(room);
                 if(index > -1){
-
+                    io.in(room.roomName).emit('kicked-for-inactivity');
                     console.log(room.roomName + " removed for inactivity")
                     rooms.splice(index,1);
                     logger.info(`room ${room.roomName} timedout with ${room.users.length} users`);

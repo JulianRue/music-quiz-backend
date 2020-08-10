@@ -234,7 +234,6 @@ export class Room{
         this.titleCount = 0;
         this.artistCount = 0;
         this.currentRound = 0;
-        this.createTime = Date.now();
     }
     getUsers() : IUser[]{
         let iUsers:IUser[] = Array();
