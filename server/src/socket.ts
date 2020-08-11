@@ -42,7 +42,7 @@ const selectedLimit = 8;
 const suggestLimit = 8;
 const playerLimit = 12;
 
-removeIdleRooms();
+removeIdleRooms(io);
 
 io.on('connection', socket => {
     logger.info(`connection: user connected (${Object.keys(io.sockets.connected).length} total users)`);
