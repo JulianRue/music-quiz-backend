@@ -7,12 +7,13 @@ import {
     User
 } from "./interfaces";
 import {getLogger} from "log4js";
+import { kickUsersForInactivity } from "./socket";
 
 const rooms: Room[] = [];
 
 const logger = getLogger();
 
-export async function removeIdleRooms(io: any){
+export async function removeIdleRooms() {
     let timeout: number = 1000*60*30; //30 min
     while(true){
         let now = Date.now();
@@ -21,7 +22,7 @@ export async function removeIdleRooms(io: any){
                 && now - room.createTime > timeout){
                 let index = rooms.indexOf(room);
                 if(index > -1){
-                    io.in(room.roomName).emit('kicked-for-inactivity');
+                    kickUsersForInactivity(room.roomName);
                     console.log(room.roomName + " removed for inactivity")
                     rooms.splice(index,1);
                     logger.info(`room ${room.roomName} timedout with ${room.users.length} users`);
@@ -31,6 +32,7 @@ export async function removeIdleRooms(io: any){
         await delay(10000);
     }
 }
+
 export function checkGuess(user: User, text:string, room:Room, socket: any, io: any): any{
     let time = Math.floor((Date.now() - room.startStamp)/1000);
     let timePoints = (30-time);

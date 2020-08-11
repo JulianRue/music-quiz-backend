@@ -42,16 +42,12 @@ const selectedLimit = 8;
 const suggestLimit = 8;
 const playerLimit = 12;
 
-removeIdleRooms(io);
+removeIdleRooms();
 
 io.on('connection', socket => {
     logger.info(`connection: user connected (${Object.keys(io.sockets.connected).length} total users)`);
 
-    socket.on('disconnecting', () => {
-        // var currentRoom = Object.keys(io.sockets.adapter.sids[socket.id]).filter(item => item!=socket.id)[0];
-        var rooms = Object.keys(socket.rooms);
-        var currentRoom = socket.rooms;
-        console.log(rooms);
+    socket.on('disconnect', () => {
         /*
         logger.info(`disconnect: user disconnected (${Object.keys(io.sockets.connected).length} total users)`);
         let room = rooms.find(r => r.users.find(u => u.id == socket.id) !== undefined)
@@ -213,8 +209,6 @@ io.on('connection', socket => {
         if (io.sockets.adapter.rooms[data.roomName] === undefined) {
             const index = addNewRoom(new Room(data.roomName, data.password, socket.id, data.username));
             socket.join(data.roomName);
-            var currentRoom = Object.keys(io.sockets.adapter.sids[socket.id]).filter(item => item!=socket.id)[0];
-            console.log(currentRoom);
             logger.info(`create-room: user "${data.username}" created room "${data.roomName}"`);
             socket.emit('room-connection', {connected: true, message: "Room created", room: data.roomName, username: data.username, isAdmin: true, status: "lobby", currentRound: 0, maxRounds: -1});
             io.in(data.roomName).emit('clients-updated', getRoomByIndex(index).getUsers());
@@ -337,5 +331,10 @@ function startGame(params : IStartGame, room:Room) : void{
 
     })();
 }
+
+export function kickUsersForInactivity(roomName: string) {
+    io.in(roomName).emit('kicked-for-inactivity');
+}
+
 
 export default {this:this}
