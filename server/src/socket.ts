@@ -215,14 +215,17 @@ io.on('connection', socket => {
         logger.info(data.songs.length + " Songs wurden hinzugefügt");
         const index = getRoomIndex(data.roomName);
         if(index === -1){
+            logger.error(`add-songs: Room "${data.roomName}" not found`);
             return;
         }
         const room: Room = getRoomByIndex(index);
         let user = room.getUser(socket.id);
         if(user.id === "-1"){
+            logger.error(`add-songs: User "${socket.id}" not found`);
             return;
         }
         if(!user.isAdmin){
+            logger.error(`add-songs: "${user.name}" is not an Admin`);
             return;
         }
         data.songs.forEach(a => room.songs.push(a));
