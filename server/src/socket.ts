@@ -208,6 +208,7 @@ io.on('connection', socket => {
             logger.error(`join-lobby: User "${user.name}" is not an admin`);
             return;
         }
+        room.newGame();
         room.status = "lobby";
         io.in(roomName).emit('lobby-joined');
     })
@@ -258,6 +259,19 @@ io.on('connection', socket => {
     });
 
     socket.on('join-room', (data : IJoinRoom) => {
+        if(data.roomName !== undefined
+            && data.roomName.length > 20){
+            return;
+        }
+        if(data.password !== undefined) {
+            if(data.password.length > 20){
+                return;
+            }
+        }
+        if(data.roomName !== undefined
+            && data.username.length > 20) {
+            return;
+        }
         const index = getRoomIndex(data.roomName);
         const room: Room = getRoomByIndex(index);
         if (index === -1) {
