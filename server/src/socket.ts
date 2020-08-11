@@ -180,13 +180,12 @@ io.on('connection', socket => {
             return;
         }
         logger.info(`start-game: game started in room "${data.roomName}" with "${data.songs.length}" songs`);
-        //TODO runden größe checken => genug songs?
-        io.in(data.roomName).emit('game-started', {maxRounds: data.roundCount});
         room.selectedPlaylists = new Array();
         room.suggestedPlaylists = new Array();
         room.newGame();
         room.status = "game";
         room.maxRounds = data.roundCount;
+        io.in(data.roomName).emit('game-started', {maxRounds: data.roundCount});
         startGame(data, room);
     });
     socket.on('join-lobby', (roomName) => {
@@ -330,10 +329,6 @@ function startGame(params : IStartGame, room:Room) : void{
         }
 
     })();
-}
-
-export function kickUsersForInactivity(roomName: string) {
-    io.in(roomName).emit('kicked-for-inactivity');
 }
 
 
