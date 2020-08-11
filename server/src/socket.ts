@@ -194,13 +194,33 @@ io.on('connection', socket => {
             logger.error(`join-lobby: room "${roomName}" cannot be found`);
             return;
         }
+        let user = room.getUser(socket.id);
+        if(user.id === "-1"){
+            logger.error(`join-lobby: User "${socket.id}" cannot be found`);
+            return;
+        }
+
+        if(!user.isAdmin){
+            logger.error(`join-lobby: User "${user.name}" is not an admin`);
+            return;
+        }
         room.status = "lobby";
         io.in(roomName).emit('lobby-joined');
     })
     socket.on('add-songs', (data: IAddSongs) => {
         logger.info(data.songs.length + " Songs wurden hinzugefügt");
         const index = getRoomIndex(data.roomName);
+        if(index === -1){
+            return;
+        }
         const room: Room = getRoomByIndex(index);
+        let user = room.getUser(socket.id);
+        if(user.id === "-1"){
+            return;
+        }
+        if(!user.isAdmin){
+            return;
+        }
         data.songs.forEach(a => room.songs.push(a));
         console.log(data.songs.length + " Songs added -> count now " + room.songs.length);
     });
