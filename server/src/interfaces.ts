@@ -125,7 +125,6 @@ export class User {
     isAdmin:boolean;
     guessedTitle:boolean;
     guessedIntrepret:boolean;
-    guessedAlbum:boolean;
 
     constructor(id: string, name: string, isAdmin: boolean = false) {
         this.id = id;
@@ -134,7 +133,6 @@ export class User {
         this.isAdmin = isAdmin;
         this.guessedTitle = false;
         this.guessedIntrepret = false;
-        this.guessedAlbum = false;
     }
     addPoints(points:number) {
         this.points += points;
@@ -145,10 +143,9 @@ export class User {
     newRound(){
         this.guessedTitle = false;
         this.guessedIntrepret = false;
-        this.guessedAlbum = false;
     }
     newGame(){
-        this.newRound()
+        this.newRound();
         this.points = 0;
     }
 }
