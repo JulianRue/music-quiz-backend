@@ -302,7 +302,9 @@ io.on('connection', socket => {
                 room.setAdmin();
                 logger.info(`leave: new admin set in room "${data.roomName}"`);
             }
-            io.in(data.roomName).emit('clients-updated', room.getUsers());
+            else if(removedIndex !== -1){
+                io.in(data.roomName).emit('clients-updated', room.getUsers());
+            }
         }
     });
 
