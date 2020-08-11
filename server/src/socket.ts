@@ -233,6 +233,19 @@ io.on('connection', socket => {
     });
     socket.on('create-room', (data : ICreateRoom) => {
         if (io.sockets.adapter.rooms[data.roomName] === undefined) {
+            if(data.roomName !== undefined
+                && data.roomName.length > 20){
+                return;
+            }
+            if(data.password !== undefined) {
+                if(data.password.length > 20){
+                    return;
+                }
+            }
+            if(data.roomName !== undefined
+                && data.username.length > 20) {
+                return;
+            }
             const index = addNewRoom(new Room(data.roomName, data.password, socket.id, data.username));
             socket.join(data.roomName);
             logger.info(`create-room: user "${data.username}" created room "${data.roomName}"`);
@@ -268,6 +281,13 @@ io.on('connection', socket => {
     });
 
     socket.on('guess', (data : IGuess) => {
+        if (data.text === undefined
+            || data.text.length > 100
+            || data.room === undefined
+            || data.room.length > 20){
+            logger.error(`guess: invalid format`);
+            return;
+        }
         const index = getRoomIndex(data.room);
         if(index == -1){
             logger.error(`guess: room "${data.room}" cannot be found`);
