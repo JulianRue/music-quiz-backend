@@ -314,9 +314,10 @@ function startGame(params : IStartGame, room:Room) : void{
 
                 room.isSongPlaying = false;
                 io.in(params.roomName).emit('round-end',room.currentSong);
-                for(let j = 0; j < 5 && room.getUsers().length > 0; j++)
+                for(let j = 0; j < 5 && room.getUsers().length > 0 && (i+1) < params.roundCount; j++)
                     await delay(1000) //pause zwischen den runden
             }
+            await delay(2000)
             room.createTime = Date.now();
             room.status = "endscreen";
             io.in(room.roomName).emit('game-ended');
