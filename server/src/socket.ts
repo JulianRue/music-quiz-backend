@@ -22,7 +22,10 @@ import {
     getUsername,
     checkGuess,
     getRoom,
-    removeIdleRooms
+    removeIdleRooms,
+    getRoomByIndex,
+    addNewRoom,
+    removeRoom
 } from './engine';
 
 const logger = getLogger();
@@ -35,7 +38,6 @@ const logger = getLogger();
 // const server = https.createServer(options);
 const server = http.createServer();
 const io = socketio(server);
-export const rooms: Room[] = [];
 const selectedLimit = 8;
 const suggestLimit = 8;
 const playerLimit = 12;
@@ -43,10 +45,13 @@ const playerLimit = 12;
 removeIdleRooms(io);
 
 io.on('connection', socket => {
-    logger.info(`connection: user connected (${Object.keys(io.sockets.connected).length} total users in ${rooms.length} rooms)`);
+    logger.info(`connection: user connected (${Object.keys(io.sockets.connected).length} total users)`);
 
-    socket.on('disconnect', () => {
-        return;
+    socket.on('disconnecting', () => {
+        // var currentRoom = Object.keys(io.sockets.adapter.sids[socket.id]).filter(item => item!=socket.id)[0];
+        var rooms = Object.keys(socket.rooms);
+        var currentRoom = socket.rooms;
+        console.log(rooms);
         /*
         logger.info(`disconnect: user disconnected (${Object.keys(io.sockets.connected).length} total users)`);
         let room = rooms.find(r => r.users.find(u => u.id == socket.id) !== undefined)
@@ -64,7 +69,7 @@ io.on('connection', socket => {
     });
 
     socket.on('playlist-selected', (data: IPlaylistSingleNetwork) => {
-        let room:Room | undefined = getRoom(rooms, data.room);
+        let room:Room | undefined = getRoom(data.room);
         if(room === undefined) {
             logger.error(`playlist-selected: room "${data.room}" is undefined`);
             return;
@@ -88,7 +93,7 @@ io.on('connection', socket => {
         }
     });
     socket.on('playlist-suggested', (data: IPlaylistSingleNetwork) => {
-        let room:Room | undefined = getRoom(rooms, data.room);
+        let room:Room | undefined = getRoom(data.room);
         if(room === undefined) {
             logger.error(`playlist-suggested: room "${data.room}" is undefined`);
             return;
@@ -110,7 +115,7 @@ io.on('connection', socket => {
         io.in(data.room).emit('playlist-suggested', data.playlist);
     });
     socket.on('playlist-selected-removed', (data: IPlaylistSingleNetwork) => {
-        let room:Room | undefined = getRoom(rooms, data.room);
+        let room:Room | undefined = getRoom(data.room);
         if(room === undefined) {
             logger.error(`playlist-selected-removed: room "${data.room}" is undefined`);
             return;
@@ -137,7 +142,7 @@ io.on('connection', socket => {
         io.in(data.room).emit('playlist-selected-removed', data.playlist);
     });
     socket.on('playlist-suggested-removed', (data: IPlaylistSingleNetwork) => {
-        let room:Room | undefined = getRoom(rooms, data.room);
+        let room:Room | undefined = getRoom(data.room);
         if(room === undefined) {
             logger.error(`playlist-suggested-removed: room "${data.room}" is undefined`);
             return;
@@ -164,7 +169,7 @@ io.on('connection', socket => {
         io.in(data.room).emit('playlist-suggested-removed', data.playlist);
     });
     socket.on('start-game', (data : IStartGame) => {
-        let room:Room | undefined = getRoom(rooms, data.roomName);
+        let room:Room | undefined = getRoom(data.roomName);
         if(room === undefined) {
             logger.error(`start-game: room "${data.roomName}" is undefined`);
             return;
@@ -189,7 +194,7 @@ io.on('connection', socket => {
         startGame(data, room);
     });
     socket.on('join-lobby', (roomName) => {
-        let room:Room | undefined = getRoom(rooms, roomName);
+        let room:Room | undefined = getRoom(roomName);
         if(room === undefined) {
             logger.error(`join-lobby: room "${roomName}" cannot be found`);
             return;
@@ -199,18 +204,20 @@ io.on('connection', socket => {
     })
     socket.on('add-songs', (data: IAddSongs) => {
         logger.info(data.songs.length + " Songs wurden hinzugefügt");
-        const index = getRoomIndex(rooms, data.roomName);
-        let room:Room = rooms[index];
+        const index = getRoomIndex(data.roomName);
+        const room: Room = getRoomByIndex(index);
         data.songs.forEach(a => room.songs.push(a));
         console.log(data.songs.length + " Songs added -> count now " + room.songs.length);
     });
     socket.on('create-room', (data : ICreateRoom) => {
         if (io.sockets.adapter.rooms[data.roomName] === undefined) {
-            const length = rooms.push(new Room(data.roomName, data.password, socket.id, data.username));
+            const index = addNewRoom(new Room(data.roomName, data.password, socket.id, data.username));
             socket.join(data.roomName);
+            var currentRoom = Object.keys(io.sockets.adapter.sids[socket.id]).filter(item => item!=socket.id)[0];
+            console.log(currentRoom);
             logger.info(`create-room: user "${data.username}" created room "${data.roomName}"`);
             socket.emit('room-connection', {connected: true, message: "Room created", room: data.roomName, username: data.username, isAdmin: true, status: "lobby", currentRound: 0, maxRounds: -1});
-            io.in(data.roomName).emit('clients-updated', rooms[length - 1].getUsers());
+            io.in(data.roomName).emit('clients-updated', getRoomByIndex(index).getUsers());
         } else {
             logger.warn(`create-room: user "${data.username}" cannot create room "${data.roomName}" (Room already exists)`);
             socket.emit('room-connection', {connected: false, message: "room"});
@@ -218,12 +225,12 @@ io.on('connection', socket => {
     });
 
     socket.on('join-room', (data : IJoinRoom) => {
-        const index = getRoomIndex(rooms, data.roomName);
-        let room: Room = rooms[index];
+        const index = getRoomIndex(data.roomName);
+        const room: Room = getRoomByIndex(index);
         if (index === -1) {
             socket.emit('room-connection', {connected: false, message: "no-room"});
             logger.warn(`join-room: user "${data.username}" cannot join room "${data.roomName}" (room doesn't exist)`);
-        } else if (!isSamePassword(rooms[index].password, data.password)) {
+        } else if (!isSamePassword(room.password, data.password)) {
             socket.emit('room-connection', {connected: false, message: "password"});
             logger.warn(`join-room: user "${data.username}" cannot join room "${data.roomName}" (wrong password)`);
         } else if (room.getUsers().length >= playerLimit) {
@@ -234,20 +241,20 @@ io.on('connection', socket => {
             room.users.push(new User(socket.id, username));
             socket.join(data.roomName);
             logger.info(`join-room: user "${data.username}" joined room "${data.roomName}"`);
-            socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, username: username, isAdmin: false, status: rooms[index].status, currentRound: rooms[index].currentRound, maxRounds: rooms[index].maxRounds});
+            socket.emit('room-connection', {connected: true, message: "Room joined", room: data.roomName, username: username, isAdmin: false, status: room.status, currentRound: room.currentRound, maxRounds: room.maxRounds});
             socket.emit('connect-playlists', {selected: room.selectedPlaylists, suggested: room.suggestedPlaylists});
             io.in(data.roomName).emit('clients-updated', room.getUsers());
         }
     });
 
     socket.on('guess', (data : IGuess) => {
-        let index = getRoomIndex(rooms,data.room);
+        const index = getRoomIndex(data.room);
         if(index == -1){
             logger.error(`guess: room "${data.room}" cannot be found`);
             return;
         }
-        let room = rooms[index];
-        let user = room.getUser(socket.id);
+        const room = getRoomByIndex(index);
+        const user = room.getUser(socket.id);
 
         if(user.id == "-1"){
             logger.error(`guess: user cannot be found in room "${data.room}"`);
@@ -260,18 +267,18 @@ io.on('connection', socket => {
     socket.on('leave', (data : ILeave) => {
         socket.leave(data.roomName);
         logger.info(`leave: user left room "${data.roomName}"`);
-        const index = getRoomIndex(rooms, data.roomName);
+        const index = getRoomIndex(data.roomName);
         if(index == -1) {
             logger.error(`leave: room "${data.roomName}" cannot be found`);
             return;
         }
 
-        const room:Room = rooms[index];
+        const room:Room = getRoomByIndex(index);
         const removedIndex = room.removeUser(socket.id);
         
         if (room.users.length === 0) {
-            rooms.splice(index, 1);
-            logger.info(`leave: room "${data.roomName}" removed (${rooms.length} rooms left)`);
+            removeRoom(index);
+            logger.info(`leave: room "${data.roomName}" removed`);
         }
         else{
             if (removedIndex === 0) {

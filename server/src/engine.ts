@@ -7,7 +7,8 @@ import {
     User
 } from "./interfaces";
 import {getLogger} from "log4js";
-import {rooms} from "./socket";
+
+const rooms: Room[] = [];
 
 const logger = getLogger();
 
@@ -127,7 +128,7 @@ export function validateGuess(guess:string, corrects:string[], percent:number, p
     return points;
 }
 
-export function removeUserGlobal(id:string, rooms:Room[]){
+export function removeUserGlobal(id:string){
     rooms.forEach(function(room){
        let index:number = room.users.findIndex( user => user.id == id);
        if(index != -1){
@@ -300,14 +301,27 @@ export function formatString(s:string):string{
     return s;
 }
 
-export function getRandomSong(songs: Song[]): Song{
+export function getRandomSong(songs: Song[]): Song {
     const val: number = Math.floor(Math.random() * songs.length);
     const song: Song = songs[val];
     songs = songs.splice(val,1);
     return song;
 }
 
-export function getRoomIndex(rooms:Room[], name:string):number{
+export function getRoom(name:string): Room | undefined {
+    for(var i = 0; i < rooms.length; i++){
+        if(rooms[i].roomName == name){
+            return rooms[i];
+        }
+    }
+    return undefined;
+}
+
+export function getRoomByIndex(index: number): Room {
+    return rooms[index];
+}
+
+export function getRoomIndex(name:string):number {
     for(var i = 0; i < rooms.length; i++){
         if(rooms[i].roomName == name){
             return i;
@@ -316,14 +330,14 @@ export function getRoomIndex(rooms:Room[], name:string):number{
     return -1;
 }
 
-export function getRoom(rooms:Room[], name:string): Room | undefined{
-    for(var i = 0; i < rooms.length; i++){
-        if(rooms[i].roomName == name){
-            return rooms[i];
-        }
-    }
-    return undefined;
+export function addNewRoom(room: Room): number {
+    return (rooms.push(room) - 1);
 }
+
+export function removeRoom(index: number) {
+    rooms.splice(index, 1);
+}
+
 export function isSamePassword(str1: string, str2: string): boolean {
     if (!str1) {
         str1 = "";
