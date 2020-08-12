@@ -199,8 +199,6 @@ io.on('connection', socket => {
             return;
         }
         logger.info(`start-game: game started in room "${data.roomName}" with "${data.songs.length}" songs`);
-        room.selectedPlaylists = new Array();
-        room.suggestedPlaylists = new Array();
         room.newGame();
         room.status = "game";
         room.maxRounds = data.roundCount;
@@ -223,6 +221,8 @@ io.on('connection', socket => {
             logger.error(`join-lobby: User "${user.name}" is not an admin`);
             return;
         }
+        room.selectedPlaylists = new Array();
+        room.suggestedPlaylists = new Array();
         room.newGame();
         room.status = "lobby";
         io.in(roomName).emit('lobby-joined');
@@ -364,7 +364,6 @@ io.on('connection', socket => {
             }
         }
     });
-
 });
 
 server.listen(8000, () => {
