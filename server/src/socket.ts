@@ -12,7 +12,10 @@ import {
     Room,
     User,
     IPlaylistSingleNetwork,
-    IAddSongs
+    IAddSongs,
+    IChat,
+    IGuessedCorrect,
+    IGuessInfo
 } from './interfaces'
 import {
     delay,
@@ -42,7 +45,7 @@ const selectedLimit = 8;
 const suggestLimit = 8;
 const playerLimit = 12;
 
-removeIdleRooms(io);
+removeIdleRooms();
 
 io.on('connection', socket => {
     logger.info(`connection: user connected (${Object.keys(io.sockets.connected).length} total users)`);
@@ -333,7 +336,7 @@ io.on('connection', socket => {
             return;
         }
 
-        checkGuess(user, data.text, room, socket, io);
+        checkGuess(user, data.text, room, socket);
     });
 
     socket.on('leave', (data : ILeave) => {
@@ -412,5 +415,22 @@ function startGame(params : IStartGame, room:Room) : void{
     })();
 }
 
+export function sendPlayerKick(roomName: string) {
+    io.in(roomName).emit('kicked');
+}
+
+export function removePlayers(room: Room) {
+    room.users.forEach(user => {
+        io.sockets.sockets[user.id].leave(room.roomName);
+    });
+}
+
+export function sendCorrectGuess(roomName: string, correctGuess: IGuessedCorrect) {
+    io.in(roomName).emit('user-guessed-correct', correctGuess);
+}
+
+export function sendChatMessage(roomName: string, chat: IChat) {
+    io.in(roomName).emit('chat', chat);
+}
 
 export default {this:this}

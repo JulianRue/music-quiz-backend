@@ -7,6 +7,7 @@ import {
     User
 } from "./interfaces";
 import {getLogger} from "log4js";
+import { sendPlayerKick, removePlayers, sendChatMessage, sendCorrectGuess } from "./socket";
 
 const rooms: Room[] = [];
 
@@ -14,7 +15,7 @@ const logger = getLogger();
 
 const roomTimeout: number = 1000 * 60 * 30; //30 min
 
-export async function removeIdleRooms(io: SocketIO.Server) {
+export async function removeIdleRooms() {
     while (true) {
         const now = Date.now();
         rooms.forEach(room => {
@@ -22,8 +23,8 @@ export async function removeIdleRooms(io: SocketIO.Server) {
                 && now - room.createTime > roomTimeout) {
                 const index = rooms.indexOf(room);
                 if(index > -1) {
-                    io.in(room.roomName).emit('kicked');
-                    room.users.forEach(user => io.sockets.sockets[user.id].leave(room.roomName));
+                    sendPlayerKick(room.roomName);
+                    removePlayers(room);
                     rooms.splice(index, 1);
                     logger.info(`room "${room.roomName}" timed out`);
                 }
@@ -33,7 +34,7 @@ export async function removeIdleRooms(io: SocketIO.Server) {
     }
 }
 
-export function checkGuess(user: User, text:string, room:Room, socket: any, io: any): any{
+export function checkGuess(user: User, text:string, room:Room, socket: any) {
     let time = Math.floor((Date.now() - room.startStamp)/1000);
     let timePoints = (30-time);
 
@@ -49,8 +50,8 @@ export function checkGuess(user: User, text:string, room:Room, socket: any, io: 
             user.addPoints(points);
             user.guessedTitle = true;
             const correctGuess: IGuessedCorrect = {username:user.name, type:"title", points:points};
-            io.in(room.roomName).emit('user-guessed-correct', correctGuess);
-            const guessInfo:IGuessInfo = {type:"title", isCorrect:true, text:text, correctValue:[room.currentSong.name]};
+            sendCorrectGuess(room.roomName, correctGuess);
+            const guessInfo: IGuessInfo = {type:"title", isCorrect:true, text:text, correctValue:[room.currentSong.name]};
             socket.emit('guess-info', guessInfo);
             if(user.guessedIntrepret){
                 socket.emit('guess-picture', room.currentSong.cover_medium);
@@ -73,7 +74,7 @@ export function checkGuess(user: User, text:string, room:Room, socket: any, io: 
             user.addPoints(points);
             user.guessedIntrepret = true;
             const correctGuess:IGuessedCorrect = {username:user.name, type:"artist", points:points};
-            io.in(room.roomName).emit('user-guessed-correct', correctGuess);
+            sendCorrectGuess(room.roomName, correctGuess);
             const guessInfo:IGuessInfo = {type:"artist", isCorrect:true, text:text, correctValue:room.currentSong.interpret};
             socket.emit('guess-info', guessInfo);
             if(user.guessedTitle){
@@ -89,8 +90,8 @@ export function checkGuess(user: User, text:string, room:Room, socket: any, io: 
     }
 
     if(!guessed){
-        let chat:IChat = {text:chatMessage, username:user.name};
-        io.in(room.roomName).emit('chat', chat);
+        const chat: IChat = {text:chatMessage, username:user.name};
+        sendChatMessage(room.roomName, chat);
     }
 }
 
