@@ -47,21 +47,34 @@ removeIdleRooms(io);
 io.on('connection', socket => {
     logger.info(`connection: user connected (${Object.keys(io.sockets.connected).length} total users)`);
 
-    socket.on('disconnect', () => {
-        /*
-        logger.info(`disconnect: user disconnected (${Object.keys(io.sockets.connected).length} total users)`);
-        let room = rooms.find(r => r.users.find(u => u.id == socket.id) !== undefined)
-        if(room !== undefined){
-            room.removeUser(socket.id);
-            io.in(room.roomName).emit('clients-updated', room.getUsers());
-            if(room.users.length == 0){// @ts-ignore
-                let index = rooms.findIndex( r => r.roomName === room.roomName);
-                if(index != -1){
-                    rooms.splice(index, 1);
-                }
+    socket.on('disconnecting', () => {
+        const roomName = Object.keys(socket.rooms).filter(room => room != socket.id)[0];
+        if (roomName === undefined) {
+            logger.error(`disconnecting: room for user cannot be found`);
+            return;
+        }
+        const index = getRoomIndex(roomName);
+        if(index == -1) {
+            logger.error(`disconnecting: room with name "${roomName}" cannot be found`);
+            return;
+        }
+
+        const room:Room = getRoomByIndex(index);
+        const removedIndex = room.removeUser(socket.id);
+        
+        if (room.users.length === 0) {
+            removeRoom(index);
+            logger.info(`disconnecting: room "${roomName}" removed`);
+        }
+        else {
+            if (removedIndex === 0) {
+                room.setAdmin();
+                logger.info(`disconnecting: new admin set in room "${roomName}"`);
+            }
+            else if(removedIndex !== -1) {
+                io.in(roomName).emit('clients-updated', room.getUsers());
             }
         }
-        */
     });
 
     socket.on('playlist-selected', (data: IPlaylistSingleNetwork) => {
@@ -236,16 +249,19 @@ io.on('connection', socket => {
         if (io.sockets.adapter.rooms[data.roomName] === undefined) {
             if(data.roomName !== undefined
                 && data.roomName.length > 20){
-                return;
+                    logger.error(`create-room: roomname too long`);
+                    return;
             }
             if(data.password !== undefined) {
                 if(data.password.length > 20){
+                    logger.error(`create-room: password too long`);
                     return;
                 }
             }
             if(data.roomName !== undefined
                 && data.username.length > 20) {
-                return;
+                    logger.error(`create-room: username too long`);
+                    return;
             }
             const index = addNewRoom(new Room(data.roomName, data.password, socket.id, data.username));
             socket.join(data.roomName);
@@ -261,16 +277,19 @@ io.on('connection', socket => {
     socket.on('join-room', (data : IJoinRoom) => {
         if(data.roomName !== undefined
             && data.roomName.length > 20){
-            return;
+                logger.error(`join-room: roomname too long`);
+                return;
         }
         if(data.password !== undefined) {
             if(data.password.length > 20){
+                logger.error(`join-room: password too long`);
                 return;
             }
         }
         if(data.roomName !== undefined
             && data.username.length > 20) {
-            return;
+                logger.error(`join-room: username too long`);
+                return;
         }
         const index = getRoomIndex(data.roomName);
         const room: Room = getRoomByIndex(index);
@@ -334,12 +353,12 @@ io.on('connection', socket => {
             removeRoom(index);
             logger.info(`leave: room "${data.roomName}" removed`);
         }
-        else{
+        else {
             if (removedIndex === 0) {
                 room.setAdmin();
                 logger.info(`leave: new admin set in room "${data.roomName}"`);
             }
-            else if(removedIndex !== -1){
+            else if(removedIndex !== -1) {
                 io.in(data.roomName).emit('clients-updated', room.getUsers());
             }
         }
