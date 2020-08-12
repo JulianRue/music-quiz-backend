@@ -30,8 +30,12 @@ import {
     addNewRoom,
     removeRoom
 } from './engine';
-
 const logger = getLogger();
+
+process.on('uncaughtException', function (err) {
+    logger.error(`UNCAUGHT_EXCEPTION: ` + err);
+    console.log("Node NOT Exiting...");
+});
 
 // const options = {
 //     key: fs.readFileSync("/etc/letsencrypt/live/monalit.de/privkey.pem"),
