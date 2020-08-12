@@ -178,8 +178,8 @@ io.on('connection', socket => {
         io.in(data.room).emit('playlist-suggested-removed', data.playlist);
     });
     socket.on('start-game', (data : IStartGame) => {
-        logger.error(`start-game: invalid round count "${data.roundCount}"`);
-        if(data.roundCount < 1 || data.roundCount > 100){
+        if(data.roundCount < 1 || data.roundCount > 100) {
+            logger.error(`start-game: invalid round count "${data.roundCount}"`);
             return;
         }
         let room:Room | undefined = getRoom(data.roomName);
