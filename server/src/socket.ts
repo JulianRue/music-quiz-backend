@@ -62,16 +62,15 @@ io.on('connection', socket => {
         const room:Room = getRoomByIndex(index);
         const removedIndex = room.removeUser(socket.id);
         
-        if (room.users.length === 0) {
-            removeRoom(index);
-            logger.info(`disconnecting: room "${roomName}" removed`);
-        }
-        else {
-            if (removedIndex === 0) {
-                room.setAdmin();
-                logger.info(`disconnecting: new admin set in room "${roomName}"`);
-            }
-            else if(removedIndex !== -1) {
+        if (removedIndex !== -1) {
+            if (room.users.length === 0) {
+                removeRoom(index);
+                logger.info(`disconnecting: room "${roomName}" removed`);
+            } else {
+                if (removedIndex === 0) {
+                    room.setAdmin();
+                    logger.info(`disconnecting: new admin set in room "${roomName}"`);
+                }
                 io.in(roomName).emit('clients-updated', room.getUsers());
             }
         }
@@ -349,16 +348,15 @@ io.on('connection', socket => {
         const room:Room = getRoomByIndex(index);
         const removedIndex = room.removeUser(socket.id);
         
-        if (room.users.length === 0) {
-            removeRoom(index);
-            logger.info(`leave: room "${data.roomName}" removed`);
-        }
-        else {
-            if (removedIndex === 0) {
-                room.setAdmin();
-                logger.info(`leave: new admin set in room "${data.roomName}"`);
-            }
-            else if(removedIndex !== -1) {
+        if (removedIndex !== -1) {
+            if (room.users.length === 0) {
+                removeRoom(index);
+                logger.info(`leave: room "${data.roomName}" removed`);
+            } else {
+                if (removedIndex === 0) {
+                    room.setAdmin();
+                    logger.info(`leave: new admin set in room "${data.roomName}"`);
+                }
                 io.in(data.roomName).emit('clients-updated', room.getUsers());
             }
         }
