@@ -50,7 +50,7 @@ io.on('connection', socket => {
     socket.on('disconnecting', () => {
         const roomName = Object.keys(socket.rooms).filter(room => room != socket.id)[0];
         if (roomName === undefined) {
-            logger.error(`disconnecting: room for user cannot be found`);
+            logger.warn(`disconnecting: room for user cannot be found`);
             return;
         }
         const index = getRoomIndex(roomName);

@@ -12,25 +12,27 @@ const rooms: Room[] = [];
 
 const logger = getLogger();
 
-export async function removeIdleRooms(io: any){
-    let timeout: number = 1000*60*30; //30 min
-    while(true){
-        let now = Date.now();
+const roomTimeout: number = 1000 * 60 * 30; //30 min
+
+export async function removeIdleRooms(io: SocketIO.Server) {
+    while (true) {
+        const now = Date.now();
         rooms.forEach(room => {
             if((room.status === 'lobby' || room.status === 'endscreen')
-                && now - room.createTime > timeout){
-                let index = rooms.indexOf(room);
-                if(index > -1){
-                    io.in(room.roomName).emit('kicked-for-inactivity');
-                    console.log(room.roomName + " removed for inactivity")
-                    rooms.splice(index,1);
-                    logger.info(`room ${room.roomName} timedout with ${room.users.length} users`);
+                && now - room.createTime > roomTimeout) {
+                const index = rooms.indexOf(room);
+                if(index > -1) {
+                    io.in(room.roomName).emit('kicked');
+                    room.users.forEach(user => io.sockets.sockets[user.id].leave(room.roomName));
+                    rooms.splice(index, 1);
+                    logger.info(`room "${room.roomName}" timed out`);
                 }
             }
-        })
+        });
         await delay(10000);
     }
 }
+
 export function checkGuess(user: User, text:string, room:Room, socket: any, io: any): any{
     let time = Math.floor((Date.now() - room.startStamp)/1000);
     let timePoints = (30-time);
@@ -215,7 +217,6 @@ function removeEnd(s:string, sub:string):string{
     return s;
 }
 
-console.log("Word: " + formatString("a/b/c"));
 export function formatString(s:string):string{
 
     s = s.toLowerCase();
