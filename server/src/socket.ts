@@ -33,7 +33,7 @@ import {
 const logger = getLogger();
 
 process.on('uncaughtException', function (err) {
-    logger.error(`UNCAUGHT_EXCEPTION: ` + err);
+    logger.fatal(`UNCAUGHT_EXCEPTION: ` + err);
     console.log("Node NOT Exiting...");
 });
 
