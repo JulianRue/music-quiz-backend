@@ -93,10 +93,7 @@ io.on('connection', socket => {
                     throw Error('username too long');
             }
             const room: Room = getRoom(data.roomName);
-            if (room === undefined) {
-                socket.emit('room-connection', {connected: false, message: 'no-room'});
-                logger.warn(`join-room: user "${data.username}" cannot join room "${data.roomName}" (room doesn't exist)`);
-            } else if (!isSamePassword(room.password, data.password)) {
+            if (!isSamePassword(room.password, data.password)) {
                 socket.emit('room-connection', {connected: false, message: 'password'});
                 logger.warn(`join-room: user "${data.username}" cannot join room "${data.roomName}" (wrong password)`);
             } else if (room.getUsers().length >= playerLimit) {
@@ -112,7 +109,12 @@ io.on('connection', socket => {
                 io.in(data.roomName).emit('clients-updated', room.getUsers());
             }
         } catch (e) {
-            logger.error('join-room: ' + e);
+            if (e.message === 'room does not exist') {
+                socket.emit('room-connection', {connected: false, message: 'no-room'});
+                logger.warn(`join-room: room does not exist`);
+            } else {
+                logger.error('join-room: ' + e);
+            }
         }
     });
 
@@ -336,7 +338,7 @@ function startGame(params : IStartGame, room:Room) {
             io.in(room.roomName).emit('game-ended');
         }
         catch (e) {
-            logger.error(e);
+            logger.error(e.message);
             room.createTime = Date.now();
             room.status = 'endscreen';
             io.in(room.roomName).emit('game-ended');
