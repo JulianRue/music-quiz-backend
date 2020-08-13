@@ -123,7 +123,7 @@ io.on('connection', socket => {
             const room: Room = getRoom(data.room);
             const user: User = room.getUser(socket.id);
             if(!user.isAdmin) {
-                throw Error('non admin user wants to remove selected playlist');
+                throw Error('user is not the admin');
             }
             if(room.selectedPlaylists.length > selectedLimit) {
                 throw Error('too many playlists selected');
@@ -151,7 +151,7 @@ io.on('connection', socket => {
             room.suggestedPlaylists.push(data.playlist);
             io.in(data.room).emit('playlist-suggested', data.playlist);
         } catch(e) {
-            logger.error('playlist-selected: ' + e);
+            logger.error('playlist-suggested: ' + e);
         }
     });
 
@@ -160,7 +160,7 @@ io.on('connection', socket => {
             const room:Room = getRoom(data.room);
             const user: User = room.getUser(socket.id);
             if(!user.isAdmin) {
-                throw Error('no admin');
+                throw Error('user is not the admin');
             }
             const index: number = room.selectedPlaylists.findIndex( a => a.id == data.playlist.id);
             if (index < 0) {
@@ -178,7 +178,7 @@ io.on('connection', socket => {
             const room:Room = getRoom(data.room);
             const user: User = room.getUser(socket.id);
             if(!user.isAdmin) {
-                throw Error('no admin');
+                throw Error('user is not the admin');
             }
             const index: number = room.suggestedPlaylists.findIndex( a => a.id == data.playlist.id);
             if (index < 0) {
@@ -199,7 +199,7 @@ io.on('connection', socket => {
             const room:Room = getRoom(data.roomName);
             const user: User = room.getUser(socket.id);
             if(!user.isAdmin) {
-                throw Error('no admin');
+                throw Error('user is not the admin');
             }
             logger.info(`start-game: game started in room "${data.roomName}" with "${data.songs.length}" songs`);
             room.newGame();
@@ -217,7 +217,7 @@ io.on('connection', socket => {
             const room: Room = getRoom(data.roomName);
             const user = room.getUser(socket.id);
             if(!user.isAdmin) {
-                throw Error('no admin');
+                throw Error('user is not the admin');
             }
             data.songs.forEach(a => room.songs.push(a));
         } catch(e) {
@@ -245,7 +245,7 @@ io.on('connection', socket => {
             const user = room.getUser(socket.id);
 
             if(!user.isAdmin) {
-                throw Error('no admin');
+                throw Error('user is not the admin');
             }
             room.selectedPlaylists = new Array();
             room.suggestedPlaylists = new Array();
