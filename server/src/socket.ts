@@ -56,15 +56,14 @@ io.on('connection', socket => {
     socket.on('create-room', (data : ICreateRoom) => {
         if (io.sockets.adapter.rooms[data.roomName] === undefined) {
             if(data.roomName !== undefined
-                && data.roomName.length > 20){
+                && data.roomName.length > 20) {
                     logger.error(`create-room: roomname too long`);
                     return;
             }
-            if(data.password !== undefined) {
-                if(data.password.length > 20){
+            if(data.password !== undefined
+                && data.password.length > 20) {
                     logger.error(`create-room: password too long`);
                     return;
-                }
             }
             if(data.roomName !== undefined
                 && data.username.length > 20) {
@@ -84,15 +83,14 @@ io.on('connection', socket => {
 
     socket.on('join-room', (data : IJoinRoom) => {
         if(data.roomName !== undefined
-            && data.roomName.length > 20){
+            && data.roomName.length > 20) {
                 logger.error(`join-room: roomname too long`);
                 return;
         }
-        if(data.password !== undefined) {
-            if(data.password.length > 20){
+        if(data.password !== undefined
+            && data.password.length > 20) {
                 logger.error(`join-room: password too long`);
                 return;
-            }
         }
         if(data.roomName !== undefined
             && data.username.length > 20) {
