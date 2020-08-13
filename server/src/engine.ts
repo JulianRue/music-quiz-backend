@@ -303,7 +303,7 @@ export function getRoomIndex(name:string):number{
             return i;
         }
     }
-    throw Error(`room does not exist (index)`);
+    throw Error('room does not exist (index)');
 }
 
 export function getRoomByIndex(index: number): Room {
@@ -324,7 +324,7 @@ export function getRoom(name:string): Room {
             return rooms[i];
         }
     }
-    throw Error(`room does not exist`);
+    throw Error('room does not exist');
 }
 
 export function isSamePassword(str1: string, str2: string): boolean {
