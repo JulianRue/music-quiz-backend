@@ -96,10 +96,24 @@ export function checkGuess(user: User, text:string, room:Room, socket: any) {
 
     if(!guessed){
         const chat: IChat = {text:chatMessage, username:user.name};
-        sendChatMessage(room.roomName, chat);
+        sendChatMessage(room.roomName, sanitizeChat(chat));
     }
 }
 
+export function sanitizeChat(chat: IChat): IChat{
+    chat.text = chat.text.replace(/</g, '');
+    chat.text = chat.text.replace(/>/g, '');
+    chat.text = chat.text.replace(/\(/g, '');
+    chat.text = chat.text.replace(/\)/g, '');
+    chat.text = chat.text.replace(/\[/g, '');
+    chat.text = chat.text.replace(/]/g, '');
+    chat.text = chat.text.replace(/{/g, '');
+    chat.text = chat.text.replace(/}/g, '');
+    chat.text = chat.text.replace(/;/g, '');
+    chat.text = chat.text.replace(/\//g, '');
+    chat.text = chat.text.replace(/\\/g, '');
+    return chat;
+}
 export function validateGuess(guess:string, corrects:string[], percent:number, percentClose:number) : number{
     //percent -> 20 = 20% etc
     guess = formatString(guess);
