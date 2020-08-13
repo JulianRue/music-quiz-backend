@@ -218,16 +218,7 @@ io.on('connection', socket => {
             if(!user.isAdmin) {
                 throw Error('user is not the admin');
             }
-            console.log("Added " + data.songs.length + " songs!");
             data.songs.forEach(a => room.songs.push(a));
-
-            for(let i = 0; i < room.songs.length; i++){
-                for(let j = 0; j < room.songs.length; j++){
-                    if(i != j && room.songs[i].id == room.songs[j].id){
-                        console.log(room.songs[i].name + " ist doppelt!");
-                    }
-                }
-            }
         } catch(e) {
             logger.error('add-songs: ' + e);
         }
