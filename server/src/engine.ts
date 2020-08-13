@@ -290,6 +290,9 @@ export function formatString(s:string):string{
 export function getRandomSong(songs: Song[]): Song{
     const val: number = Math.floor(Math.random() * songs.length);
     const song: Song = songs[val];
+    if (song === undefined) {
+        throw Error('song is undefined');
+    }
     songs = songs.splice(val,1);
     return song;
 }

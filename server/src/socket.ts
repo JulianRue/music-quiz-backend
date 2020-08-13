@@ -312,9 +312,6 @@ function startGame(params : IStartGame, room:Room) {
             for(var i = 0; i < params.roundCount && room.getUsers().length > 0; i++){
                 room.newRound();
                 room.currentSong = getRandomSong(room.songs);
-                if(room.currentSong === undefined) {
-                    throw new Error(`startGame: current song in room "${room.roomName}" is undefined`);
-                }
                 const timestamp = Date.now();
                 io.in(params.roomName).emit('song-started', {url: room.currentSong.url, timestamp: timestamp});
 
