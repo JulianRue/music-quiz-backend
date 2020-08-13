@@ -274,7 +274,7 @@ io.on('connection', socket => {
                 io.in(data.roomName).emit('clients-updated', room.getUsers());
             }
         } catch(e) {
-            logger.error('leave-room: ' + e);
+            logger.error('leave: ' + e);
         }
     });
 
