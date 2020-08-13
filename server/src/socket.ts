@@ -176,7 +176,7 @@ io.on('connection', socket => {
     socket.on('playlist-suggested-removed', (data: IPlaylistSingleNetwork) => {
         try {
             const room:Room = getRoom(data.room);
-            let user: User = room.getUser(socket.id);
+            const user: User = room.getUser(socket.id);
             if(!user.isAdmin) {
                 throw Error('no admin');
             }
