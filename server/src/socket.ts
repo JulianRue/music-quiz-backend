@@ -296,7 +296,7 @@ io.on('connection', socket => {
                 io.in(roomName).emit('clients-updated', room.getUsers());
             }
         } catch(e) {
-            logger.error('disconnecting: ' + e);
+            logger.warn('disconnecting: ' + e);
         }
     });
 });
@@ -341,7 +341,6 @@ function startGame(params : IStartGame, room:Room) {
             room.status = 'endscreen';
             io.in(room.roomName).emit('game-ended');
         }
-
     })();
 }
 
