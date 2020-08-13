@@ -53,202 +53,6 @@ removeIdleRooms();
 io.on('connection', socket => {
     logger.info(`connection: user connected (${Object.keys(io.sockets.connected).length} total users)`);
 
-    socket.on('disconnecting', () => {
-        const roomName = Object.keys(socket.rooms).filter(room => room != socket.id)[0];
-        if (roomName === undefined) {
-            logger.warn(`disconnecting: room for user cannot be found`);
-            return;
-        }
-        const index = getRoomIndex(roomName);
-        if(index == -1) {
-            logger.error(`disconnecting: room with name "${roomName}" cannot be found`);
-            return;
-        }
-
-        const room:Room = getRoomByIndex(index);
-        const removedIndex = room.removeUser(socket.id);
-        
-        if (removedIndex !== -1) {
-            if (room.users.length === 0) {
-                removeRoom(index);
-                logger.info(`disconnecting: room "${roomName}" removed`);
-            } else {
-                if (removedIndex === 0) {
-                    room.setAdmin();
-                    logger.info(`disconnecting: new admin set in room "${roomName}"`);
-                }
-                io.in(roomName).emit('clients-updated', room.getUsers());
-            }
-        }
-    });
-
-    socket.on('playlist-selected', (data: IPlaylistSingleNetwork) => {
-        let room:Room | undefined = getRoom(data.room);
-        if(room === undefined) {
-            logger.error(`playlist-selected: room "${data.room}" is undefined`);
-            return;
-        }
-        if(room.selectedPlaylists.length > selectedLimit) {
-            logger.error(`playlist-selected: too many playlists selected in room "${data.room}"`);
-            return;
-        }
-        if(room.selectedPlaylists.filter( local => local.id == data.playlist.id).length > 0) {
-            logger.error(`playlist-selected: selected playlist already selected`);
-            return;
-        }
-        let user: User = room.getUser(socket.id);
-        if(user.id === '-1') {
-            logger.error(`playlist-selected: user not found in room "${data.room}"`);
-            return;
-        }
-        if(user.isAdmin){
-            room.selectedPlaylists.push(data.playlist);
-            io.in(data.room).emit('playlist-selected', data.playlist);
-        }
-    });
-    socket.on('playlist-suggested', (data: IPlaylistSingleNetwork) => {
-        let room:Room | undefined = getRoom(data.room);
-        if(room === undefined) {
-            logger.error(`playlist-suggested: room "${data.room}" is undefined`);
-            return;
-        }
-        if(room.suggestedPlaylists.length > suggestLimit) {
-            logger.error(`playlist-suggested: too many playlists suggested in room "${data.room}"`);
-            return;
-        }
-        if(room.suggestedPlaylists.filter(local => local.id == data.playlist.id).length > 0) {
-            logger.error(`playlist-selected: suggested playlist already selected`);
-            return;
-        }
-        let user: User = room.getUser(socket.id);
-        if(user.id === '-1') {
-            logger.error(`playlist-suggested: user not found in room "${data.room}"`);
-            return;
-        }
-        room.suggestedPlaylists.push(data.playlist);
-        io.in(data.room).emit('playlist-suggested', data.playlist);
-    });
-    socket.on('playlist-selected-removed', (data: IPlaylistSingleNetwork) => {
-        let room:Room | undefined = getRoom(data.room);
-        if(room === undefined) {
-            logger.error(`playlist-selected-removed: room "${data.room}" is undefined`);
-            return;
-        }
-        if(room.selectedPlaylists.length == 0) {
-            logger.error(`playlist-selected-removed: not enough playlists in room "${data.room}"`);
-            return;
-        }
-        let user: User = room.getUser(socket.id);
-        if(user.id === '-1') {
-            logger.error(`playlist-selected-removed: user not found in room "${data.room}"`);
-            return;
-        }
-        if(!user.isAdmin) {
-            logger.error(`playlist-selected-removed: "${user.name}" is not the admin in room "${data.room}"`);
-            return;
-        }
-        let index: number = room.selectedPlaylists.findIndex( a => a.id == data.playlist.id);
-        if(index < 0) {
-            logger.error(`playlist-selected-removed: playlist could not be removed in room "${data.room}"`);
-            return;
-        }
-        room.selectedPlaylists.splice(index,1);
-        io.in(data.room).emit('playlist-selected-removed', data.playlist);
-    });
-    socket.on('playlist-suggested-removed', (data: IPlaylistSingleNetwork) => {
-        let room:Room | undefined = getRoom(data.room);
-        if(room === undefined) {
-            logger.error(`playlist-suggested-removed: room "${data.room}" is undefined`);
-            return;
-        }
-        if(room.suggestedPlaylists.length == 0) {
-            logger.error(`playlist-suggested-removed: not enough playlists in room "${data.room}"`);
-            return;
-        }
-        let user: User = room.getUser(socket.id);
-        if(user.id === '-1') {
-            logger.error(`playlist-suggested-removed: user not found in room "${data.room}"`);
-            return;
-        }
-        if(!user.isAdmin) {
-            logger.error(`playlist-suggested-removed: "${user.name}" is not the admin in room "${data.room}"`);
-            return;
-        }
-        let index: number = room.suggestedPlaylists.findIndex( a => a.id == data.playlist.id);
-        if(index < 0) {
-            logger.error(`playlist-suggested-removed: playlist could not be removed in room "${data.room}"`);
-            return;
-        }
-        room.suggestedPlaylists.splice(index,1);
-        io.in(data.room).emit('playlist-suggested-removed', data.playlist);
-    });
-    socket.on('start-game', (data : IStartGame) => {
-        if(data.roundCount < 1 || data.roundCount > 100) {
-            logger.error(`start-game: invalid round count "${data.roundCount}"`);
-            return;
-        }
-        let room:Room | undefined = getRoom(data.roomName);
-        if(room === undefined) {
-            logger.error(`start-game: room "${data.roomName}" is undefined`);
-            return;
-        }
-        let user: User = room.getUser(socket.id);
-        if(user.id === '-1') {
-            logger.error(`start-game: user not found in room "${data.roomName}"`);
-            return;
-        }
-        if(!user.isAdmin) {
-            logger.error(`start-game: "${user.name}" is not the admin in room "${data.roomName}"`);
-            return;
-        }
-        logger.info(`start-game: game started in room "${data.roomName}" with "${data.songs.length}" songs`);
-        room.newGame();
-        room.status = "game";
-        room.maxRounds = data.roundCount;
-        io.in(data.roomName).emit('game-started', {maxRounds: data.roundCount});
-        startGame(data, room);
-    });
-    socket.on('join-lobby', (roomName) => {
-        let room:Room | undefined = getRoom(roomName);
-        if(room === undefined) {
-            logger.error(`join-lobby: room "${roomName}" cannot be found`);
-            return;
-        }
-        let user = room.getUser(socket.id);
-        if(user.id === "-1"){
-            logger.error(`join-lobby: User "${socket.id}" cannot be found`);
-            return;
-        }
-
-        if(!user.isAdmin){
-            logger.error(`join-lobby: User "${user.name}" is not an admin`);
-            return;
-        }
-        room.selectedPlaylists = new Array();
-        room.suggestedPlaylists = new Array();
-        room.newGame();
-        room.status = "lobby";
-        io.in(roomName).emit('lobby-joined');
-    })
-    socket.on('add-songs', (data: IAddSongs) => {
-        logger.info(data.songs.length + " Songs wurden hinzugefügt");
-        const index = getRoomIndex(data.roomName);
-        if(index === -1){
-            logger.error(`add-songs: Room "${data.roomName}" not found`);
-            return;
-        }
-        const room: Room = getRoomByIndex(index);
-        let user = room.getUser(socket.id);
-        if(user.id === "-1"){
-            logger.error(`add-songs: User "${socket.id}" not found`);
-            return;
-        }
-        if(!user.isAdmin){
-            logger.error(`add-songs: "${user.name}" is not an Admin`);
-            return;
-        }
-        data.songs.forEach(a => room.songs.push(a));
-    });
     socket.on('create-room', (data : ICreateRoom) => {
         if (io.sockets.adapter.rooms[data.roomName] === undefined) {
             if(data.roomName !== undefined
@@ -317,6 +121,156 @@ io.on('connection', socket => {
         }
     });
 
+    socket.on('playlist-selected', (data: IPlaylistSingleNetwork) => {
+        let room:Room | undefined = getRoom(data.room);
+        if(room === undefined) {
+            logger.error(`playlist-selected: room "${data.room}" is undefined`);
+            return;
+        }
+        if(room.selectedPlaylists.length > selectedLimit) {
+            logger.error(`playlist-selected: too many playlists selected in room "${data.room}"`);
+            return;
+        }
+        if(room.selectedPlaylists.filter( local => local.id == data.playlist.id).length > 0) {
+            logger.error(`playlist-selected: selected playlist already selected`);
+            return;
+        }
+        let user: User = room.getUser(socket.id);
+        if(user.id === '-1') {
+            logger.error(`playlist-selected: user not found in room "${data.room}"`);
+            return;
+        }
+        if(user.isAdmin){
+            room.selectedPlaylists.push(data.playlist);
+            io.in(data.room).emit('playlist-selected', data.playlist);
+        }
+    });
+
+    socket.on('playlist-suggested', (data: IPlaylistSingleNetwork) => {
+        let room:Room | undefined = getRoom(data.room);
+        if(room === undefined) {
+            logger.error(`playlist-suggested: room "${data.room}" is undefined`);
+            return;
+        }
+        if(room.suggestedPlaylists.length > suggestLimit) {
+            logger.error(`playlist-suggested: too many playlists suggested in room "${data.room}"`);
+            return;
+        }
+        if(room.suggestedPlaylists.filter(local => local.id == data.playlist.id).length > 0) {
+            logger.error(`playlist-selected: suggested playlist already selected`);
+            return;
+        }
+        let user: User = room.getUser(socket.id);
+        if(user.id === '-1') {
+            logger.error(`playlist-suggested: user not found in room "${data.room}"`);
+            return;
+        }
+        room.suggestedPlaylists.push(data.playlist);
+        io.in(data.room).emit('playlist-suggested', data.playlist);
+    });
+
+    socket.on('playlist-selected-removed', (data: IPlaylistSingleNetwork) => {
+        let room:Room | undefined = getRoom(data.room);
+        if(room === undefined) {
+            logger.error(`playlist-selected-removed: room "${data.room}" is undefined`);
+            return;
+        }
+        if(room.selectedPlaylists.length == 0) {
+            logger.error(`playlist-selected-removed: not enough playlists in room "${data.room}"`);
+            return;
+        }
+        let user: User = room.getUser(socket.id);
+        if(user.id === '-1') {
+            logger.error(`playlist-selected-removed: user not found in room "${data.room}"`);
+            return;
+        }
+        if(!user.isAdmin) {
+            logger.error(`playlist-selected-removed: "${user.name}" is not the admin in room "${data.room}"`);
+            return;
+        }
+        let index: number = room.selectedPlaylists.findIndex( a => a.id == data.playlist.id);
+        if(index < 0) {
+            logger.error(`playlist-selected-removed: playlist could not be removed in room "${data.room}"`);
+            return;
+        }
+        room.selectedPlaylists.splice(index,1);
+        io.in(data.room).emit('playlist-selected-removed', data.playlist);
+    });
+
+    socket.on('playlist-suggested-removed', (data: IPlaylistSingleNetwork) => {
+        let room:Room | undefined = getRoom(data.room);
+        if(room === undefined) {
+            logger.error(`playlist-suggested-removed: room "${data.room}" is undefined`);
+            return;
+        }
+        if(room.suggestedPlaylists.length == 0) {
+            logger.error(`playlist-suggested-removed: not enough playlists in room "${data.room}"`);
+            return;
+        }
+        let user: User = room.getUser(socket.id);
+        if(user.id === '-1') {
+            logger.error(`playlist-suggested-removed: user not found in room "${data.room}"`);
+            return;
+        }
+        if(!user.isAdmin) {
+            logger.error(`playlist-suggested-removed: "${user.name}" is not the admin in room "${data.room}"`);
+            return;
+        }
+        let index: number = room.suggestedPlaylists.findIndex( a => a.id == data.playlist.id);
+        if(index < 0) {
+            logger.error(`playlist-suggested-removed: playlist could not be removed in room "${data.room}"`);
+            return;
+        }
+        room.suggestedPlaylists.splice(index,1);
+        io.in(data.room).emit('playlist-suggested-removed', data.playlist);
+    });
+
+    socket.on('start-game', (data : IStartGame) => {
+        if(data.roundCount < 1 || data.roundCount > 100) {
+            logger.error(`start-game: invalid round count "${data.roundCount}"`);
+            return;
+        }
+        let room:Room | undefined = getRoom(data.roomName);
+        if(room === undefined) {
+            logger.error(`start-game: room "${data.roomName}" is undefined`);
+            return;
+        }
+        let user: User = room.getUser(socket.id);
+        if(user.id === '-1') {
+            logger.error(`start-game: user not found in room "${data.roomName}"`);
+            return;
+        }
+        if(!user.isAdmin) {
+            logger.error(`start-game: "${user.name}" is not the admin in room "${data.roomName}"`);
+            return;
+        }
+        logger.info(`start-game: game started in room "${data.roomName}" with "${data.songs.length}" songs`);
+        room.newGame();
+        room.status = "game";
+        room.maxRounds = data.roundCount;
+        io.in(data.roomName).emit('game-started', {maxRounds: data.roundCount});
+        startGame(data, room);
+    });
+
+    socket.on('add-songs', (data: IAddSongs) => {
+        const index = getRoomIndex(data.roomName);
+        if(index === -1){
+            logger.error(`add-songs: Room "${data.roomName}" not found`);
+            return;
+        }
+        const room: Room = getRoomByIndex(index);
+        let user = room.getUser(socket.id);
+        if(user.id === "-1"){
+            logger.error(`add-songs: User "${socket.id}" not found`);
+            return;
+        }
+        if(!user.isAdmin){
+            logger.error(`add-songs: "${user.name}" is not an Admin`);
+            return;
+        }
+        data.songs.forEach(a => room.songs.push(a));
+    });
+
     socket.on('guess', (data : IGuess) => {
         if (data.text === undefined
             || data.text.length > 100
@@ -341,6 +295,29 @@ io.on('connection', socket => {
         checkGuess(user, data.text, room, socket);
     });
 
+    socket.on('join-lobby', (roomName) => {
+        let room:Room | undefined = getRoom(roomName);
+        if(room === undefined) {
+            logger.error(`join-lobby: room "${roomName}" cannot be found`);
+            return;
+        }
+        let user = room.getUser(socket.id);
+        if(user.id === "-1"){
+            logger.error(`join-lobby: User "${socket.id}" cannot be found`);
+            return;
+        }
+
+        if(!user.isAdmin){
+            logger.error(`join-lobby: User "${user.name}" is not an admin`);
+            return;
+        }
+        room.selectedPlaylists = new Array();
+        room.suggestedPlaylists = new Array();
+        room.newGame();
+        room.status = "lobby";
+        io.in(roomName).emit('lobby-joined');
+    });
+
     socket.on('leave', (data : ILeave) => {
         socket.leave(data.roomName);
         logger.info(`leave: user left room "${data.roomName}"`);
@@ -363,6 +340,35 @@ io.on('connection', socket => {
                     logger.info(`leave: new admin set in room "${data.roomName}"`);
                 }
                 io.in(data.roomName).emit('clients-updated', room.getUsers());
+            }
+        }
+    });
+
+    socket.on('disconnecting', () => {
+        const roomName = Object.keys(socket.rooms).filter(room => room != socket.id)[0];
+        if (roomName === undefined) {
+            logger.warn(`disconnecting: room for user cannot be found`);
+            return;
+        }
+        const index = getRoomIndex(roomName);
+        if(index == -1) {
+            logger.error(`disconnecting: room with name "${roomName}" cannot be found`);
+            return;
+        }
+
+        const room:Room = getRoomByIndex(index);
+        const removedIndex = room.removeUser(socket.id);
+        
+        if (removedIndex !== -1) {
+            if (room.users.length === 0) {
+                removeRoom(index);
+                logger.info(`disconnecting: room "${roomName}" removed`);
+            } else {
+                if (removedIndex === 0) {
+                    room.setAdmin();
+                    logger.info(`disconnecting: new admin set in room "${roomName}"`);
+                }
+                io.in(roomName).emit('clients-updated', room.getUsers());
             }
         }
     });
