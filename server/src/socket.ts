@@ -52,7 +52,6 @@ removeIdleRooms();
 
 io.on('connection', socket => {
     logger.info(`connection: user connected (${Object.keys(io.sockets.connected).length} total users)`);
-
     socket.on('create-room', (data : ICreateRoom) => {
         try {
             if (io.sockets.adapter.rooms[data.roomName] === undefined) {
@@ -219,6 +218,7 @@ io.on('connection', socket => {
             if(!user.isAdmin) {
                 throw Error('user is not the admin');
             }
+            console.log("Added " + data.songs.length + " songs!");
             data.songs.forEach(a => room.songs.push(a));
         } catch(e) {
             logger.error('add-songs: ' + e);
@@ -271,6 +271,14 @@ io.on('connection', socket => {
             } else {
                 if (removedIndex === 0) {
                     room.setAdmin();
+                    if(room.songs.length + room.currentRound < room.maxRounds){
+                        room.songs.forEach(song => {
+                            if(room.songIds.find( temp => temp === song.id) === undefined){
+                                room.songIds.push(song.id);
+                            }
+                        });
+                        io.to(room.users[0].id).emit('get-songs', room.songIds);
+                    }
                     logger.info(`leave: new admin set in room "${data.roomName}"`);
                 }
                 io.in(data.roomName).emit('clients-updated', room.getUsers());
@@ -293,6 +301,14 @@ io.on('connection', socket => {
             } else {
                 if (removedIndex === 0) {
                     room.setAdmin();
+                    if(room.songs.length + room.currentRound < room.maxRounds){
+                        room.songs.forEach(song => {
+                            if(room.songIds.find( temp => temp === song.id) === undefined){
+                                room.songIds.push(song.id);
+                            }
+                        });
+                        io.to(room.users[0].id).emit('get-songs', room.songIds);
+                    }
                     logger.info(`disconnecting: new admin set in room "${roomName}"`);
                 }
                 io.in(roomName).emit('clients-updated', room.getUsers());
@@ -314,6 +330,15 @@ function startGame(params : IStartGame, room:Room) {
             for(var i = 0; i < params.roundCount && room.getUsers().length > 0; i++){
                 room.newRound();
                 room.currentSong = getRandomSong(room.songs);
+                if(room.songs.length + room.currentRound < params.roundCount){
+                    if(room.songIds.find( temp => temp === room.currentSong.id) === undefined){
+                        room.songIds.push(room.currentSong.id);
+                    }
+                }
+                else if(room.songIds.length > 0){
+                    room.songIds = [];
+                }
+
                 const timestamp = Date.now();
                 io.in(params.roomName).emit('song-started', {url: room.currentSong.url, timestamp: timestamp});
 

@@ -141,6 +141,7 @@ export class Room{
     artistCount: number;
     startStamp: number;
     songs: Song[];
+    songIds: string[];
     selectedPlaylists: IPlaylistSingle[];
     suggestedPlaylists: IPlaylistSingle[];
 
@@ -158,6 +159,7 @@ export class Room{
         this.artistCount = 0;
         this.startStamp = 0;
         this.songs = new Array();
+        this.songIds = new Array();
         this.selectedPlaylists = new Array();
         this.suggestedPlaylists = new Array();
         this.createTime = Date.now();
@@ -186,6 +188,7 @@ export class Room{
         this.titleCount = 0;
         this.artistCount = 0;
         this.currentRound = 0;
+        this.songIds = [];
     }
     
     getUsers() : IUser[]{
