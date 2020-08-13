@@ -31,7 +31,7 @@ export async function removeIdleRooms() {
                     sendPlayerKick(room.roomName);
                     removePlayers(room);
                     rooms.splice(index, 1);
-                    logger.info(`room "${room.roomName}" timed out`);
+                    logger.info('room timed out');
                 }
             }
         });

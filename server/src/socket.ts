@@ -52,6 +52,7 @@ removeIdleRooms();
 
 io.on('connection', socket => {
     logger.info(`connection: user connected (${Object.keys(io.sockets.connected).length} total users)`);
+
     socket.on('create-room', (data : ICreateRoom) => {
         try {
             if (io.sockets.adapter.rooms[data.roomName] === undefined) {
@@ -67,11 +68,11 @@ io.on('connection', socket => {
                 }
                 const index = addNewRoom(new Room(data.roomName, data.password, socket.id, data.username));
                 socket.join(data.roomName);
-                logger.info(`user "${data.username}" created room "${data.roomName}"`);
+                logger.info('create-room: room created');
                 socket.emit('room-connection', {connected: true, message: 'created', room: data.roomName, username: data.username, isAdmin: true, status: 'lobby', currentRound: 0, maxRounds: -1});
                 io.in(data.roomName).emit('clients-updated', getRoomByIndex(index).getUsers());
             } else {
-                logger.warn(`user "${data.username}" cannot create room "${data.roomName}" (Room already exists)`);
+                logger.warn('create-room: room already exists');
                 socket.emit('room-connection', {connected: false, message: 'room'});
             }
         } catch (e) {
@@ -94,15 +95,15 @@ io.on('connection', socket => {
             const room: Room = getRoom(data.roomName);
             if (!isSamePassword(room.password, data.password)) {
                 socket.emit('room-connection', {connected: false, message: 'password'});
-                logger.warn(`join-room: user "${data.username}" cannot join room "${data.roomName}" (wrong password)`);
+                logger.warn('join-room: wrong password');
             } else if (room.getUsers().length >= playerLimit) {
                 socket.emit('room-connection', {connected: false, message: 'full-room'});
-                logger.warn(`join-room: user "${data.username}" cannot join room "${data.roomName}" (room is full)`);
+                logger.warn('join-room: room is full');
             } else {
                 const username = getUsername(data.username, room.users);
                 room.users.push(new User(socket.id, username));
                 socket.join(data.roomName);
-                logger.info(`join-room: user "${data.username}" joined room "${data.roomName}"`);
+                logger.info('join-room: user joined room');
                 socket.emit('room-connection', {connected: true, message: 'joined', room: data.roomName, username: username, isAdmin: false, status: room.status, currentRound: room.currentRound, maxRounds: room.maxRounds});
                 socket.emit('connect-playlists', {selected: room.selectedPlaylists, suggested: room.suggestedPlaylists});
                 io.in(data.roomName).emit('clients-updated', room.getUsers());
@@ -110,7 +111,7 @@ io.on('connection', socket => {
         } catch (e) {
             if (e.message === 'room does not exist') {
                 socket.emit('room-connection', {connected: false, message: 'no-room'});
-                logger.warn(`join-room: room does not exist`);
+                logger.warn('join-room: room does not exist');
             } else {
                 logger.error('join-room: ' + e);
             }
@@ -200,7 +201,7 @@ io.on('connection', socket => {
             if(!user.isAdmin) {
                 throw Error('user is not the admin');
             }
-            logger.info(`start-game: game started in room "${data.roomName}" with "${data.songs.length}" songs`);
+            logger.info('start-game: game started');
             room.newGame();
             room.status = 'game';
             room.maxRounds = data.roundCount;
@@ -259,14 +260,14 @@ io.on('connection', socket => {
     socket.on('leave', (data : ILeave) => {
         try {
             socket.leave(data.roomName);
-            logger.info(`leave: user left room "${data.roomName}"`);
+            logger.info('leave: user left room');
             const roomIndex = getRoomIndex(data.roomName);
             const room:Room = getRoomByIndex(roomIndex);
             const removedIndex = room.removeUser(socket.id);
             
             if (room.users.length === 0) {
                 removeRoom(roomIndex);
-                logger.info(`leave: room "${data.roomName}" removed`);
+                logger.info('leave: room removed');
             } else {
                 if (removedIndex === 0) {
                     room.setAdmin();
@@ -278,7 +279,6 @@ io.on('connection', socket => {
                         });
                         io.to(room.users[0].id).emit('get-songs', room.songIds);
                     }
-                    logger.info(`leave: new admin set in room "${data.roomName}"`);
                 }
                 io.in(data.roomName).emit('clients-updated', room.getUsers());
             }
@@ -296,7 +296,7 @@ io.on('connection', socket => {
             
             if (room.users.length === 0) {
                 removeRoom(roomIndex);
-                logger.info(`disconnecting: room "${roomName}" removed`);
+                logger.info('disconnecting: room removed');
             } else {
                 if (removedIndex === 0) {
                     room.setAdmin();
@@ -308,7 +308,6 @@ io.on('connection', socket => {
                         });
                         io.to(room.users[0].id).emit('get-songs', room.songIds);
                     }
-                    logger.info(`disconnecting: new admin set in room "${roomName}"`);
                 }
                 io.in(roomName).emit('clients-updated', room.getUsers());
             }
@@ -345,7 +344,6 @@ function startGame(params : IStartGame, room:Room) {
                     await delay(1020); // delay damit alle gleichzeitig starten!
 
                 room.startStamp = Date.now();
-                logger.info(`startGame: "${room.currentSong.id}" playing in room "${params.roomName}"`);
                 room.isSongPlaying = true;   // wenn lied dann läuft auf true setzen
 
                 for(let j = 0; j < 30 && room.getUsers().length > 0; j++)
