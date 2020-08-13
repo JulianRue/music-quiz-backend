@@ -116,12 +116,10 @@ export function validateGuess(guess:string, corrects:string[], percent:number, p
                 }
                 var count = levenshtein(sub,correct);
                 if(count === 0){
-                    console.log("correct " + sub + " | For: " + correct);
                     points = 1;
                     break;
                 }
                 else if(count / correct.length < percentClose){
-                    console.log("close " + sub + " | For: " + correct);
                     points = 2;
                 }
             }
@@ -129,16 +127,6 @@ export function validateGuess(guess:string, corrects:string[], percent:number, p
     });
 
     return points;
-}
-
-export function removeUserGlobal(id:string){
-    rooms.forEach(function(room){
-       let index:number = room.users.findIndex( user => user.id == id);
-       if(index != -1){
-           room.users.splice(index,1);
-           return;
-       }
-    });
 }
 
 export function getUsername(username:string, users:User[]):string{
@@ -206,15 +194,6 @@ function removeSub(s:string, start:string, end:string) :string{
         s = s.replace(subStr, "");
     }
 
-    return s;
-}
-
-function removeEnd(s:string, sub:string):string{
-    let index1:number = s.indexOf(sub);
-    if(index1 != -1){
-        let subStr:string = s.slice(index1,s.length);
-        s.replace(subStr, "");
-    }
     return s;
 }
 

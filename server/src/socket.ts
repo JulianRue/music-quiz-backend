@@ -14,8 +14,7 @@ import {
     IPlaylistSingleNetwork,
     IAddSongs,
     IChat,
-    IGuessedCorrect,
-    IGuessInfo
+    IGuessedCorrect
 } from './interfaces'
 import {
     delay,
@@ -33,8 +32,8 @@ import {
 const logger = getLogger();
 
 process.on('uncaughtException', function (err) {
-    logger.fatal(`UNCAUGHT_EXCEPTION: ` + err);
-    console.log("Node NOT Exiting...");
+    logger.fatal(err);
+    console.log("UNCAUGHT_EXCEPTION");
 });
 
 // const options = {
@@ -249,7 +248,6 @@ io.on('connection', socket => {
             return;
         }
         data.songs.forEach(a => room.songs.push(a));
-        console.log(data.songs.length + " Songs added -> count now " + room.songs.length);
     });
     socket.on('create-room', (data : ICreateRoom) => {
         if (io.sockets.adapter.rooms[data.roomName] === undefined) {
@@ -381,9 +379,8 @@ function startGame(params : IStartGame, room:Room) : void{
             for(var i = 0; i < params.roundCount && room.getUsers().length > 0; i++){
                 room.newRound();
                 room.currentSong = getRandomSong(room.songs);
-                if(room.currentSong === undefined){
-                    console.log("Thrown!")
-                    throw new Error('Something bad happened');
+                if(room.currentSong === undefined) {
+                    throw new Error(`startGame: current song in room "${room.roomName}" is undefined`);
                 }
                 const timestamp = Date.now();
                 io.in(params.roomName).emit('song-started', {url: room.currentSong.url, timestamp: timestamp});
@@ -392,7 +389,7 @@ function startGame(params : IStartGame, room:Room) : void{
                     await delay(1020); // delay damit alle gleichzeitig starten!
 
                 room.startStamp = Date.now();
-                logger.info(`function startGame: "${room.currentSong.id}" playing in room "${params.roomName}"`);
+                logger.info(`startGame: "${room.currentSong.id}" playing in room "${params.roomName}"`);
                 room.isSongPlaying = true;   // wenn lied dann läuft auf true setzen
 
                 for(let j = 0; j < 30 && room.getUsers().length > 0; j++)
@@ -403,7 +400,7 @@ function startGame(params : IStartGame, room:Room) : void{
                 for(let j = 0; j < 5 && room.getUsers().length > 0 && (i+1) < params.roundCount; j++)
                     await delay(1000) //pause zwischen den runden
             }
-            await delay(2000)
+            await delay(2000);
             room.createTime = Date.now();
             room.status = "endscreen";
             io.in(room.roomName).emit('game-ended');
