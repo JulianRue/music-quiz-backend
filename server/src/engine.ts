@@ -7,7 +7,12 @@ import {
     User
 } from "./interfaces";
 import {getLogger} from "log4js";
-import { sendPlayerKick, removePlayers, sendChatMessage, sendCorrectGuess } from "./socket";
+import {
+    sendPlayerKick,
+    removePlayers,
+    sendChatMessage,
+    sendCorrectGuess
+} from "./socket";
 
 const rooms: Room[] = [];
 
@@ -131,7 +136,7 @@ export function validateGuess(guess:string, corrects:string[], percent:number, p
 
 export function getUsername(username:string, users:User[]):string{
     let name = username;
-    for(let i = 1; i < 999; i++){
+    for(let i = 1; i < 20; i++){
         let tempUsr = users.find(user => user.name == name);
         if(tempUsr === undefined){
             return name;
@@ -140,7 +145,7 @@ export function getUsername(username:string, users:User[]):string{
             name = username + " (" + i + ")";
         }
     }
-    return "";
+    throw Error('username could not be calculated');
 }
 
 function levenshtein(a: string, b: string): number {
@@ -295,7 +300,7 @@ export function getRoomIndex(name:string):number{
             return i;
         }
     }
-    return -1;
+    throw Error(`room "${name}" does not exist (index)`);
 }
 
 export function getRoomByIndex(index: number): Room {
@@ -310,14 +315,15 @@ export function removeRoom(index: number) {
     rooms.splice(index, 1);
 }
 
-export function getRoom(name:string): Room | undefined{
+export function getRoom(name:string): Room {
     for(var i = 0; i < rooms.length; i++){
         if(rooms[i].roomName == name){
             return rooms[i];
         }
     }
-    return undefined;
+    throw Error(`room "${name}" does not exist`);
 }
+
 export function isSamePassword(str1: string, str2: string): boolean {
     if (!str1) {
         str1 = "";

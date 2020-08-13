@@ -171,7 +171,7 @@ export class Room{
                 }
             }
         }
-        return new User("-1","");
+        throw Error ('user does not exist');
     }
 
     newRound(){
@@ -187,6 +187,7 @@ export class Room{
         this.artistCount = 0;
         this.currentRound = 0;
     }
+    
     getUsers() : IUser[]{
         let iUsers:IUser[] = Array();
         this.users.forEach(user => iUsers.push({username : user.name, isAdmin : user.isAdmin, points : user.points, correctTitle: user.guessedTitle, correctArtist: user.guessedIntrepret}));
@@ -197,6 +198,8 @@ export class Room{
         const index = this.users.findIndex(user => user.id === id);
         if(index !== -1){
             this.users.splice(index, 1);
+        } else {
+            throw Error('user could not be removed');
         }
         return index;
     }
