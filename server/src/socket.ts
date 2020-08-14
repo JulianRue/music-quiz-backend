@@ -355,12 +355,10 @@ function startGame(params : IStartGame, room:Room) {
                     await delay(1000) //pause zwischen den runden
             }
             await delay(2000);
-            room.createTime = Date.now();
-            room.status = 'endscreen';
-            io.in(room.roomName).emit('game-ended');
         }
         catch (e) {
             logger.error(e.message);
+        } finally {
             room.createTime = Date.now();
             room.status = 'endscreen';
             io.in(room.roomName).emit('game-ended');
