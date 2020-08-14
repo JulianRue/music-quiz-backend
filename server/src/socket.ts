@@ -27,7 +27,8 @@ import {
     removeIdleRooms,
     getRoomByIndex,
     addNewRoom,
-    removeRoom
+    removeRoom,
+    getRoomsCount
 } from './engine';
 const logger = getLogger();
 
@@ -51,7 +52,7 @@ const playerLimit = 12;
 removeIdleRooms();
 
 io.on('connection', socket => {
-    logger.info(`connection: user connected (${Object.keys(io.sockets.connected).length} total users)`);
+    logger.info(`connection: user connected (total users: ${Object.keys(io.sockets.connected).length})`);
 
     socket.on('create-room', (data : ICreateRoom) => {
         try {
@@ -68,7 +69,7 @@ io.on('connection', socket => {
                 }
                 const index = addNewRoom(new Room(data.roomName, data.password, socket.id, data.username));
                 socket.join(data.roomName);
-                logger.info('create-room: room created');
+                logger.info(`create-room: room created (total rooms: ${getRoomsCount()})`);
                 socket.emit('room-connection', {connected: true, message: 'created', room: data.roomName, username: data.username, isAdmin: true, status: 'lobby', currentRound: 0, maxRounds: -1});
                 io.in(data.roomName).emit('clients-updated', getRoomByIndex(index).getUsers());
             } else {
@@ -267,7 +268,7 @@ io.on('connection', socket => {
             
             if (room.users.length === 0) {
                 removeRoom(roomIndex);
-                logger.info('leave: room removed');
+                logger.info(`leave: room removed (total rooms: ${getRoomsCount()})`);
             } else {
                 if (removedIndex === 0) {
                     room.setAdmin();
@@ -296,7 +297,7 @@ io.on('connection', socket => {
             
             if (room.users.length === 0) {
                 removeRoom(roomIndex);
-                logger.info('disconnecting: room removed');
+                logger.info(`disconnecting: room removed (total rooms: ${getRoomsCount()})`);
             } else {
                 if (removedIndex === 0) {
                     room.setAdmin();

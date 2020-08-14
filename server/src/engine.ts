@@ -332,6 +332,10 @@ export function removeRoom(index: number) {
     rooms.splice(index, 1);
 }
 
+export function getRoomsCount(): number {
+    return rooms.length;
+}
+
 export function getRoom(name:string): Room {
     for(var i = 0; i < rooms.length; i++){
         if(rooms[i].roomName == name){
