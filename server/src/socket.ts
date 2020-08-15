@@ -28,13 +28,13 @@ import {
     getRoomByIndex,
     addNewRoom,
     removeRoom,
-    getRoomsCount
+    getRoomsCount, rooms
 } from './engine';
 const logger = getLogger();
 
 process.on('uncaughtException', function (err) {
     logger.fatal(err);
-    console.log('UNCAUGHT_EXCEPTION');
+    console.log('UNCAUGHT_EXCEPTION ' + err);
 });
 
 // const options = {
@@ -78,6 +78,22 @@ io.on('connection', socket => {
             }
         } catch (e) {
             logger.error('create-room: ' + e);
+        }
+    });
+
+    socket.on('join-random-room', (data : IJoinRoom) => {
+        try{
+            let tempRoom = rooms.filter(room => room.password === "" && room.users.length < 8);
+            if(tempRoom != undefined
+                && tempRoom.length > 0){
+                if(tempRoom.length > 1){
+                    tempRoom = tempRoom.sort((a,b) => (a.users.length > b.users.length) ? 1 : ((b.users.length > a.users.length) ? -1 : 0));
+                }
+                socket.emit('join-ranom-room', tempRoom[0]);
+            }
+        }
+        catch(e) {
+
         }
     });
 

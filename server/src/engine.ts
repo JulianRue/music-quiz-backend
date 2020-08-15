@@ -14,7 +14,7 @@ import {
     sendCorrectGuess
 } from "./socket";
 
-const rooms: Room[] = [];
+export const rooms: Room[] = [];
 
 const logger = getLogger();
 
