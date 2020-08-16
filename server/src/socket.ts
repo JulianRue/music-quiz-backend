@@ -44,7 +44,7 @@ process.on('uncaughtException', function (err) {
 
 // const server = https.createServer(options);
 const server = http.createServer();
-const io = socketio(server);
+const io = socketio(server, {pingTimeout: 5000, pingInterval: 10000});
 const selectedLimit = 8;
 const suggestLimit = 8;
 const playerLimit = 12;
