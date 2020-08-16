@@ -329,7 +329,9 @@ io.on('connection', socket => {
                 io.in(roomName).emit('clients-updated', room.getUsers());
             }
         } catch(e) {
-            logger.warn('disconnecting: ' + e);
+            if (e.message !== 'room does not exist (index)') {
+                logger.error('disconnecting: ' + e);
+            }
         }
     });
 });
