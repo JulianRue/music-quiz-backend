@@ -85,26 +85,21 @@ io.on('connection', socket => {
     });
 
     socket.on('join-random-room', function() {
-        console.log("Called!")
         try{
             let tempRoom: Room[] = rooms.filter(room => (room.password === undefined || room.password === '') && room.users.length < 6);
-            //rooms.forEach(room => tempRoom.push(room));
-            tempRoom.forEach(r => console.log("Raum: " + r.roomName))
             if(tempRoom != undefined
                 && tempRoom.length > 0){
                 if(tempRoom.length > 1){
                     tempRoom = tempRoom.sort((a,b) => (a.users.length > b.users.length) ? 1 : ((b.users.length > a.users.length) ? -1 : 0));
-                    tempRoom.forEach(r => console.log(r.users.length))
                 }
-                console.log("Room -> " + tempRoom[0]);
                 socket.emit('get-random-room', tempRoom[0].roomName);
             }
             else{
-                socket.emit('get-random-room', "");
+                socket.emit('room-connection', {connected: false, message: 'no-room'});
             }
         }
         catch(e) {
-            console.log("ERROR! " + e)
+            logger.error('join-random-room: ' + e);
         }
     });
 
