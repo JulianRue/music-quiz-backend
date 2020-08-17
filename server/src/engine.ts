@@ -56,7 +56,7 @@ export function checkGuess(user: User, text:string, room:Room, socket: any) {
             user.guessedTitle = true;
             const correctGuess: IGuessedCorrect = {username:user.name, type:"title", points:points};
             sendCorrectGuess(room.roomName, correctGuess);
-            const guessInfo: IGuessInfo = {type:"title", isCorrect:true, text:text, correctValue:[room.currentSong.name]};
+            const guessInfo: IGuessInfo = {type:"title", isCorrect:true, text:text, correctValue:[formatSongName(room.currentSong.name)]};
             socket.emit('guess-info', guessInfo);
             if(user.guessedIntrepret){
                 socket.emit('guess-picture', room.currentSong.cover_medium);
@@ -215,6 +215,12 @@ function removeSub(s:string, start:string, end:string) :string{
     return s;
 }
 
+export function formatSongName(s:string):string{
+    s = removeSub(s, "(", ")");
+    s = removeSub(s, "[", "]");
+    s = removeSub(s, "{", "}");
+    return s;
+}
 export function formatString(s:string):string{
 
     s = s.toLowerCase();
