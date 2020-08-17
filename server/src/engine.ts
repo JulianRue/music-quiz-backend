@@ -95,23 +95,22 @@ export function checkGuess(user: User, text:string, room:Room, socket: any) {
     }
 
     if(!guessed){
-        const chat: IChat = {text:chatMessage, username:user.name};
-        sendChatMessage(room.roomName, sanitizeChat(chat));
+        sendChatMessage(room.roomName, {text:sanitizeChat(chatMessage), username:user.name});
     }
 }
 
-export function sanitizeChat(chat: IChat): IChat{
-    chat.text = chat.text.replace(/</g, '');
-    chat.text = chat.text.replace(/>/g, '');
-    chat.text = chat.text.replace(/\(/g, '');
-    chat.text = chat.text.replace(/\)/g, '');
-    chat.text = chat.text.replace(/\[/g, '');
-    chat.text = chat.text.replace(/]/g, '');
-    chat.text = chat.text.replace(/{/g, '');
-    chat.text = chat.text.replace(/}/g, '');
-    chat.text = chat.text.replace(/;/g, '');
-    chat.text = chat.text.replace(/\//g, '');
-    chat.text = chat.text.replace(/\\/g, '');
+export function sanitizeChat(chat: string): string{
+    chat = chat.replace(/</g, '');
+    chat = chat.replace(/>/g, '');
+    chat = chat.replace(/\(/g, '');
+    chat = chat.replace(/\)/g, '');
+    chat = chat.replace(/\[/g, '');
+    chat = chat.replace(/]/g, '');
+    chat = chat.replace(/{/g, '');
+    chat = chat.replace(/}/g, '');
+    chat = chat.replace(/;/g, '');
+    chat = chat.replace(/\//g, '');
+    chat = chat.replace(/\\/g, '');
     return chat;
 }
 export function validateGuess(guess:string, corrects:string[], percent:number, percentClose:number) : number{

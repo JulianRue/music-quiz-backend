@@ -28,7 +28,7 @@ import {
     getRoomByIndex,
     addNewRoom,
     removeRoom,
-    getRoomsCount, rooms
+    getRoomsCount, rooms, sanitizeChat
 } from './engine';
 const logger = getLogger();
 
@@ -56,6 +56,8 @@ io.on('connection', socket => {
 
     socket.on('create-room', (data : ICreateRoom) => {
         try {
+            data.roomName = sanitizeChat(data.roomName);
+            data.username = sanitizeChat(data.username);
             if (io.sockets.adapter.rooms[data.roomName] === undefined) {
                 if(data.roomName.length > 20) {
                         throw Error('roomname too long');
@@ -67,6 +69,7 @@ io.on('connection', socket => {
                 if(data.username.length > 20) {
                         throw Error('username too long');
                 }
+
                 const index = addNewRoom(new Room(data.roomName, data.password, socket.id, data.username));
                 socket.join(data.roomName);
                 logger.info(`create-room: room created (total rooms: ${getRoomsCount()})`);
@@ -81,19 +84,27 @@ io.on('connection', socket => {
         }
     });
 
-    socket.on('join-random-room', (data : IJoinRoom) => {
+    socket.on('join-random-room', function() {
+        console.log("Called!")
         try{
-            let tempRoom = rooms.filter(room => room.password === "" && room.users.length < 8);
+            let tempRoom: Room[] = rooms.filter(room => (room.password === undefined || room.password === '') && room.users.length < 6);
+            //rooms.forEach(room => tempRoom.push(room));
+            tempRoom.forEach(r => console.log("Raum: " + r.roomName))
             if(tempRoom != undefined
                 && tempRoom.length > 0){
                 if(tempRoom.length > 1){
                     tempRoom = tempRoom.sort((a,b) => (a.users.length > b.users.length) ? 1 : ((b.users.length > a.users.length) ? -1 : 0));
+                    tempRoom.forEach(r => console.log(r.users.length))
                 }
-                socket.emit('join-ranom-room', tempRoom[0]);
+                console.log("Room -> " + tempRoom[0]);
+                socket.emit('get-random-room', tempRoom[0].roomName);
+            }
+            else{
+                socket.emit('get-random-room', "");
             }
         }
         catch(e) {
-
+            console.log("ERROR! " + e)
         }
     });
 
