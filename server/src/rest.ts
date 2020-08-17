@@ -34,6 +34,8 @@ var originsWhitelist = [
     'https://monalit.de/',
     'http://monalit.de',
     'https://monalit.de',
+    'http://songclasher.com',
+    'http://songclasher.com/',
   ];
 
 
