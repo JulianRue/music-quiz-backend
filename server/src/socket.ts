@@ -28,7 +28,10 @@ import {
     getRoomByIndex,
     addNewRoom,
     removeRoom,
-    getRoomsCount, rooms, sanitizeChat
+    getRoomsCount,
+    rooms,
+    sanitizeChat,
+    formatSongName
 } from './engine';
 const logger = getLogger();
 
@@ -242,7 +245,10 @@ io.on('connection', socket => {
             if(!user.isAdmin) {
                 throw Error('user is not the admin');
             }
-            data.songs.forEach(a => room.songs.push(a));
+            data.songs.forEach(song => {
+                song.name = formatSongName(song.name);
+                room.songs.push(song);
+            });
         } catch(e) {
             logger.error('add-songs: ' + e);
         }
@@ -348,7 +354,10 @@ server.listen(8000, () => {
 
 function startGame(params : IStartGame, room:Room) {
     (async () => {
-        params.songs.forEach(a => room.songs.push(a));
+        params.songs.forEach(song => {
+            song.name = formatSongName(song.name);
+            room.songs.push(song);
+        });
         try{
             for(var i = 0; i < params.roundCount && room.getUsers().length > 0; i++){
                 room.newRound();
