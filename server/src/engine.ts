@@ -113,6 +113,7 @@ export function sanitizeChat(chat: string): string{
     chat = chat.replace(/\\/g, '');
     return chat;
 }
+
 export function validateGuess(guess:string, corrects:string[], percent:number, percentClose:number) : number{
     //percent -> 20 = 20% etc
     guess = formatString(guess);
@@ -236,7 +237,7 @@ export function formatString(s:string):string{
     s = s.replace(/\./g,"");
     s = s.replace(/\//g,"");
     s = s.replace(/\|/g,"");
-    s = s.replace(/$/g,"s");
+    s = s.replace(/\$/g,"s");
     s = s.replace(/€/g,"e");
     s = s.replace(/@/g,"a");
     s = s.replace(/~/g,"");
@@ -249,7 +250,7 @@ export function formatString(s:string):string{
     s = s.replace(/"/g,"");
     s = s.replace(/=/g,"");
     s = s.replace(/</g,"");
-    s = s.replace(/|/g,"");
+    s = s.replace(/\|/g,"");
     s = s.replace(/\*/g,"");
     s = s.replace(/;/g,"");
     s = s.replace(/,/,"");
