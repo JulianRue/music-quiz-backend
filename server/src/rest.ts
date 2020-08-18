@@ -13,18 +13,7 @@ const options = {
 };
  */
 
-const Keycloak =  require("keycloak-connect");
-var session = require('express-session');
 var cors = require('cors');
-var memoryStore =  new  session.MemoryStore();
-var keycloak =  new  Keycloak({ store: memoryStore });
-app.use(session({
-    secret: '284dd0d2-1bfd-4278-940b-4badb994bdc0',
-    resave: false,
-    saveUninitialized: true,
-    store: memoryStore
-}));
-app.use(keycloak.middleware());
 
 var originsWhitelist = [
     'http://localhost:4200',
