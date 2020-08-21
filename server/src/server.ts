@@ -14,3 +14,8 @@ configure({
         }
     }
 });
+
+setInterval(function(){
+    global.gc();
+    console.log('GC done')
+}, 1000*30)

@@ -335,6 +335,11 @@ export function addNewRoom(room: Room): number {
 }
 
 export function removeRoom(index: number) {
+    delete rooms[index].selectedPlaylists;
+    delete rooms[index].users;
+    delete rooms[index].suggestedPlaylists;
+    delete rooms[index].songs;
+    delete rooms[index];
     rooms.splice(index, 1);
 }
 

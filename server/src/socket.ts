@@ -1,6 +1,6 @@
 import http from 'http';
-// import https from 'https';
-// import fs from 'fs';
+import https from 'https';
+import fs from 'fs';
 import socketio from 'socket.io';
 import {getLogger} from 'log4js';
 import {
@@ -40,14 +40,14 @@ process.on('uncaughtException', function (err) {
     console.log('UNCAUGHT_EXCEPTION ' + err);
 });
 
-// const options = {
-//     key: fs.readFileSync('/etc/letsencrypt/live/monalit.de/privkey.pem'),
-//     cert: fs.readFileSync('/etc/letsencrypt/live/monalit.de/fullchain.pem')
-// };
+const options = {
+     key: fs.readFileSync('/etc/letsencrypt/live/songclasher.com/privkey.pem'),
+     cert: fs.readFileSync('/etc/letsencrypt/live/songclasher.com/fullchain.pem')
+};
 
-// const server = https.createServer(options);
-const server = http.createServer();
-const io = socketio(server, {pingTimeout: 5000, pingInterval: 10000});
+const server = https.createServer(options);
+//const server = http.createServer();
+const io = socketio(server, {pingTimeout: 5000, pingInterval: 10000, perMessageDeflate: false});
 const selectedLimit = 8;
 const suggestLimit = 8;
 const playerLimit = 12;
