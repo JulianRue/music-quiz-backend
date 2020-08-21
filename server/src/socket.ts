@@ -227,7 +227,7 @@ io.on('connection', socket => {
             if(!user.isAdmin) {
                 throw Error('user is not the admin');
             }
-            logger.info('start-game: game started');
+            logger.info(`start-game: game started with ${data.roundCount} songs`);
             room.newGame();
             room.status = 'game';
             room.maxRounds = data.roundCount;
@@ -391,7 +391,7 @@ function startGame(params : IStartGame, room:Room) {
             await delay(2000);
         }
         catch (e) {
-            logger.error(e.message);
+            logger.error('startGame: ' + e.message);
         } finally {
             room.createTime = Date.now();
             room.status = 'endscreen';
