@@ -93,7 +93,7 @@ io.on('connection', socket => {
             if(tempRoom != undefined
                 && tempRoom.length > 0){
                 if(tempRoom.length > 1){
-                    tempRoom = tempRoom.sort((a,b) => (a.users.length > b.users.length) ? 1 : ((b.users.length > a.users.length) ? -1 : 0));
+                    tempRoom = tempRoom.sort((a,b) => (a.users.length > b.users.length) ? -1 : ((b.users.length > a.users.length) ? 1 : 0));
                 }
                 socket.emit('get-random-room', tempRoom[0].roomName);
             }
