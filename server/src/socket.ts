@@ -108,6 +108,7 @@ io.on('connection', socket => {
 
     socket.on('join-room', (data : IJoinRoom) => {
         try {
+            data.username = sanitizeChat(data.username)
             if(data.roomName.length > 20) {
                     throw Error('roomname too long');
             }
