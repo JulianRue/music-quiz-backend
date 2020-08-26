@@ -1,6 +1,5 @@
 import express, {Response} from 'express';
 import bodyParser from 'body-parser';
-import db from "./queries";
 
 export const app = express();
 
@@ -32,7 +31,6 @@ var corsOptions = {
 
 
 export const port :number  = 3000;
-console.log("Started rest");
 
 app.use(bodyParser.json());
 app.use(
@@ -61,7 +59,7 @@ app.listen(port, () => {
 */
 
 https.createServer(options, app).listen(port, () => {
-    console.log(`http REST Interface is running on port ${port}.`)
+    console.log(`REST Interface is running on port ${port}.`);
 });
 
 export default {}

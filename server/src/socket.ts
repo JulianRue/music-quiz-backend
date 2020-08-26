@@ -108,7 +108,7 @@ io.on('connection', socket => {
 
     socket.on('join-room', (data : IJoinRoom) => {
         try {
-            data.username = sanitizeChat(data.username)
+            data.username = sanitizeChat(data.username);
             if(data.roomName.length > 20) {
                     throw Error('roomname too long');
             }
@@ -350,7 +350,7 @@ io.on('connection', socket => {
 });
 
 server.listen(8000, () => {
-    console.log('Socket.io Server is listening on port 8000');
+    console.log('Socket.io Server is listening on port 8000.');
 });
 
 function startGame(params : IStartGame, room:Room) {

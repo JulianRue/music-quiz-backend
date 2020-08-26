@@ -5,7 +5,7 @@ import './rest'
 configure({
     appenders: {
         everything: {
-            type: "dateFile", filename: "logs/musicquiz.log"
+            type: "dateFile", filename: "logs/songclasher.log"
         }
     },
     categories: {
@@ -17,5 +17,4 @@ configure({
 
 setInterval(function(){
     global.gc();
-    console.log('GC done')
 }, 1000*30)
