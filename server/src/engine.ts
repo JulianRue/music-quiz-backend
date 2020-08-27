@@ -363,7 +363,8 @@ export function isSamePassword(str1: string, str2: string): boolean {
     if (!str2) {
         str2 = "";
     }
-    return str1 === str2;
+
+    return str1 === str2 || str1 === "";
 }
 
 export function delay(ms: number) {

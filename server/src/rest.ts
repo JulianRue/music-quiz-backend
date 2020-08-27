@@ -11,7 +11,6 @@ const options = {
     cert: fs.readFileSync("/etc/letsencrypt/live/songclasher.com/fullchain.pem")
 };
 
-
 var cors = require('cors');
 
 var originsWhitelist = [
