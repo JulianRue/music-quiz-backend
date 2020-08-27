@@ -89,7 +89,7 @@ io.on('connection', socket => {
 
     socket.on('join-random-room', function() {
         try{
-            let tempRoom: Room[] = rooms.filter(room => (room.password === undefined || room.password === '') && room.users.length < 6);
+            let tempRoom: Room[] = rooms.filter(room => (room.password === undefined || room.password === '') && room.users.length < 6 && room.status != "endscreen" && room.currentRound < room.maxRounds-4);
             if(tempRoom != undefined
                 && tempRoom.length > 0){
                 if(tempRoom.length > 1){
