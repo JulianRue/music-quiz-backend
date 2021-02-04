@@ -1,19 +1,7 @@
-/server/node_modules/
-/server/node_modules
-/server/node_modules/*
-.node_modules/
+/node_modules
 
-/server/.idea/*
-/server/.idea
-/server/.idea/
-.idea/.gitignore
-.idea/misc.xml
-.idea/modules.xml
-.idea/
+/.idea
 
-/server/export/*
-/server/export
-/server/export/
+/export
 
-/server/logs
-/server/logs/*
+/logs
